@@ -1,0 +1,74 @@
+name: Build and Deploy to Azure Static Web Apps
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+    branches:
+      - main
+
+# Allow one concurrent deployment per ref; cancel superseded runs.
+concurrency:
+  group: swa-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build_and_deploy:
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
+    runs-on: ubuntu-latest
+    name: Build and Deploy
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: false
+          lfs: false
+
+      # Angular 21 requires Node ^20.19 || ^22.12 || >=24. We pin 22.x (LTS)
+      # for reproducible CI builds. The build runs inside the SWA action via
+      # Oryx, but we install + run a guarded build here is NOT done — Oryx
+      # handles npm ci && npm run build. We only set up Node so any pre-steps
+      # (e.g. manifest generation) have a runtime available if Oryx skips them.
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Build And Deploy
+        id: builddeploy
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          action: upload
+          ###### Repository/Build Configurations ######
+          # app_location: path to the Angular app source, relative to repo root.
+          #   Phase 4 scaffolds the app at the repo root, so "/" is correct.
+          # api_location: empty — this is a frontend-only app (no Functions API).
+          # output_location: path to the built static files, relative to app_location.
+          #   The @angular/build (application) builder emits to dist/<app>/browser.
+          #   IMPORTANT: Phase 4 must set <app> to the real Angular project name
+          #   (output_location below) so the deploy picks up the correct folder.
+          app_location: "/"
+          api_location: ""
+          output_location: "dist/estudio-dental-mendieta/browser"
+        env:
+          # Oryx runs `npm run build`. If a prebuild script exists in package.json
+          # (e.g. "prebuild": "node scripts/generate-manifest.mjs"), npm runs it
+          # automatically before build — generating assets/seed/manifest.json and
+          # copying patient photos. No extra workflow step is required.
+          NODE_VERSION: "22"
+
+  close_pull_request:
+    if: github.event_name == 'pull_request' && github.event.action == 'closed'
+    runs-on: ubuntu-latest
+    name: Close Pull Request
+    steps:
+      - name: Close Pull Request
+        id: closepullrequest
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
+          action: close
