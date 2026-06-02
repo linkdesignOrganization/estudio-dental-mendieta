@@ -3,6 +3,8 @@ import { RouterOutlet, Router, NavigationEnd } from '@angular/router';
 import { SidebarComponent } from './sidebar.component';
 import { HeaderComponent } from './header.component';
 import { FooterComponent } from './footer.component';
+import { IconComponent } from '../shared/components/icon.component';
+import { StoreService } from '../core/persistence/store.service';
 
 /**
  * app-shell (DEMO-001..004 / DC-030). Grid 2 columnas en desktop: sidebar fijo
@@ -13,7 +15,7 @@ import { FooterComponent } from './footer.component';
 @Component({
   selector: 'app-app-shell',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterOutlet, SidebarComponent, HeaderComponent, FooterComponent],
+  imports: [RouterOutlet, SidebarComponent, HeaderComponent, FooterComponent, IconComponent],
   template: `
     <div class="shell" [class.shell--drawer-open]="drawerOpen()">
       <aside class="shell__sidebar">
@@ -28,6 +30,14 @@ import { FooterComponent } from './footer.component';
         <app-header class="shell__header" (openMenu)="openDrawer()" />
         <main class="shell__content" id="contenido">
           <div class="shell__inner">
+            @if (degraded()) {
+              <div class="storage-notice" role="status" aria-live="polite">
+                <app-icon name="warning" [size]="18" />
+                <p class="storage-notice__text t-small">
+                  Estás trabajando sin almacenamiento local: los cambios se mantienen mientras la pestaña esté abierta, pero no se guardarán al cerrarla. Revisá la configuración de privacidad del navegador para conservarlos.
+                </p>
+              </div>
+            }
             <router-outlet />
           </div>
           <app-footer />
@@ -44,6 +54,15 @@ import { FooterComponent } from './footer.component';
     .shell__content { flex: 1; overflow-y: auto; display: flex; flex-direction: column; }
     .shell__inner { flex: 1; width: 100%; max-width: var(--content-max); margin: 0 auto; padding: var(--space-8) var(--space-8); }
     .shell__backdrop { display: none; }
+    .storage-notice {
+      display: flex; align-items: flex-start; gap: var(--space-2);
+      margin-bottom: var(--space-5); padding: var(--space-3) var(--space-4);
+      background: var(--color-warning-bg); color: var(--color-warning-text);
+      border: 1px solid color-mix(in srgb, var(--color-warning-text) 25%, transparent);
+      border-radius: var(--radius-md);
+    }
+    .storage-notice app-icon { flex: 0 0 auto; margin-top: 1px; }
+    .storage-notice__text { margin: 0; line-height: var(--lh-body); }
 
     @media (max-width: 1199px) {
       .shell { grid-template-columns: 1fr; }
@@ -69,6 +88,8 @@ import { FooterComponent } from './footer.component';
 })
 export class AppShellComponent {
   private readonly router = inject(Router);
+  /** Aviso visible cuando el almacenamiento local no está disponible (UX-091 / BUG-E06). */
+  protected readonly degraded = inject(StoreService).degraded;
   protected readonly drawerOpen = signal(false);
 
   constructor() {

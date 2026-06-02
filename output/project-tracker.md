@@ -6,9 +6,15 @@
 
 ## Estado actual
 - Modo: NEW (NORMAL — no Pixel-Perfect, CON design-brief de Task Dasher)
-- Fase: FASE 4 — Construcción Visual · Paso 4f-sub (3 sub-testers en worktree)
+- Fase: FASE 4 — Construcción Visual · Paso 4f-sub (3 sub-testers SECUENCIAL, sin worktree)
 - Próximo: 4f-consolidate → anti-deferral → 4g demo
 - 4f-plan ✓: 233 criterios (Visual 158, Flow 47, Edge 28), ronda 1
+- NOTA worktree no disponible (git init post-arranque) → sub-testers secuenciales por browser MCP compartido
+- Flow Tester ✓: 45 PASA, 90/90 desktop+4/4 mobile, 1 bug baja (BUG-F01 ruta catálogo)
+- Edge Tester ✓: 28 criterios, 100/100 PASS, 6 bugs (E01-E06)
+- Visual Checker ✓: 138/158 PASA, BUG-V01 CRÍTICO (hoja estilos no aplica: media=print+onload bloqueado por CSP — raíz de E02/E05/V06/20 fallas visuales) + V04 a11y. BVC-027 y GAP-A04 PASAN
+- Fase: 4f anti-deferral RONDA 1 — Developer fix ✓ (7 bugs), DevOps re-deploy + verificar
+- Bugs abiertos: 7 en re-test (fix V01 = inlineCritical:false; resto corregidos)
 - 4a ✓ + 4b ✓ + 4c ✓ + 4d ✓ + 4e DEPLOY VIVO ✓ (sitio carga, manifest+fotos OK)
 - 4e-regress: N/A (primera construcción, sin tests previos)
 - Modo Visual: PROSA (fallback) — el workflow estándar hardcodea CRM tracking (PROHIBIDO aquí) + variante visual no validada e2e + sesión con errores de infra

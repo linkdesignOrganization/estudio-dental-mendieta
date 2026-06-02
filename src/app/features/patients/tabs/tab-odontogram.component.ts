@@ -24,7 +24,7 @@ import { currentPatientId } from '../patient-context';
         </div>
       </header>
 
-      @defer (on viewport) {
+      @defer (on idle) {
         <app-odontogram [top]="top()" [bottom]="bottom()" (select)="openTooth($event)" />
       } @placeholder {
         <div class="odo-skel" aria-hidden="true">

@@ -6,6 +6,7 @@ import { StatusBadgeComponent } from '../../shared/components/status-badge.compo
 import { PatientCardComponent } from '../../shared/components/patient-card.component';
 import { DataTableComponent, TableRowDirective, TableColumn } from '../../shared/components/data-table.component';
 import { SkeletonComponent } from '../../shared/components/skeleton.component';
+import { EmptyStateComponent } from '../../shared/components/empty-state.component';
 import { StoreService } from '../../core/persistence/store.service';
 import { Patient } from '../../core/models/models';
 import { paymentBadge } from '../../shared/status-map';
@@ -19,7 +20,7 @@ import { paymentBadge } from '../../shared/status-map';
 @Component({
   selector: 'app-patient-list',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, IconComponent, AvatarComponent, StatusBadgeComponent, PatientCardComponent, DataTableComponent, TableRowDirective, SkeletonComponent],
+  imports: [RouterLink, IconComponent, AvatarComponent, StatusBadgeComponent, PatientCardComponent, DataTableComponent, TableRowDirective, SkeletonComponent, EmptyStateComponent],
   template: `
     <div class="page-head">
       <div class="page-head__titles">
@@ -77,7 +78,11 @@ import { paymentBadge } from '../../shared/status-map';
         <div class="cards" aria-busy="true">@for (i of [0,1,2,3,4,5]; track i) { <app-skeleton preset="card" [index]="i" /> }</div>
       } @else {
         <div class="cards">
-          @for (p of filtered(); track p.id) { <app-patient-card [patient]="p" /> }
+          @for (p of filtered(); track p.id) { <app-patient-card [patient]="p" />
+          } @empty {
+            <app-empty-state class="cards__empty" icon="magnifying-glass" title="No encontramos pacientes con ese criterio"
+              description="Probá con otro nombre o ajustá los filtros para ver más resultados." />
+          }
         </div>
       }
     }
@@ -108,6 +113,7 @@ import { paymentBadge } from '../../shared/status-map';
     .cell--end { text-align: right; }
     .cell-person { display: flex; align-items: center; gap: var(--space-3); }
     .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-5); }
+    .cards__empty { grid-column: 1 / -1; }
     @media (max-width: 1199px) { .cards { grid-template-columns: repeat(2, 1fr); } }
     @media (max-width: 767px) {
       .page-head__actions { width: 100%; }

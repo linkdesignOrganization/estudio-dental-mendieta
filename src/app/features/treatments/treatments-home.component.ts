@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, signal, computed, inject } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { AvatarComponent } from '../../shared/components/avatar.component';
 import { StatusBadgeComponent } from '../../shared/components/status-badge.component';
 import { DataTableComponent, TableRowDirective, TableColumn } from '../../shared/components/data-table.component';
@@ -90,7 +90,9 @@ export class TreatmentsHomeComponent {
     { key: 'estado', label: 'Estado', align: 'end' },
   ];
 
-  protected readonly section = signal<'activos' | 'catalogo'>('activos');
+  protected readonly section = signal<'activos' | 'catalogo'>(
+    inject(ActivatedRoute).snapshot.data['section'] === 'catalogo' ? 'catalogo' : 'activos',
+  );
   protected readonly prof = signal('');
 
   protected readonly activeRows = computed(() => {

@@ -29,7 +29,7 @@ import { StoreService } from '../../core/persistence/store.service';
         <div class="field">
           <label class="field__label" for="pay-amount">Monto (ARS)</label>
           <input id="pay-amount" class="input-edm" [class.is-invalid]="showError()" type="number" inputmode="numeric"
-                 min="1" placeholder="0" [value]="amount()" (input)="onAmount($event)"
+                 min="1" placeholder="0" [value]="amount()" (input)="onAmount($event)" (blur)="touched.set(true)"
                  [attr.aria-invalid]="showError()" aria-describedby="pay-amount-err" />
           @if (showError()) {
             <span class="field__error" id="pay-amount-err">
@@ -100,7 +100,13 @@ export class RegisterPaymentComponent {
 
   protected readonly numericAmount = computed(() => parseFloat(this.amount()));
   protected readonly isValid = computed(() => !isNaN(this.numericAmount()) && this.numericAmount() > 0);
-  protected readonly showError = computed(() => this.touched() && !this.isValid());
+  // El campo vacío queda neutro (placeholder + botón deshabilitado guían). El error inline
+  // aparece en cuanto hay un monto cargado inválido (ej. 0/-500/letras) o tras blur/submit,
+  // de modo que el mensaje sea siempre alcanzable por la UI (no solo en un submit bloqueado).
+  protected readonly showError = computed(() => {
+    const hasInput = this.amount().trim().length > 0;
+    return !this.isValid() && (hasInput || this.touched());
+  });
 
   protected onAmount(e: Event) { this.amount.set((e.target as HTMLInputElement).value); }
   protected onMedio(e: Event) { this.medio.set((e.target as HTMLSelectElement).value); }

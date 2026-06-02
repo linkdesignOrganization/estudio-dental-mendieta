@@ -42,6 +42,12 @@ pnpm-debug.log*
 # Playwright MCP capture artifacts (transient tooling output from visual research)
 .playwright-mcp/
 
+# Playwright E2E run outputs (the .spec.ts under e2e/tests/ ARE tracked; these run artifacts are not)
+e2e/test-results/
+e2e/playwright-report/
+test-results/
+playwright-report/
+
 # NOTE: input/mockpeople/ (patient photos) and, once Phase 4 creates it,
 # public/ (where the photos are copied for runtime) are intentionally
 # NOT ignored — the static app needs them at build/deploy time.

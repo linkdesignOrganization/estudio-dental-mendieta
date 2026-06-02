@@ -5,6 +5,8 @@ import { Routes } from '@angular/router';
  */
 export const TREATMENTS_ROUTES: Routes = [
   { path: '', loadComponent: () => import('./treatments-home.component').then((m) => m.TreatmentsHomeComponent), title: 'Tratamientos' },
+  { path: 'catalogo', loadComponent: () => import('./treatments-home.component').then((m) => m.TreatmentsHomeComponent), data: { section: 'catalogo' }, title: 'Catálogo de tipos' },
+  { path: 'catalogo/:id', loadComponent: () => import('./treatment-type-detail.component').then((m) => m.TreatmentTypeDetailComponent), title: 'Tipo de tratamiento' },
   { path: 'activos/:id', loadComponent: () => import('./treatment-plan-redirect.component').then((m) => m.TreatmentPlanRedirectComponent), title: 'Tratamiento' },
   { path: 'tipos/:id', loadComponent: () => import('./treatment-type-detail.component').then((m) => m.TreatmentTypeDetailComponent), title: 'Tipo de tratamiento' },
 ];

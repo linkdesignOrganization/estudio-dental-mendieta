@@ -90,7 +90,8 @@ interface TabLink { label: string; route: string; }
         <nav class="ficha__tabs" role="tablist" aria-label="Secciones de la ficha">
           @for (t of tabs; track t.route) {
             <a class="ficha__tab" [routerLink]="['/pacientes', p.id, t.route]" routerLinkActive="is-active"
-               role="tab" ariaCurrentWhenActive="page">{{ t.label }}</a>
+               #rla="routerLinkActive" role="tab" [attr.aria-selected]="rla.isActive"
+               [attr.tabindex]="rla.isActive ? 0 : -1" ariaCurrentWhenActive="page">{{ t.label }}</a>
           }
         </nav>
 
