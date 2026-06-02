@@ -6,8 +6,8 @@
 
 ## Estado actual
 - Modo: NEW (NORMAL) · FASE 5 en PROSA (worktree no disponible + run-regression sed bug macOS)
-- Fase: FASE 5 — Iteración 2 (Pacientes) · Paso 5d (DevOps deploy)
-- Próximo: 5d-regress → 5e QA → It3..It5
+- Fase: FASE 5 — Iteración 2 COMPLETA ✓ (0 bugs). 5j commit → Iteración 3 (Agenda)
+- Próximo: Iteración 3 — calendario + flujos de turnos (+ mobile día/lista por feedback demo)
 - It2 5a ✓: sub-detalles pieza/evento/plan + 3 gaps (detalle pieza historial real, contacto emergencia, filtros lista). SEED byte-idéntico (PRNG separado, sin drift)
 - It1 ✓ (commit ac766db). Demos/feedback consolidados al final de FASE 5
 - UX-022 era flaky (carrera wizard, no bug); seed restaurado. Iteración 1 = auditoría, criterios mayormente cubiertos por regresión
@@ -61,3 +61,4 @@
 - ✓ FASE 4: Construcción Visual completa — demo APROBADA, sitio vivo, 233 criterios, 0 bugs, 24 .spec.ts/234 tests, ~13 bugs corregidos (V01 CSP crítico). PROSA. commit dda276f (2026-06-02)
 - ✓ FASE 3.5-INFRA: N/A (frontend-only, sin backend/DB) (2026-06-02)
 - ✓ FASE 5 It1 (Fundación): auditoría base demo, corrigió REQ-057/058 + regresión seed (PRNG separado), UX-022 flaky estabilizado, 0 bugs, suite 490 tests (2026-06-02)
+- ✓ FASE 5 It2 (Pacientes): ficha a fondo + sub-detalles (pieza/evento/plan), 3 gaps hardcodeados corregidos, seed byte-idéntico (sin drift), regresión 486 verde, 0 bugs (2026-06-02)
