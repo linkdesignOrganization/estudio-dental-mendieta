@@ -132,7 +132,7 @@ El sitio `https://happy-coast-044ea7e0f.7.azurestaticapps.net` quedó **verifica
 | **Root `/`** | HTTP 200, sirve el shell Angular (`<app-root>`, `<base href="/">`, title "Estudio Dental Mendieta", bundles hasheados `main-*.js` / `styles-*.css`) |
 | **Deep-link `/pacientes`** | HTTP 200, SPA fallback correcto (devuelve el mismo `index.html` → el router del cliente resuelve la ruta) |
 | **Seed manifest `/seed/manifest.json`** | HTTP 200, `application/json`, 29 pacientes (12 H / 17 M) |
-| **Fotos de paciente** | `hombres/28.jpg` y `mujeres/32.jpg` → HTTP 200, `image/jpeg` |
+| **Fotos de paciente** | sirven en `/imagenes/pacientes/{hombres,mujeres}/N.jpg` (el `path` real está en cada entrada de `manifest.json`) → HTTP 200, `image/jpeg`. ⚠️ NO usar `/seed/fotos/...`: esa ruta no existe y por el SPA fallback devuelve `200` + `text/html` (index.html), enmascarando el 404 — verificar SIEMPRE el `content_type`, no solo el status |
 | **Bundles + favicon** | `main-*.js` (`text/javascript`), `styles-*.css` (`text/css`), `favicon.ico` → HTTP 200 |
 | **Security headers** | CSP, X-Frame-Options (SAMEORIGIN), X-Content-Type-Options (nosniff), Referrer-Policy, Permissions-Policy → todos presentes en la respuesta (config de `public/` aplicada) |
 
@@ -144,8 +144,24 @@ SITE="https://happy-coast-044ea7e0f.7.azurestaticapps.net"
 curl -s -o /dev/null -w "root %{http_code}\n" "$SITE/"
 curl -s -o /dev/null -w "/pacientes %{http_code}\n" "$SITE/pacientes"   # SPA fallback → 200
 curl -s -o /dev/null -w "manifest %{http_code} %{content_type}\n" "$SITE/seed/manifest.json"
+# Foto: tomar un path REAL del manifest y verificar content_type=image/jpeg (no /seed/fotos/)
+P=$(curl -s "$SITE/seed/manifest.json" | node -e "let d='';process.stdin.on('data',c=>d+=c).on('end',()=>console.log(JSON.parse(d).pacientes[0].path))")
+curl -s -o /dev/null -w "foto $P %{http_code} %{content_type}\n" "$SITE$P"
 curl -s -D - -o /dev/null "$SITE/" | grep -i content-security-policy    # headers vivos
 ```
+
+### Re-deploy round 1 — fixes de QA Construcción Visual (2026-06-02) — verificado
+Push de `fix: visual-build - bug fixes round 1` (commit `41a7d9b`) → run `26799504393` **success** (~1m53s). El build de CI corrió el hook `prebuild` (manifest regenerado, `generadoEn: 2026-06-02T05:02:41Z`, 29 pacientes). Verificación del fix crítico **BUG-V01** (los estilos del DS no aplicaban en pantalla):
+
+| Verificación | Resultado |
+|---|---|
+| `index.html` desplegado | `<link rel="stylesheet" href="styles-FHPOFM43.css">` **normal** — sin `media="print"`, sin `onload="this.media='all'"` |
+| Hoja del DS aplica en pantalla | `styles-FHPOFM43.css` 200, `media="(all)"`, **appliesToScreen=true**, 593 reglas activas (Playwright sobre `/pacientes`) |
+| `.btn-edm--primary` computed | background `rgb(109,168,212)` (#6da8d4 azul), font `"Red Hat Text"`, radius `12px`, display `flex` → **estilos SÍ aplican** |
+| Ruta nueva `/tratamientos/catalogo` | 200 (SPA fallback, sirve `app-root`); `catalogo/:id` también 200 — registrada en `treatments.routes.ts` |
+| Manifest + fotos | manifest 200 `application/json`; fotos en `/imagenes/pacientes/...` 200 `image/jpeg` |
+
+> **Raíz de V01 (para futuros redeploys):** el anti-patrón `media="print"`/`onload` NO está en `src/index.html` — lo inyectaba `optimization.styles.inlineCritical` (default de producción del builder `application`). El fix fue `inlineCritical: false` en `angular.json` (config `production`). Si reaparece "estilos no aplican / FOUC", revisar ahí, no el HTML fuente.
 
 ---
 
