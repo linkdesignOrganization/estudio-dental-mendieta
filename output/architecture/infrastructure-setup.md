@@ -242,6 +242,26 @@ Push de `feat: iteration 3 - pre-QA deploy` (commit `8d5fd31`) → run `26834655
 
 > **Nota para el QA Orchestrator (rutas de la agenda — evitar falso negativo):** la clase `.agenda-row` (vista lista) vive en `agenda-list-view.component.ts` y se renderiza en `/agenda` con **viewport mobile** (`agenda` es el default mobile). La ruta `/agenda/dia` carga un componente DISTINTO (`DayListComponent`, una **tabla** `app-data-table` con `<td class="cell">` que lista solo los turnos de HOY) y NO usa `.agenda-row`. Para navegar a un turno reagendable desde un probe, usar la lista mobile de `/agenda` (cada fila enlaza a `/agenda/:id`), no `/agenda/dia`. El form de reagendar usa `input#r-date` + botones `.resch__slot` (ocupados `[disabled]`) + primary "Confirmar nuevo horario" (deshabilitado hasta elegir slot).
 
+### Iteración 4 (Pacientes escritura + Tratamientos) — Pre-QA Deploy (2026-06-02, paso 5d) — verificado
+Push de `feat: iteration 4 - pre-QA deploy` (commit `8bfc152`) → run `26845395311` **success** (~1m). `headSha` del run coincide con el HEAD local pusheado. Redeploy de **solo código** — sin cambios de infra (SWA, CI/CD y secret siguen igual que en Fase 4). 10 archivos en el commit: 6 componentes de It4 modificados (`store.service.ts`, `patient-create.component.ts`, `patient-list.component.ts`, `tabs/tab-odontogram.component.ts`, `treatment-type-detail.component.ts`, `treatments-home.component.ts`) + 1 servicio nuevo (`patient-flow.service.ts`, estado compartido del flujo de creación entre los 2 segmentos de ruta) + reporte `output/iterations/iteration-4/verification-5a.md` + 2 trackers.
+
+**Seed byte-idéntico (sin drift) — manejo del manifest:** el `public/seed/manifest.json` está trackeado, pero el hook `prebuild` lo reescribe en cada build local solo para refrescar el campo cosmético `generadoEn` (timestamp). Los datos (29 pacientes 12 H / 17 M, 15 documentos) son idénticos. Ese churn de timestamp se **descartó** con `git checkout -- public/seed/manifest.json` antes del `git add -A`, de modo que el manifest NO entró al commit. En CI el `prebuild` lo regenera igual (`[manifest] 29 pacientes (12 H / 17 M), 15 documentos`), así el sitio sirve el seed correcto sin ensuciar el historial. Budget OK: `Initial total 427.99 kB / 103.48 kB gzipped` (<500KB error-budget). El bundle servido `main-YIQ6IJV4.js` == el del build local de It4 → confirma código realmente desplegado, no caché.
+
+> **Nota (paso post-job benigno):** el log del run muestra `error: could not lock config file .git/config: Permission denied` en el step "Post Checkout". Es el cleanup del runner que corre la acción `Azure/static-web-apps-deploy`, NO el build/deploy. El run concluyó `success` y el deploy se aplicó. Patrón conocido, no bloqueante.
+
+**Verificación funcional post-deploy (Playwright contra el SWA, 9/9 PASS)** — alcance "deploy exitoso + sitio carga + cambios de It4 reflejados"; la validación QA detallada la hace el QA Orchestrator:
+
+| Eje | Resultado |
+|---|---|
+| Root `/`, `/pacientes`, `/tratamientos`, `/pacientes/nuevo/datos` | 200 `text/html` (shell Angular + SPA fallback); manifest 200 `application/json`; foto `/imagenes/pacientes/hombres/1.jpg` 200 `image/jpeg` (content-type verificado, no fallback enmascarado) |
+| **CREAR paciente = 2 pasos + género** | stepper `app-stepper` "Datos personales / Datos clínicos" (Paso 1 de 2); `<select id="c-genero">` con opciones **Femenino / Masculino** en paso 1; "Siguiente" navega a paso 2 ("Datos clínicos y de cobertura"); 0 errores de consola |
+| **EDITAR — dirty-check (F01)** | SIN cambios → "Cancelar" sale directo a `/pacientes/pac-001/informacion` (sin diálogo); CON cambios (editar teléfono) → muestra `app-confirm-dialog` "Tenés datos cargados. ¿Querés descartar y salir?" |
+| **ODONTOGRAMA — pieza editable + persiste** | pieza 18 cambiada `ausente → sana` vía `app-tooth-state-selector` + "Guardar estado"; tras **recarga dura** de `/pacientes/pac-001/pieza/18`, el chip `.td-main__chip[data-state]` sigue en `"sana"` → persiste (localStorage) |
+| **TRATAMIENTOS — columna "Próxima fecha"** | tabla de Activos con headers `PACIENTE \| TRATAMIENTO \| PROFESIONAL \| ETAPAS \| PRÓXIMA FECHA` (columna `{ key: 'proxima', label: 'Próxima fecha' }`) |
+| Security headers | CSP, X-Frame-Options (SAMEORIGIN), X-Content-Type-Options (nosniff), Referrer-Policy, Permissions-Policy → presentes |
+
+> **Nota para el QA Orchestrator (ruta de CREAR paciente — evitar falso negativo):** el flujo de crear NO está en `/pacientes/nuevo` (esa ruta no existe → cae al 404 `not-found`). Son **2 segmentos de ruta** (multipaso por URL, no por estado interno): paso 1 = `/pacientes/nuevo/datos` (form con `#c-nombre`, `#c-genero`, etc.), paso 2 = `/pacientes/nuevo/clinico`. El botón "Siguiente" (`.btn-edm--primary`) navega entre ellos; el estado se comparte vía `PatientFlowService`. Editar = `/pacientes/:id/editar`; detalle de pieza = `/pacientes/:id/pieza/:fdi`. El único guard del árbol es `seedReadyGuard` (hidrata el store, NO es auth/login → no redirige a `/login`).
+
 ---
 
 ## 5. Decisión de suscripción y SKU (resuelta)

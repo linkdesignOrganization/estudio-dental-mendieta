@@ -6,8 +6,8 @@
 
 ## Estado actual
 - Modo: NEW (NORMAL) · FASE 5 en PROSA (worktree no disponible + run-regression sed bug macOS)
-- Fase: FASE 5 — Iteración 4 · Paso 5d (DevOps deploy). 5b/5c ✓ (fix seguridad: foto excluye SVG + límite 2MB)
-- Próximo: 5d-regress → 5e QA → It5
+- Fase: FASE 5 — Iteración 4 COMPLETA ✓ (0 bugs). 5j commit → Iteración 5 (Facturación + Pagos + Reportes — ÚLTIMA)
+- Próximo: Iteración 5 — presupuestos, facturas, obras sociales, REGISTRAR pago editable, reportes con gráficos
 - It4 5a ✓: crear paciente 2 rutas + género (estaba hardcodeado mujer) + foto, editar dirty-check (F01), odontograma editable @defer immediate, tratamientos col próxima fecha. Seed byte-idéntico
 - It1/2/3 ✓
 - UX-003 era flaky (click tragado nav encadenada, no agenda); seed byte-idéntico
@@ -68,3 +68,4 @@
 - ✓ FASE 5 It1 (Fundación): auditoría base demo, corrigió REQ-057/058 + regresión seed (PRNG separado), UX-022 flaky estabilizado, 0 bugs, suite 490 tests (2026-06-02)
 - ✓ FASE 5 It2 (Pacientes): ficha a fondo + sub-detalles (pieza/evento/plan), 3 gaps hardcodeados corregidos, seed byte-idéntico (sin drift), regresión 486 verde, 0 bugs (2026-06-02)
 - ✓ FASE 5 It3 (Agenda): vista semanal real (bug grid mensual corregido), mobile día/lista (feedback demo, chips 22px→44px), reagendar notif WhatsApp, notas internas, UX-003 flaky estabilizado, regresión 536 verde, 0 bugs (2026-06-02)
+- ✓ FASE 5 It4 (escritura+tratamientos): crear paciente (género hardcodeado mujer→real) 2 rutas+foto, editar dirty-check (F01), odontograma editable persistente, tratamientos, FIX seguridad foto (SVG/XSS+2MB), REQ-187 test adaptado @defer, regresión 568 verde, 0 bugs (2026-06-02)

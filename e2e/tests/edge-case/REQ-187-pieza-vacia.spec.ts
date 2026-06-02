@@ -19,11 +19,14 @@ import { gotoApp, warmSeed, openPatient } from '../_helpers/seed';
  *       → control positivo: 3 ítems reales de historial (Dr. Federico Salinas), NO empty-state.
  *
  * Nota de hidratación (BUG-E04, ya documentado en UX-047): el diagrama del odontograma
- * es un bloque @defer que hidrata al entrar en viewport/idle. Por eso el flujo de usuario
- * (listado → ficha → tab Odontograma → pieza) hace scroll de la pieza a viewport y espera
- * las 32 piezas antes de hacer click. El deep-link directo a /pieza/{fdi} SÍ hidrata el
- * detalle en ambos viewports (no depende del diagrama), por lo que las aserciones del
- * empty-state se hacen sobre el detalle (estable en desktop y mobile).
+ * es un bloque @defer. En It4 pasó de `on idle` a `on immediate` para hidratar de forma
+ * determinista en deep-link/refresh y mobile (donde `on idle/viewport` podían dejar 0
+ * piezas). Su chunk se carga por red, así que las 32 piezas aparecen unos instantes
+ * DESPUÉS de entrar al tab; por eso el flujo de usuario (listado → ficha → tab Odontograma
+ * → pieza) espera web-first las 32 piezas (toHaveCount, que reintenta) antes del click. El
+ * deep-link directo a /pieza/{fdi} SÍ hidrata el detalle en ambos viewports (no depende del
+ * diagrama), por lo que las aserciones del empty-state se hacen sobre el detalle (estable en
+ * desktop y mobile).
  */
 
 const COPY_VACIO_PIEZA = 'Sin procedimientos registrados en esta pieza';
@@ -64,13 +67,20 @@ test('REQ-187: una pieza sana muestra el estado vacío "Sin procedimientos…" (
   await expect(page).toHaveURL(/\/pacientes\/pac-029\/odontograma$/);
   await expect(page.getByRole('heading', { name: 'Odontograma' })).toBeVisible();
 
-  // El diagrama es @defer: lo traemos a viewport y esperamos las 32 piezas antes del click.
+  // El diagrama es un bloque @defer (on immediate): su chunk se carga por red al entrar
+  // en la pantalla, así que las 32 piezas aparecen unos instantes DESPUÉS de navegar al
+  // tab (más lento bajo la emulación mobile). Esperamos web-first a que el diagrama esté
+  // completo —la aserción `toHaveCount` reintenta con el expect.timeout (15s), absorbiendo
+  // la latencia del @defer— ANTES de tocar la pieza. (En It2, con `on idle`, el test hacía
+  // un `scrollIntoViewIfNeeded()` imperativo PRIMERO: esa acción no reintenta el conteo y
+  // competía con el render del @defer, agotando el actionTimeout en mobile.)
   const piezaSana = page.getByRole('button', { name: 'Pieza 11 (universal 8), Sana' });
-  await piezaSana.scrollIntoViewIfNeeded();
   await expect(page.getByRole('button', { name: /^Pieza \d+ \(universal \d+\)/ })).toHaveCount(32);
   await expect(piezaSana).toBeVisible();
 
-  // 4) Click en la pieza SANA.
+  // 4) Click en la pieza SANA. `.click()` auto-scrollea el target a viewport (la pieza ya
+  // está adjunta y visible por las aserciones de arriba), por lo que no hace falta un
+  // scroll imperativo previo que pueda correr antes de que el @defer hidrate.
   await piezaSana.click();
   await expect(page).toHaveURL(/\/pacientes\/pac-029\/pieza\/11$/);
 
