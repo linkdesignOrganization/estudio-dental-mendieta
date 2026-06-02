@@ -6,9 +6,9 @@
 
 ## Estado actual
 - Modo: NEW (NORMAL — no Pixel-Perfect, CON design-brief de Task Dasher)
-- Fase: FASE 3.5 — DevOps provisionando (Azure SWA + repo + CI/CD)
-- Próximo: FASE 4 (Construcción Visual / demo)
-- Infra: Azure sub=CEFSA-prod (4bdfcf40-…) · repo=público linkdesignOrganization/estudio-dental-mendieta · node v26 · Angular 21
+- Fase: FASE 3.5 COMPLETADA — infra lista (SWA Standard + repo + CI/CD + token)
+- Próximo: FASE 4 — Construcción Visual (demo navegable)
+- Infra: Azure sub=CEFSA-prod (4bdfcf40-…) SKU=Standard · repo=público linkdesignOrganization/estudio-dental-mendieta · node v26 · Angular 21
 - Diseño: design-criteria.md = 120 DC-xxx + 29 BVC-xxx · ux-criteria.md = 71 UX-xxx
 - Cliente APROBÓ el plan (con ajuste: Angular 17→21)
 - Arquitectura: Angular 17+ standalone, Bootstrap 5 selectivo, localStorage, 5 iteraciones, 21 DEMO-xxx
@@ -20,7 +20,7 @@
 - Mobile: TODOS los flujos usables en mobile (responsive completo) — sube alcance
 - Interacción: Pagos Y Odontograma editables — sube alcance
 - Bugs abiertos: 0
-- URL deploy: N/A
+- URL deploy: https://happy-coast-044ea7e0f.7.azurestaticapps.net (SWA Standard, sin contenido aún hasta 4e)
 - Effort sesión: max ✓
 
 ## Notas de arranque
@@ -40,3 +40,4 @@
 - ✓ FASE 3.0 (capturas): 8 páginas Task Dasher capturadas (49 PNGs desktop+mobile), 29 BVC del Brief Analyst (2026-06-01)
 - ✓ FASE 3.0 (síntesis): visual-analysis.md (360 líneas, 30 BVC, tokens prescriptivos azul+Red Hat) — Design Researcher cayó 1 vez por socket, OK en intento 2 (2026-06-01)
 - ✓ FASE 3: planificación completa, 5 iteraciones, 21 DEMO-xxx, 120 DC-xxx, 71 UX-xxx, plan-verifier PASA sin gaps (2026-06-01)
+- ✓ FASE 3.5: infra demo — repo público + CI/CD GitHub Actions + SWA Standard en CEFSA-prod (happy-coast-044ea7e0f), cliente autorizó ~$9/mes (2 bloqueos resueltos: cuota Free, permisos Sponsorship) (2026-06-01)
