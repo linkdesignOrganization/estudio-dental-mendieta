@@ -184,6 +184,26 @@ Push de `fix: visual-build - touch target residuals + qa round 2 test adaptation
 
 Smoke test post-deploy (alcance: "deploy exitoso + sitio carga"; la validación de los ≥44px la hace el QA): root `/` 200 `text/html` (shell Angular, sin regresión FOUC `media="print"`), `/pacientes` 200 (SPA fallback), manifest 200 `application/json` (29 pacientes), foto `/imagenes/pacientes/hombres/1.jpg` 200 `image/jpeg` (content-type verificado), bundles+favicon 200, security headers (CSP/X-Frame-Options/X-Content-Type-Options/Referrer-Policy/Permissions-Policy) presentes. **Todo ✅.**
 
+### Iteración 1 (Fundación) — Pre-QA Deploy (2026-06-02, paso 5d) — verificado
+Push de `feat: iteration 1 - pre-QA deploy` (commit `f535a69`) → run `26818370793` **success** (~1m52s). `headSha` del run coincide con el HEAD local. El Developer auditó la base de la demo y cerró 2 gaps de la Fundación: (1) los **6 profesionales de cabecera** con nombres exactos del brief, y (2) **44 documentos** con thumbnails SVG autoalojados. Cambios desplegados: `src/app/core/seed/{ar-data,seed.generator}.ts`, `scripts/generate-manifest.mjs` (IMG_RE ahora acepta `svg`), **15 SVGs nuevos** en `public/imagenes/documentos/` (5 `foto-*` + 10 `radiografia-*`), specs de flow E2E con refs de profesionales actualizadas, y reportes en `output/iterations/iteration-1/`.
+
+**Confirmación crítica del prebuild (manifest regenerado en CI):** el log del run muestra `[manifest] 29 pacientes (12 H / 17 M), 15 documentos → public/seed/manifest.json` — antes de esta iteración eran **0 documentos**. El budget de bundle pasó: `Initial total 424.67 kB / 102.37 kB gzipped` (<500KB error-budget).
+
+> **Dónde viven los datos de Fundación (para el QA / futuros redeploys):** el `manifest.json` solo lista *assets crudos* descubiertos en build-time (`pacientes`: paths de fotos; `documentos`: los 15 paths de SVG). Los **6 profesionales** y la **asignación de documentos por paciente** se generan client-side en `seed.generator.ts` a partir de `ar-data.ts` (compilado en un lazy chunk de JS, p.ej. `chunk-F65ANOK5.js`), NO en el manifest. Por diseño (UX-048) **algunos pacientes no tienen documentos** (edge case del seed) → su tab muestra el placeholder controlado "Sin documentos"; eso NO es un bug. `pac-001` es uno de esos; `pac-002` (Mateo Gómez) SÍ tiene documento.
+
+Verificación post-deploy (todos ✅):
+
+| Eje | Resultado |
+|---|---|
+| Root `/` + `/pacientes` | 200 `text/html` (shell Angular + SPA fallback); listado renderiza "29 pacientes en el sistema" con fotos reales |
+| Manifest `/seed/manifest.json` | 200 `application/json`, `generadoEn 2026-06-02T12:02:46Z` (fresco, regenerado por CI), **15 documentos** (5 fotos + 10 radiografías), 29 pacientes |
+| **Thumbnails SVG sirven como imagen real** | `foto-01.svg`/`radiografia-01.svg`/`radiografia-10.svg` → 200 **`image/svg+xml`** con bytes = source; el contenido empieza por `<svg xmlns=...` (no `<!doctype html>`). Control negativo: `NOPE-99.svg` → 200 `text/html` (SPA fallback) — prueba que el content-type de los SVG reales es genuino y no fallback enmascarado |
+| **6 profesionales en el bundle desplegado** | `prof-01..prof-06` presentes en `chunk-F65ANOK5.js` con los nombres exactos del brief (acentos minificados a `\x`): Dra. Soledad Russo, Dra. Carolina Etcheverry, Dr. Federico Salinas, Dr. Mart**í**n Aguilera (`\xED`), Dr. Juan Pablo Acu**ñ**a (`\xF1a`), Dra. Laura B**é**ccar Varela (`\xE9`) |
+| **Runtime: profesional en la ficha** | ficha `/pacientes/pac-001/informacion` (Playwright) muestra "Profesional de cabecera: Dr. Federico Salinas" en el header |
+| **Runtime: thumbnail real en tab Documentos** | tab Documentos de `pac-002` (Playwright) renderiza el `<img>` de `radiografia-06.svg` con `naturalWidth>0` (no roto) — gráfico de radiografía dental "Serie periapical". 0 errores de consola en listado y ficha |
+
+> Redeploy de solo código + assets — sin cambios de infra. El SWA, CI/CD y secret siguen igual que en Fase 4.
+
 ---
 
 ## 5. Decisión de suscripción y SKU (resuelta)
