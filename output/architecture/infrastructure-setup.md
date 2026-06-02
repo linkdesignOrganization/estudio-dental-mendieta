@@ -163,6 +163,22 @@ Push de `fix: visual-build - bug fixes round 1` (commit `41a7d9b`) → run `2679
 
 > **Raíz de V01 (para futuros redeploys):** el anti-patrón `media="print"`/`onload` NO está en `src/index.html` — lo inyectaba `optimization.styles.inlineCritical` (default de producción del builder `application`). El fix fue `inlineCritical: false` en `angular.json` (config `production`). Si reaparece "estilos no aplican / FOUC", revisar ahí, no el HTML fuente.
 
+### Re-deploy round 2 — fix BUG-V05 (touch targets ≥44px mobile) (2026-06-02) — verificado
+Push de `fix: visual-build - touch targets >=44px mobile (BUG-V05)` (commit `331020c`) → run `26804209775` **success** (~1m55s). El build de CI corrió el hook `prebuild` (manifest regenerado, 29 pacientes 12 H / 17 M) y `ng build` completó sin errores (budget OK). Bundles nuevos: `main-7MFTGH7B.js` / `styles-PDCEFIZS.css`. El `headSha` del run coincide con el HEAD local pusheado.
+
+Verificación post-deploy (alcance: "el deploy es exitoso y el sitio carga" — la validación detallada de los ≥44px la hace el QA):
+
+| Verificación | Resultado |
+|---|---|
+| Root `/` | HTTP 200 `text/html`, sirve el shell Angular (`<app-root>`, `<base href="/">`, title "Estudio Dental Mendieta", bundle hasheado **nuevo** `main-7MFTGH7B.js`) |
+| Deep-link `/pacientes` | HTTP 200 (SPA fallback correcto) |
+| Bundles + favicon | `main-7MFTGH7B.js` (`text/javascript`), `styles-PDCEFIZS.css` (`text/css`), `favicon.ico` → 200 |
+| Seed manifest `/seed/manifest.json` | HTTP 200 `application/json`, 29 pacientes |
+| Foto de paciente (path real del manifest) | `/imagenes/pacientes/hombres/1.jpg` → 200 `image/jpeg` (content-type verificado, no SPA-fallback enmascarado) |
+| Security headers | CSP, X-Frame-Options (SAMEORIGIN), X-Content-Type-Options (nosniff), Referrer-Policy, Permissions-Policy → todos presentes |
+
+> El fix de BUG-V05 vive en `src/styles/theme.scss` (media query `@media (max-width:767px)` con `--touch-target-min` = 44px sobre `.icon-btn`/`.btn-edm`/`.input-edm`/`.select-edm`/`.back-link`) más ajustes `min-height`/`min-width` por-componente en 14 componentes. Redeploy de solo código — sin cambios de infra.
+
 ---
 
 ## 5. Decisión de suscripción y SKU (resuelta)

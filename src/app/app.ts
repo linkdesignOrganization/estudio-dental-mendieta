@@ -19,6 +19,8 @@ import { ToastHostComponent } from './shared/components/toast-host.component';
   styles: [`
     .skip-link {
       position: absolute; left: var(--space-4); top: -48px; z-index: 2000;
+      display: inline-flex; align-items: center;
+      min-height: var(--touch-target-min); /* hit-area ≥44px (DC-072/088 / BVC-017) */
       background: var(--color-accent-deep); color: #fff; padding: var(--space-2) var(--space-4);
       border-radius: var(--radius-sm); transition: top var(--motion-fast) var(--motion-ease);
     }

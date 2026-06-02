@@ -11,11 +11,13 @@ import { warmSeed, gotoApp } from '../_helpers/seed';
  *   (DC-021/BUG-E02: opacity .4 + cursor not-allowed). Esos dos gates quedan ACTIVOS y PASAN.
  * BUG-V04 (a11y) — CORREGIDO: cada role="tab" de la ficha expone aria-selected. Gate ACTIVO, PASA.
  *
- * BUG-V05 (a11y, PENDIENTE — derivado de V01): aunque V01 subió los icon-buttons de ~28px a 40px,
- *   en mobile (375px) NO alcanzan el touch target ≥44px que exigen DC-021/DC-072/DC-088/BVC-017
- *   (`--touch-target-min: 44px` está definido pero no se aplica al hit-area). Box real: burger/bell
- *   40×40, avatar 32×32, search-input 23px alto. El gate DC-072/088 sigue `fixme` y se reporta a
- *   Developer (ver visual-fixme-cierre.md). Se reactivará cuando los controles mobile lleguen a ≥44px.
+ * BUG-V05 (a11y, PARCIALMENTE corregido — derivado de V01): el fix de V05 subió a ≥44px
+ *   burger/bell/avatar (44×44), "Editar paciente", view-toggles, tabs (52px) y piezas del
+ *   odontograma (53px). El gate DC-072/088 fue REACTIVADO (ya no es `fixme`), pero HOY sigue
+ *   ROJO por DOS controles residuales en /pacientes mobile: `input.search-pill__input` 23px (el
+ *   wrapper .search-pill sí mide 44px, el input interno no se estira) y `a.skip-link` 42px.
+ *   Reportado a Developer en output/iterations/visual-build/visual-v05-cierre.md. El gate pasará a
+ *   verde automáticamente cuando ambos residuales lleguen a ≥44px.
  */
 
 const PID = 'pac-001';
@@ -74,12 +76,17 @@ test('DC-021 (BUG-E02/BUG-V01): la regla .btn-edm:disabled aplica (opacity 0.4 +
 
 // DC-072 / DC-088 / BVC-017 — touch targets ≥44px en mobile (hamburguesa, campana, icon-buttons).
 //
-// SIGUE `fixme` → BUG-V05 (a11y) PENDIENTE para Developer. El fix de V01 subió los icon-buttons de
-// ~28px a 40px, pero NO al ≥44px que exige el design system en mobile. Estado live verificado
-// (375px, /pacientes): burger 40×40, bell 40×40, "Editar paciente" 40×40, avatar 32×32,
-// search-input 23px de alto. El token `--touch-target-min: 44px` está definido en :root pero no se
-// aplica al hit-area de estos controles. Reactivar cuando el hit-area mobile llegue a ≥44px.
-test.fixme('DC-072/088 (BUG-V05): touch targets ≥44px en mobile', async ({ page }) => {
+// REACTIVADO tras fix (parcial) de BUG-V05 (a11y). El Developer SÍ subió a ≥44px: burger/bell/avatar
+// (.header__avatar-btn 44×44), "Editar paciente" (icon-btn 44×44), view-toggles, paginación, items
+// del sidebar, botones primarios, tabs de la ficha (52px) y piezas .tooth del odontograma (53px).
+// Gate ACTIVO porque debe quedar verde cuando V05 esté 100%. HOY sigue ROJO (live, /pacientes,
+// Pixel 5 375px) por DOS controles residuales <44px → BUG-V05 RESIDUAL para Developer:
+//   1) input.search-pill__input "Buscar pacientes" → 23px (el .search-pill wrapper sí mide 44px,
+//      pero el <input> interno no se estira: height:23px, min-height:0, align-self:stretch sin que
+//      el flex padre lo estire). El control de teclado/táctil real es 23px de alto.
+//   2) a.skip-link "Saltar al contenido" → 42px (line-height 25.6 + padding 8/8; faltan ~2px).
+// Reactivar verde cuando ambos lleguen a ≥44px. Ver output/iterations/visual-build/visual-v05-cierre.md.
+test('DC-072/088 (BUG-V05): touch targets ≥44px en mobile', async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 });
   await gotoApp(page, '/pacientes');
   await page.getByRole('heading', { level: 1, name: 'Pacientes' }).waitFor();

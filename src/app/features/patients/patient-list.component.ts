@@ -118,8 +118,12 @@ import { paymentBadge } from '../../shared/status-map';
     @media (max-width: 767px) {
       .page-head__actions { width: 100%; }
       /* Touch target ≥44px en mobile (DC-088 / BVC-017): el buscador y los toggles
-         de vista crecen su hit-area a 44px (el input estira al alto del pill). */
+         de vista crecen su hit-area a 44px. El <input> es el elemento que recibe el
+         tap/foco real, así que su PROPIA caja (no solo la del pill) debe medir ≥44px:
+         min-height directo sobre el input. El pill mantiene align-items:center, por lo
+         que el ícono (16px, height inline) no se deforma. */
       .search-pill { flex: 1; min-width: 0; height: auto; min-height: var(--touch-target-min); }
+      .search-pill__input { min-height: var(--touch-target-min); height: auto; }
       .view-toggle__btn { height: var(--touch-target-min); }
       .cards { grid-template-columns: 1fr; }
     }

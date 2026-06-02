@@ -13,8 +13,9 @@
 - Flow Tester ✓: 45 PASA, 90/90 desktop+4/4 mobile, 1 bug baja (BUG-F01 ruta catálogo)
 - Edge Tester ✓: 28 criterios, 100/100 PASS, 6 bugs (E01-E06)
 - Visual Checker ✓: 138/158 PASA, BUG-V01 CRÍTICO (hoja estilos no aplica: media=print+onload bloqueado por CSP — raíz de E02/E05/V06/20 fallas visuales) + V04 a11y. BVC-027 y GAP-A04 PASAN
-- Fase: 4f anti-deferral RONDA 3 — V05 fix ✓ (touch ≥44px mobile), DevOps deploy → activar fixme touch → regresión
-- Bugs abiertos: 1 (V05 en re-deploy/re-test)
+- Fase: 4f anti-deferral RONDA 3 — V05 residuales fix ✓ (gate touch verde local), DevOps deploy → regresión final
+- Bugs abiertos: 0 (V05 cerrado pendiente verificación post-deploy + regresión)
+- Observación demo: chips agenda semanal mobile 22px (no forzado — path táctil = vista día/lista; decisión del cliente)
 - Bugs abiertos: 9 fallos en re-QA — naturaleza: UX-045 test obsoleto (E03 ya fixeado), 6 mobile timeouts (tests no adaptados a mobile/posible bug), DC-076 odontograma (¿@defer?)
 - NOTA regresión: usar --no-chunks desde e2e/ con REGRESSION_TESTS_DIR=tests (chunked rompe por BSD sed)
 - 4a ✓ + 4b ✓ + 4c ✓ + 4d ✓ + 4e DEPLOY VIVO ✓ (sitio carga, manifest+fotos OK)
