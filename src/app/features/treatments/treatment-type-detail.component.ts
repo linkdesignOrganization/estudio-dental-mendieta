@@ -47,7 +47,14 @@ import { StoreService } from '../../core/persistence/store.service';
             <div class="icon-chip"><span class="icon-chip__glyph"><app-icon name="clock" [size]="16" /></span><div class="icon-chip__body"><span class="icon-chip__label">Duración estimada</span><span class="icon-chip__value">{{ t.duracionEst }}</span></div></div>
             <div class="ttd__profs">
               <span class="t-small t-secondary">Profesionales habilitados</span>
-              <app-avatar-stack [items]="profFotos()" [max]="4" />
+              <div class="ttd__profs-row">
+                <app-avatar-stack [items]="profFotos()" [max]="6" />
+                <ul class="ttd__profs-names">
+                  @for (p of profesionales(); track p.id) {
+                    <li class="t-small"><span class="ttd__profs-name">{{ p.nombre }}</span><span class="t-secondary"> · {{ p.especialidad }}</span></li>
+                  }
+                </ul>
+              </div>
             </div>
           </section>
         </div>
@@ -76,6 +83,9 @@ import { StoreService } from '../../core/persistence/store.service';
     .ttd__materials { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-2); color: var(--color-text); }
     .ttd__materials li { display: flex; align-items: center; gap: var(--space-2); }
     .ttd__profs { display: flex; flex-direction: column; gap: var(--space-2); }
+    .ttd__profs-row { display: flex; align-items: flex-start; gap: var(--space-4); flex-wrap: wrap; }
+    .ttd__profs-names { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-1); }
+    .ttd__profs-name { color: var(--color-text); font-weight: var(--weight-medium); }
     @media (max-width: 767px) { .ttd__grid { grid-template-columns: 1fr; } .ttd__card--meta { flex-direction: column; gap: var(--space-4); } }
   `],
 })
@@ -85,5 +95,6 @@ export class TreatmentTypeDetailComponent {
   protected readonly type = computed(() => this.store.treatmentTypeById(this.id()));
   protected readonly steps = computed(() => this.store.treatmentTypeDetail(this.id()).pasos);
   protected readonly materials = computed(() => this.store.treatmentTypeDetail(this.id()).materiales);
-  protected readonly profFotos = computed(() => this.store.professionals().slice(0, 4).map((p) => p.fotoPath));
+  protected readonly profesionales = computed(() => this.store.treatmentTypeProfessionals(this.id()));
+  protected readonly profFotos = computed(() => this.profesionales().map((p) => p.fotoPath));
 }

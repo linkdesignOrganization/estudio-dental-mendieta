@@ -1,11 +1,10 @@
 import { Component, ChangeDetectionStrategy, signal, computed, inject } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { AvatarComponent } from '../../shared/components/avatar.component';
-import { StatusBadgeComponent } from '../../shared/components/status-badge.component';
+import { IconComponent } from '../../shared/components/icon.component';
 import { DataTableComponent, TableRowDirective, TableColumn } from '../../shared/components/data-table.component';
 import { TreatmentTypeCardComponent } from '../../shared/components/treatment-type-card.component';
 import { StoreService } from '../../core/persistence/store.service';
-import { treatmentBadge } from '../../shared/status-map';
 import { TreatmentPlan } from '../../core/models/models';
 
 /**
@@ -16,7 +15,7 @@ import { TreatmentPlan } from '../../core/models/models';
 @Component({
   selector: 'app-treatments-home',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [AvatarComponent, StatusBadgeComponent, DataTableComponent, TableRowDirective, TreatmentTypeCardComponent],
+  imports: [AvatarComponent, IconComponent, DataTableComponent, TableRowDirective, TreatmentTypeCardComponent],
   template: `
     <div class="page-head">
       <div class="page-head__titles">
@@ -51,7 +50,13 @@ import { TreatmentPlan } from '../../core/models/models';
           <td class="cell">{{ t.nombre }}</td>
           <td class="cell">{{ t.profesional }}</td>
           <td class="cell"><span class="cell-stage">{{ t.etapasCompletadas }}/{{ t.etapasTotales }}</span></td>
-          <td class="cell cell--end"><app-status-badge [label]="badge(t).label" [tone]="badge(t).tone" /></td>
+          <td class="cell cell--end">
+            @if (t.proximaFecha) {
+              <span class="cell-next"><app-icon name="calendar-blank" [size]="16" /> {{ t.proximaFecha }}</span>
+            } @else {
+              <span class="cell-next cell-next--none">Sin fecha prevista</span>
+            }
+          </td>
         </ng-template>
       </app-data-table>
     } @else {
@@ -73,6 +78,8 @@ import { TreatmentPlan } from '../../core/models/models';
     .cell--end { text-align: right; }
     .cell-person { display: flex; align-items: center; gap: var(--space-3); }
     .cell-stage { font-variant-numeric: tabular-nums; font-weight: var(--weight-medium); }
+    .cell-next { display: inline-flex; align-items: center; gap: var(--space-1); white-space: nowrap; font-variant-numeric: tabular-nums; }
+    .cell-next--none { color: var(--color-text-secondary); font-style: italic; }
     .catalog { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-5); }
     @media (max-width: 1199px) { .catalog { grid-template-columns: repeat(2, 1fr); } }
     @media (max-width: 767px) {
@@ -91,7 +98,7 @@ export class TreatmentsHomeComponent {
     { key: 'tratamiento', label: 'Tratamiento' },
     { key: 'profesional', label: 'Profesional' },
     { key: 'etapas', label: 'Etapas' },
-    { key: 'estado', label: 'Estado', align: 'end' },
+    { key: 'proxima', label: 'Próxima fecha', align: 'end' },
   ];
 
   protected readonly section = signal<'activos' | 'catalogo'>(
@@ -108,7 +115,6 @@ export class TreatmentsHomeComponent {
   constructor(private router: Router) {}
   protected onProf(e: Event) { this.prof.set((e.target as HTMLSelectElement).value); }
   protected openPlan(t: TreatmentPlan) { this.router.navigate(['/pacientes', t.pacienteId, 'plan', t.id]); }
-  protected badge(t: TreatmentPlan) { return treatmentBadge(t.estado); }
   protected patientName(id: string) { const p = this.store.patientById(id); return p ? `${p.nombre} ${p.apellido}` : '—'; }
   protected patientFoto(id: string) { return this.store.patientById(id)?.fotoPath; }
   protected readonly trackPlan = (t: TreatmentPlan) => t.id;

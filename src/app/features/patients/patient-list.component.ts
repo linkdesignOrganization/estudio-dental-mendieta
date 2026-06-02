@@ -8,6 +8,7 @@ import { DataTableComponent, TableRowDirective, TableColumn } from '../../shared
 import { SkeletonComponent } from '../../shared/components/skeleton.component';
 import { EmptyStateComponent } from '../../shared/components/empty-state.component';
 import { StoreService } from '../../core/persistence/store.service';
+import { PatientFlowService } from './patient-flow.service';
 import { Patient } from '../../core/models/models';
 import { paymentBadge } from '../../shared/status-map';
 
@@ -33,9 +34,9 @@ import { paymentBadge } from '../../shared/status-map';
           <input class="search-pill__input" type="search" placeholder="Buscar por nombre…"
                  aria-label="Buscar pacientes" [value]="query()" (input)="onSearch($event)" />
         </div>
-        <a class="btn-edm btn-edm--primary" routerLink="/pacientes/nuevo/datos">
+        <button type="button" class="btn-edm btn-edm--primary" (click)="nuevoPaciente()">
           <app-icon name="plus" [size]="18" /> Nuevo paciente
-        </a>
+        </button>
       </div>
     </div>
 
@@ -197,6 +198,7 @@ export class PatientListComponent {
   protected readonly fEdad = signal('');
 
   private readonly store = inject(StoreService);
+  private readonly flow = inject(PatientFlowService);
   protected readonly obrasSociales = computed(() => this.store.obrasSociales());
   protected readonly profesionales = computed(() => this.store.professionals());
   protected readonly columns: TableColumn[] = [
@@ -247,6 +249,12 @@ export class PatientListComponent {
     this.fEdad.set('');
   }
   protected open(p: Patient) { this.router.navigate(['/pacientes', p.id]); }
+  /** Inicia el alta de paciente desde cero: limpia el wizard y entra al Paso 1 (REQ-173). */
+  protected nuevoPaciente() {
+    const os = this.store.obrasSocialesRaw();
+    this.flow.reset(os.length ? os[0].id : 'os-particular');
+    this.router.navigate(['/pacientes', 'nuevo', 'datos']);
+  }
   protected badge(p: Patient) { return paymentBadge(p.estadoCuenta); }
   protected readonly trackPatient = (p: Patient) => p.id;
   protected readonly rowLabel = (p: Patient) => `Ver ficha de ${p.nombre} ${p.apellido}`;

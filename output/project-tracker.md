@@ -6,8 +6,10 @@
 
 ## Estado actual
 - Modo: NEW (NORMAL) · FASE 5 en PROSA (worktree no disponible + run-regression sed bug macOS)
-- Fase: FASE 5 — Iteración 3 COMPLETA ✓ (0 bugs). 5j commit → Iteración 4 (Pacientes escritura + Tratamientos)
-- Próximo: Iteración 4 — crear/editar paciente, odontograma editable, catálogo tratamientos
+- Fase: FASE 5 — Iteración 4 · Paso 5d (DevOps deploy). 5b/5c ✓ (fix seguridad: foto excluye SVG + límite 2MB)
+- Próximo: 5d-regress → 5e QA → It5
+- It4 5a ✓: crear paciente 2 rutas + género (estaba hardcodeado mujer) + foto, editar dirty-check (F01), odontograma editable @defer immediate, tratamientos col próxima fecha. Seed byte-idéntico
+- It1/2/3 ✓
 - UX-003 era flaky (click tragado nav encadenada, no agenda); seed byte-idéntico
 - It3 5a ✓: vista semanal real (corrigió bug grid mensual), mobile día/lista (feedback demo), notas internas, reagendar notif WhatsApp real. Seed byte-idéntico
 - It1/It2 ✓. Lección: PRNG separado para datos nuevos del seed

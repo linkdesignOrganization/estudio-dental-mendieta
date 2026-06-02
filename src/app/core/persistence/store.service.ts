@@ -4,7 +4,7 @@ import {
   NotificationEntity, AppointmentStatus, ToothState, PaymentStatus,
   // presentation shapes (contrato con los componentes de la cáscara)
   Patient, Appointment, TreatmentPlan, TreatmentType, ObraSocial, Tooth, ClinicalEvent,
-  AccountMovement, DocumentItem, Invoice, Budget, Kpi, AppNotification, ToothProcedure,
+  AccountMovement, DocumentItem, Invoice, Budget, Kpi, AppNotification, ToothProcedure, Professional,
 } from '../models/models';
 import { StorageService } from './storage.service';
 import { ManifestLoader } from '../seed/manifest.loader';
@@ -251,6 +251,19 @@ export class StoreService {
   treatmentTypeDetail(id: string): { pasos: string[]; materiales: string[] } {
     const seed = AR_TREATMENT_TYPES.find((t) => t.id === id);
     return { pasos: seed?.pasos ?? [], materiales: seed?.materiales ?? [] };
+  }
+  /**
+   * Profesionales habilitados para un tipo de tratamiento (REQ-202). Derivado de forma
+   * determinista por especialidad — NO toca el seed ni el PRNG (sin drift). El generalista
+   * y cualquier especialista cuya especialidad mapea al tipo quedan habilitados; siempre
+   * hay al menos un profesional.
+   */
+  treatmentTypeProfessionals(id: string): Professional[] {
+    const especialidades = TYPE_ESPECIALIDADES[id] ?? [];
+    const habilitados = this.professionals().filter(
+      (p) => p.especialidad === 'Odontología general' || especialidades.includes(p.especialidad),
+    );
+    return habilitados.length ? habilitados : this.professionals().slice(0, 1);
   }
 
   // odontograma
@@ -724,6 +737,30 @@ export class StoreService {
     return Math.floor((TODAY.getTime() - d.getTime()) / 86_400_000);
   }
 }
+
+/**
+ * Especialidades habilitadas por tipo de tratamiento (REQ-202). Mapa estático de dominio:
+ * la odontología general queda habilitada para todo (se agrega en el filtro del store);
+ * aquí solo se listan las especialidades adicionales relevantes a cada tipo. No afecta el
+ * seed generado — es metadata de presentación del catálogo.
+ */
+const TYPE_ESPECIALIDADES: Record<string, string[]> = {
+  'tt-01': [],                                  // Consulta y diagnóstico — generalista
+  'tt-02': [],                                  // Limpieza y profilaxis — generalista
+  'tt-03': [],                                  // Obturación — generalista
+  'tt-04': ['Endodoncia'],                      // Tratamiento de conducto
+  'tt-05': [],                                  // Extracción simple — generalista
+  'tt-06': ['Implantología'],                   // Implante dental
+  'tt-07': ['Estética dental', 'Implantología'],// Corona de porcelana
+  'tt-08': ['Ortodoncia'],                      // Ortodoncia con brackets
+  'tt-09': ['Ortodoncia'],                      // Ortodoncia invisible
+  'tt-10': ['Estética dental'],                 // Blanqueamiento dental
+  'tt-11': ['Estética dental'],                 // Carilla de porcelana
+  'tt-12': ['Estética dental'],                 // Prótesis removible
+  'tt-13': ['Estética dental', 'Implantología'],// Prótesis fija (puente)
+  'tt-14': [],                                  // Periodoncia — generalista
+  'tt-15': ['Odontopediatría'],                 // Odontopediatría
+};
 
 // ============================ helpers de fecha/formato ============================
 function isoOf(d: Date): string {

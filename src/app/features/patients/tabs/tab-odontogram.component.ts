@@ -8,8 +8,10 @@ import { currentPatientId } from '../patient-context';
 
 /**
  * Ficha — Tab 2 Odontograma (DEMO-010 / DC-043 / DC-107). Diagrama de 32 piezas +
- * leyenda. Cada pieza clickeable → ruta de detalle. Carga con @defer (skeleton del
- * diagrama mientras carga). Paciente nuevo → todas "sana".
+ * leyenda. Cada pieza clickeable → ruta de detalle del estado editable (REQ-267..270).
+ * Lazy vía @defer (on immediate): aísla el SVG del bundle inicial (NFR-004) pero hidrata
+ * de forma determinista en deep-link/refresh y en cualquier entorno (corrige BUG-E04 en
+ * mobile, donde `on viewport`/`on idle` podían dejar 0 piezas). Paciente nuevo → todas "sana".
  */
 @Component({
   selector: 'app-tab-odontogram',
@@ -24,7 +26,7 @@ import { currentPatientId } from '../patient-context';
         </div>
       </header>
 
-      @defer (on idle) {
+      @defer (on immediate) {
         <app-odontogram [top]="top()" [bottom]="bottom()" (select)="openTooth($event)" />
       } @placeholder {
         <div class="odo-skel" aria-hidden="true">
