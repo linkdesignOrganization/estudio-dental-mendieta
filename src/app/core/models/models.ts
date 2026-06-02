@@ -46,11 +46,14 @@ export interface Appointment {
   pacienteNombre: string;
   pacienteFoto: string;
   profesional: string;
+  profesionalId: string;
   fecha: string;
   hora: string;
   duracionMin: number;
   tratamiento: string;
+  tipoTratamientoId: string;
   estado: AppointmentStatus;
+  notas: string;
 }
 
 export interface TreatmentPlan {

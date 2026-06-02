@@ -1,7 +1,7 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import {
   StoreState, PatientEntity, AppointmentEntity, TreatmentPlanEntity, AccountMovementEntity,
-  AppointmentStatus, ToothState, PaymentStatus,
+  NotificationEntity, AppointmentStatus, ToothState, PaymentStatus,
   // presentation shapes (contrato con los componentes de la cáscara)
   Patient, Appointment, TreatmentPlan, TreatmentType, ObraSocial, Tooth, ClinicalEvent,
   AccountMovement, DocumentItem, Invoice, Budget, Kpi, AppNotification, ToothProcedure,
@@ -180,11 +180,14 @@ export class StoreService {
       pacienteNombre: p ? `${p.nombre} ${p.apellido}` : '—',
       pacienteFoto: p?.fotoPath ?? '',
       profesional: this.profName().get(a.profesionalId) ?? '—',
+      profesionalId: a.profesionalId,
       fecha: a.fecha,
       hora: a.hora,
       duracionMin: a.duracionMin,
       tratamiento: a.tratamiento,
+      tipoTratamientoId: a.tipoTratamientoId,
       estado: a.estado,
+      notas: a.notas ?? '',
     };
   };
 
@@ -590,12 +593,31 @@ export class StoreService {
     }), true);
   }
 
-  /** Reagenda un turno a nueva fecha/hora (UX-023b). Persiste. */
+  /**
+   * Reagenda un turno a nueva fecha/hora (UX-023b) y genera el aviso de WhatsApp al
+   * paciente (REQ-089). Persiste fecha/hora + una notificación real que aparece en la
+   * campana (sin lenguaje de simulación). El id usa timestamp → no toca el PRNG del seed.
+   */
   reagendarTurno(id: string, fecha: string, hora: string): void {
-    this.update((s) => ({
-      ...s,
-      appointments: s.appointments.map((a) => (a.id === id ? { ...a, fecha, hora } : a)),
-    }), true);
+    this.update((s) => {
+      const turno = s.appointments.find((a) => a.id === id);
+      const paciente = turno ? s.patients.find((p) => p.id === turno.pacienteId) : undefined;
+      const appointments = s.appointments.map((a) => (a.id === id ? { ...a, fecha, hora } : a));
+      if (!turno) return { ...s, appointments };
+      const nombre = paciente ? `${paciente.nombre} ${paciente.apellido}` : 'el paciente';
+      const aviso: NotificationEntity = {
+        id: `not-${Date.now().toString(36)}`,
+        tipo: 'turno',
+        icono: 'chat-circle-dots',
+        titulo: 'Aviso de WhatsApp enviado',
+        subtitulo: `${nombre} fue notificado del nuevo horario: ${formatShortDate(fecha)} · ${hora}`,
+        fecha: `${isoOf(TODAY)}T${hora}`,
+        leida: false,
+        pacienteId: turno.pacienteId,
+        ruta: `/agenda/${id}`,
+      };
+      return { ...s, appointments, notifications: [aviso, ...s.notifications] };
+    }, true);
   }
 
   /** Cambia el estado de una pieza del odontograma (UX-028/086). Persiste. */

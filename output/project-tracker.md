@@ -6,8 +6,10 @@
 
 ## Estado actual
 - Modo: NEW (NORMAL) · FASE 5 en PROSA (worktree no disponible + run-regression sed bug macOS)
-- Fase: FASE 5 — Iteración 2 COMPLETA ✓ (0 bugs). 5j commit → Iteración 3 (Agenda)
-- Próximo: Iteración 3 — calendario + flujos de turnos (+ mobile día/lista por feedback demo)
+- Fase: FASE 5 — Iteración 3 (Agenda) · Paso 5d (DevOps deploy)
+- Próximo: 5d-regress → 5e QA → It4..It5
+- It3 5a ✓: vista semanal real (corrigió bug grid mensual), mobile día/lista (feedback demo), notas internas, reagendar notif WhatsApp real. Seed byte-idéntico
+- It1/It2 ✓. Lección: PRNG separado para datos nuevos del seed
 - It2 5a ✓: sub-detalles pieza/evento/plan + 3 gaps (detalle pieza historial real, contacto emergencia, filtros lista). SEED byte-idéntico (PRNG separado, sin drift)
 - It1 ✓ (commit ac766db). Demos/feedback consolidados al final de FASE 5
 - UX-022 era flaky (carrera wizard, no bug); seed restaurado. Iteración 1 = auditoría, criterios mayormente cubiertos por regresión

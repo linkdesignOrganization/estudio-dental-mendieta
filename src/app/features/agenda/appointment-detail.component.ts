@@ -44,6 +44,15 @@ import { formatLongDate } from '../../shared/date-format';
             <div class="appt__row"><dt><app-icon name="user" [size]="16" /> Profesional</dt><dd>{{ a.profesional }}</dd></div>
             <div class="appt__row"><dt><app-icon name="tooth" [size]="16" /> Motivo</dt><dd>{{ a.tratamiento }}</dd></div>
           </dl>
+
+          <div class="appt__notes">
+            <span class="appt__notes-label t-small t-secondary"><app-icon name="clipboard-text" [size]="16" /> Notas internas</span>
+            @if (a.notas) {
+              <p class="appt__notes-body">{{ a.notas }}</p>
+            } @else {
+              <p class="appt__notes-empty t-small t-secondary">Sin notas internas para este turno.</p>
+            }
+          </div>
         </section>
 
         <aside class="appt__side">
@@ -86,6 +95,10 @@ import { formatLongDate } from '../../shared/date-format';
     .appt__row { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); }
     .appt__row dt { display: inline-flex; align-items: center; gap: var(--space-2); color: var(--color-text-secondary); font-size: var(--text-small); }
     .appt__row dd { margin: 0; color: var(--color-text); text-align: right; }
+    .appt__notes { display: flex; flex-direction: column; gap: var(--space-2); padding-top: var(--space-2); border-top: 1px solid var(--color-border); }
+    .appt__notes-label { display: inline-flex; align-items: center; gap: var(--space-2); }
+    .appt__notes-body { margin: 0; color: var(--color-text); white-space: pre-wrap; }
+    .appt__notes-empty { margin: 0; }
     .appt__side { display: flex; flex-direction: column; gap: var(--space-3); }
     @media (max-width: 991px) { .appt { grid-template-columns: 1fr; } }
   `],
