@@ -1,0 +1,32 @@
+/* ============================================================================
+   Bootstrap 5 SELECTIVO (ADR-2) — SOLO grid responsive + API de utilidades.
+   Se importa con @import (no @use) para que Bootstrap resuelva sus deps internas
+   (functions/variables/mixins) y genere las clases. Se OMITE deliberadamente:
+   - `root` (emite las CSS vars --bs-* incl. el azul #0d6efd, anti-patrón DC-029)
+   - reboot, type, buttons, forms, cards, modal, etc. (usamos los propios del DS).
+   Antes de importar, se sobre-escriben las variables de marca para que ni siquiera
+   los mapas internos contengan el azul Bootstrap: $primary/$blue/$link-color → azul DS.
+   ============================================================================ */
+
+// 1) Config: redefinir variables de marca ANTES de variables/maps de Bootstrap
+$primary: #6da8d4;
+$blue: #246991;
+$link-color: #246991;
+$border-radius: 12px;
+$border-radius-sm: 10px;
+$border-radius-lg: 14px;
+
+// 2) Núcleo de configuración de Bootstrap (functions → variables → maps → mixins)
+@import "bootstrap/scss/functions";
+@import "bootstrap/scss/variables";
+@import "bootstrap/scss/variables-dark";
+@import "bootstrap/scss/maps";
+@import "bootstrap/scss/mixins";
+@import "bootstrap/scss/utilities";
+
+// 3) Layout: contenedores + grid responsive
+@import "bootstrap/scss/containers";
+@import "bootstrap/scss/grid";
+
+// 4) API de utilidades (genera .d-flex, .gap-*, .text-*, .col-*, .order-*, etc.)
+@import "bootstrap/scss/utilities/api";

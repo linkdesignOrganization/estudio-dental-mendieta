@@ -1,0 +1,37 @@
+/* ============================================================================
+   Red Hat — self-hosted (woff2 subseteado latin), pesos 400 y 500 SOLO.
+   DC-015 / DC-016 / BVC-001. Sin Inter/Roboto/Arial/system como fuente final.
+   Cargados desde /fonts (public/) — cumple CSP font-src 'self'.
+   ============================================================================ */
+
+@font-face {
+  font-family: "Red Hat Display";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/red-hat-display-400.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Red Hat Display";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/red-hat-display-500.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Red Hat Text";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/red-hat-text-400.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Red Hat Text";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/red-hat-text-500.woff2") format("woff2");
+}

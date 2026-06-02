@@ -1,0 +1,104 @@
+/* ============================================================================
+   DESIGN TOKENS — Estudio Dental Mendieta
+   Checklist DC-001..029 de design-criteria.md. Valores 🔒 PRESCRIPTIVOS del
+   cliente: NO se reinterpretan. ADN: superficies blancas sobre canvas #fafafa,
+   una sola familia de acento AZUL, Red Hat 400/500, radius 10-14px,
+   borde O sombra (nunca ambos), semánticos siempre pastel, mucho aire.
+   ============================================================================ */
+
+:root {
+  /* ----- COLOR · familia azul (4 tonos) — DC-001..005 ---------------------- */
+  --color-accent-sky: #c5d8e8;   /* DC-001 azul cielo: pills suaves, sidebar activo tintado, banner ficha, track de barras */
+  --color-accent: #6da8d4;       /* DC-002 azul medio: relleno barras, item activo, icon-chips, número de progreso. NUNCA texto blanco encima */
+  --color-accent-deep: #246991;  /* DC-003 azul profundo: CTA con texto blanco, links, valores azules, círculo +N, badge conteo */
+  --color-accent-tint: #eff8ff;  /* DC-004 azul casi-blanco: fondos tintados de fila/tab seleccionado/activo */
+
+  /* ----- COLOR · neutros, superficie, borde — DC-006..009 ------------------ */
+  --color-bg: #fafafa;           /* DC-006 canvas de la app, NUNCA saturado */
+  --color-bg-elevated: #ffffff;  /* DC-006 cards/header/sidebar/modales/inputs */
+  --color-text: #2a2a35;         /* DC-007 texto principal, gris oscuro cálido, NUNCA negro puro (14.18:1 sobre blanco) */
+  --color-text-secondary: #707080; /* DC-008 subtítulos/captions/labels/timestamps (4.86:1 sobre blanco) */
+  --color-border: #e8e8ee;       /* DC-009 bordes de cards/inputs + dividers (0.5-1px) */
+
+  /* ----- COLOR · semánticos (SIEMPRE pastel: fondo + texto oscuro) — DC-010..014 */
+  --color-success-bg: #e3f3ea;   --color-success-text: #2d6a4f; /* DC-010 5.56:1 */
+  --color-error-bg:   #fce9ea;   --color-error-text:   #b23a48; /* DC-011 5.01:1 */
+  --color-warning-bg: #fbf1da;   --color-warning-text: #946200; /* DC-012 4.67:1 */
+  --color-info-bg:    #e2eef6;   --color-info-text:    #246991; /* DC-013 5.08:1 (usa azul profundo) */
+  --color-neutral-bg: #eeeef0;   --color-neutral-text: #55555f; /* DC-014 6.36:1 */
+
+  /* ----- TIPOGRAFÍA — DC-015..018 ----------------------------------------- */
+  --font-display: "Red Hat Display", "Red Hat Text", sans-serif; /* DC-015 títulos/H1/nombre paciente */
+  --font-body: "Red Hat Text", "Red Hat Display", sans-serif;    /* DC-015 body */
+  /* Pesos: SOLO 400 y 500 (DC-016) — definidos como tokens para uso disciplinado */
+  --weight-regular: 400;
+  --weight-medium: 500;
+  /* Escala (DC-017) — máx 3 tamaños por pantalla (DC-018) */
+  --text-display: 28px;          /* H1, nombre de paciente; escala a 32px en ficha (--text-display-lg) */
+  --text-display-lg: 32px;
+  --text-title: 20px;            /* subtítulo de sección */
+  --text-body: 16px;             /* cuerpo; captions/labels comparten este tamaño con color secundario */
+  --text-small: 14px;            /* mínimo permitido para metadata densa (no <14px sobre #fafafa) */
+  --lh-display: 1.2;             /* línea de títulos ~1.2 */
+  --lh-title: 1.25;
+  --lh-body: 1.6;                /* cuerpo 1.5-1.7 */
+  --ls-display: -0.01em;         /* letter-spacing levemente negativo en Display */
+
+  /* ----- SPACING (múltiplos de 4) — DC-019..020 --------------------------- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;               /* permitido SOLO como gap entre cards (DC-019) */
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --card-padding: 24px;          /* DC-020 padding interno de cards (hasta 32 en grandes) */
+  --card-padding-lg: 32px;
+  --card-gap: 16px;              /* DC-020 separación entre cards en listas (16-20) */
+  --section-gap: 32px;           /* separación entre secciones 32-48 */
+
+  /* ----- SIZING controles — DC-021 --------------------------------------- */
+  --control-height: 40px;        /* inputs/selects/textarea/botones */
+  --touch-target-min: 44px;      /* touch target mínimo en mobile */
+  --disabled-opacity: 0.4;       /* opacidad disabled */
+
+  /* ----- ELEVACIÓN, RADIUS, MOTION — DC-022..026 -------------------------- */
+  --shadow-card: 0 1px 4px rgba(42, 42, 53, 0.04);        /* DC-022 un solo nivel */
+  --shadow-card-hover: 0 1px 6px rgba(42, 42, 53, 0.06);  /* DC-022 hover */
+  --shadow-overlay: 0 8px 28px rgba(42, 42, 53, 0.12);    /* modales/dropdowns/drawer (overlay, no Material) */
+  --radius-sm: 10px;             /* DC-024 inputs, badges, chips, search-pill */
+  --radius-md: 12px;             /* DC-024 default: botones, cards */
+  --radius-lg: 14px;             /* DC-024 cards grandes, modales, banner */
+  --radius-pill: 999px;          /* DC-025 SOLO circulares: avatares, +N, badge conteo, dot */
+  --radius-circle: 50%;
+  --motion-duration: 200ms;      /* DC-026 transiciones 150-250ms */
+  --motion-fast: 150ms;
+  --motion-slow: 250ms;
+  --motion-ease: cubic-bezier(0.4, 0, 0.2, 1); /* DC-026 easing */
+
+  /* ----- ICONOGRAFÍA — DC-027 -------------------------------------------- */
+  --icon-stroke: 1.5;            /* Phosphor regular, stroke 1.5px */
+  --icon-inline: 16px;
+  --icon-action: 20px;           /* botones/filas */
+  --icon-primary: 24px;          /* acciones primarias */
+
+  /* ----- FOCUS RING — DC-028 --------------------------------------------- */
+  --focus-ring: 0 0 0 2px var(--color-accent-deep); /* azul profundo, offset 2px */
+
+  /* ----- CHASIS layout (shell) ------------------------------------------- */
+  --sidebar-width: 232px;        /* DC-030/031 sidebar fijo 230-250 */
+  --header-height: 64px;         /* DC-030 header sticky ~64px */
+  --content-max: 1240px;         /* ancho máximo del área de contenido para mucho aire */
+  --drawer-width: 320px;         /* DC-080 drawer mobile máx 320 / 80vw */
+}
+
+/* Respeta prefers-reduced-motion — DC-143: desactiva rise/stagger, mantiene fades */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-duration: 0.01ms;
+    --motion-fast: 0.01ms;
+    --motion-slow: 0.01ms;
+  }
+}

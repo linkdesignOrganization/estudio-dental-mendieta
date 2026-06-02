@@ -1,0 +1,332 @@
+/* ============================================================================
+   THEME — base global + overrides de Bootstrap (DC-029) + utilidades del DS.
+   Materializa el design system sobre el grid/utilidades de Bootstrap.
+   ============================================================================ */
+
+/* ----- BOOTSTRAP OVERRIDES (DC-029) --------------------------------------- */
+:root {
+  --bs-body-font-family: var(--font-body);          /* Red Hat, no Inter */
+  --bs-body-font-size: var(--text-body);
+  --bs-body-color: var(--color-text);
+  --bs-body-bg: var(--color-bg);
+  --bs-border-radius: var(--radius-md);             /* 12px */
+  --bs-border-radius-sm: var(--radius-sm);
+  --bs-border-radius-lg: var(--radius-lg);
+  --bs-border-color: var(--color-border);
+  --bs-primary: #6da8d4;                            /* acento, NO #0d6efd */
+  --bs-primary-rgb: 109, 168, 212;
+  --bs-link-color: #246991;                         /* azul profundo */
+  --bs-link-color-rgb: 36, 105, 145;
+  --bs-link-hover-color: #1c5476;
+  --bs-font-weight-bold: 500;                        /* mapear bold a 500 */
+}
+
+/* fw-bold / strong / b mapeados a 500 — nunca 700+ (DC-016/029) */
+.fw-bold, strong, b { font-weight: var(--weight-medium) !important; }
+.fw-bolder { font-weight: var(--weight-medium) !important; }
+.fw-semibold { font-weight: var(--weight-medium) !important; }
+
+/* .rounded-pill PROHIBIDO en cards/inputs (DC-025/029): se permite solo en chips circulares ya controlados */
+
+/* sombras de Bootstrap → la única sombra del sistema (DC-022/029) */
+.shadow, .shadow-sm, .shadow-lg { box-shadow: var(--shadow-card) !important; }
+
+/* ----- RESET / BASE ------------------------------------------------------- */
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+body {
+  font-family: var(--font-body);
+  font-weight: var(--weight-regular);
+  font-size: var(--text-body);
+  line-height: var(--lh-body);
+  color: var(--color-text);
+  background-color: var(--color-bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: var(--weight-medium);
+  line-height: var(--lh-display);
+  letter-spacing: var(--ls-display);
+  color: var(--color-text);
+  margin: 0;
+}
+
+p { margin: 0; }
+
+a {
+  color: var(--color-accent-deep);
+  text-decoration: none;
+  transition: color var(--motion-fast) var(--motion-ease);
+}
+a:hover { color: #1c5476; }
+
+button { font-family: var(--font-body); }
+
+/* Focus ring visible en TODO interactivo (DC-028 / BVC-015) */
+:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+/* Asegura ring también en elementos con fondo/overflow */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+/* ----- TIPOGRAFÍA utilitaria (escala DC-017) ------------------------------ */
+.t-display    { font-family: var(--font-display); font-size: var(--text-display);    font-weight: var(--weight-medium); line-height: var(--lh-display); letter-spacing: var(--ls-display); }
+.t-display-lg { font-family: var(--font-display); font-size: var(--text-display-lg); font-weight: var(--weight-medium); line-height: var(--lh-display); letter-spacing: var(--ls-display); }
+.t-title      { font-family: var(--font-display); font-size: var(--text-title);      font-weight: var(--weight-medium); line-height: var(--lh-title); }
+.t-body       { font-family: var(--font-body);    font-size: var(--text-body);       font-weight: var(--weight-regular); line-height: var(--lh-body); }
+.t-body-medium{ font-family: var(--font-body);    font-size: var(--text-body);       font-weight: var(--weight-medium);  line-height: var(--lh-body); }
+.t-secondary  { color: var(--color-text-secondary); }
+.t-small      { font-size: var(--text-small); }
+
+/* ----- SUPERFICIES: card (borde O sombra, nunca ambos — DC-023) ----------- */
+.surface-card {            /* card de CONTENIDO → sombra + border:none (DC-023) */
+  background: var(--color-bg-elevated);
+  border: none;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  padding: var(--card-padding);
+}
+.surface-card.is-lg { border-radius: var(--radius-lg); padding: var(--card-padding-lg); }
+
+.surface-bordered {        /* contenedor/fila/input → borde + sombra:none (DC-023) */
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: none;
+}
+
+/* hover de cards clickeables (DC-143): elevación sutil ≤250ms */
+.is-clickable {
+  cursor: pointer;
+  transition: box-shadow var(--motion-duration) var(--motion-ease),
+              transform var(--motion-duration) var(--motion-ease),
+              background-color var(--motion-duration) var(--motion-ease),
+              border-color var(--motion-duration) var(--motion-ease);
+}
+.surface-card.is-clickable:hover { box-shadow: var(--shadow-card-hover); transform: translateY(-1px); }
+
+/* ----- BOTONES (DC-071, GAP-A04) ------------------------------------------ */
+.btn-edm {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  height: var(--control-height);
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  font-weight: var(--weight-medium);
+  line-height: 1;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color var(--motion-duration) var(--motion-ease),
+              border-color var(--motion-duration) var(--motion-ease),
+              color var(--motion-duration) var(--motion-ease),
+              opacity var(--motion-duration) var(--motion-ease);
+}
+.btn-edm:focus-visible { box-shadow: var(--focus-ring); }
+.btn-edm:disabled, .btn-edm[aria-disabled="true"] {
+  opacity: var(--disabled-opacity);
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* primary: azul medio + texto OSCURO (GAP-A04: blanco no pasa AA sobre #6da8d4) */
+.btn-edm--primary {
+  background: var(--color-accent);
+  color: var(--color-text);
+  border-color: var(--color-accent);
+}
+.btn-edm--primary:hover { background: #5e9bc9; border-color: #5e9bc9; }
+.btn-edm--primary:active { background: #5491c2; }
+
+/* primary-deep: azul profundo + texto BLANCO (cuando se requiere blanco) */
+.btn-edm--deep {
+  background: var(--color-accent-deep);
+  color: #ffffff;
+  border-color: var(--color-accent-deep);
+}
+.btn-edm--deep:hover { background: #1f5c80; border-color: #1f5c80; }
+
+/* secondary: blanco + borde + texto oscuro */
+.btn-edm--secondary {
+  background: var(--color-bg-elevated);
+  color: var(--color-text);
+  border-color: var(--color-border);
+}
+.btn-edm--secondary:hover { background: var(--color-accent-tint); border-color: var(--color-accent-sky); }
+
+/* ghost: solo texto/ícono */
+.btn-edm--ghost {
+  background: transparent;
+  color: var(--color-text);
+  border-color: transparent;
+}
+.btn-edm--ghost:hover { background: var(--color-accent-tint); }
+
+/* destructive: coral pastel + texto oscuro del hue */
+.btn-edm--destructive {
+  background: var(--color-error-bg);
+  color: var(--color-error-text);
+  border-color: var(--color-error-bg);
+}
+.btn-edm--destructive:hover { background: #f9dcde; }
+
+.btn-edm--block { width: 100%; }
+
+/* icon-button (DC-072): área toque mín, sin fondo por defecto, aria-label obligatorio */
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--control-height);
+  height: var(--control-height);
+  min-width: var(--control-height);
+  border: none;
+  background: transparent;
+  color: var(--color-text-secondary);
+  border-radius: var(--radius-circle);
+  cursor: pointer;
+  transition: background-color var(--motion-fast) var(--motion-ease),
+              color var(--motion-fast) var(--motion-ease);
+}
+.icon-btn:hover { background: var(--color-accent-tint); color: var(--color-text); }
+.icon-btn:focus-visible { box-shadow: var(--focus-ring); }
+.icon-btn:disabled { opacity: var(--disabled-opacity); cursor: not-allowed; }
+
+/* ----- INPUTS / SELECT / TEXTAREA (DC-069) -------------------------------- */
+.field { display: flex; flex-direction: column; gap: var(--space-2); }
+.field__label {
+  font-size: var(--text-body);
+  font-weight: var(--weight-medium);
+  color: var(--color-text-secondary);
+}
+.input-edm,
+.select-edm,
+.textarea-edm {
+  width: 100%;
+  height: var(--control-height);
+  padding: 0 var(--space-3);
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  color: var(--color-text);
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  box-shadow: none;
+  transition: border-color var(--motion-fast) var(--motion-ease),
+              box-shadow var(--motion-fast) var(--motion-ease);
+}
+.textarea-edm { height: auto; min-height: 96px; padding: var(--space-3); line-height: var(--lh-body); resize: vertical; }
+.input-edm::placeholder, .textarea-edm::placeholder { color: var(--color-text-secondary); opacity: 0.7; }
+.input-edm:hover, .select-edm:hover, .textarea-edm:hover { border-color: var(--color-accent-sky); }
+.input-edm:focus-visible, .select-edm:focus-visible, .textarea-edm:focus-visible {
+  outline: none;
+  border-color: var(--color-accent-deep);
+  box-shadow: var(--focus-ring);
+}
+.input-edm:disabled, .select-edm:disabled, .textarea-edm:disabled { opacity: var(--disabled-opacity); cursor: not-allowed; }
+.input-edm.is-invalid, .select-edm.is-invalid, .textarea-edm.is-invalid { border-color: var(--color-error-text); }
+
+.select-edm {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 256 256' fill='none' stroke='%23707080' stroke-width='16' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='208 96 128 176 48 96'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right var(--space-3) center;
+  padding-right: var(--space-8);
+  cursor: pointer;
+}
+
+.field__error {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--text-small);
+  color: var(--color-error-text);
+}
+
+/* ----- DIVIDER ------------------------------------------------------------ */
+.divider {
+  height: 1px;
+  background: var(--color-border);
+  border: none;
+  margin: var(--space-4) 0;
+}
+
+/* ----- ICON-CHIP (label gris + valor, ícono azul) — usado en cards/ficha -- */
+.icon-chip {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+}
+.icon-chip__glyph {
+  flex: 0 0 auto;
+  color: var(--color-accent-deep);
+  display: inline-flex;
+}
+.icon-chip__body { display: flex; flex-direction: column; min-width: 0; }
+.icon-chip__label { font-size: var(--text-small); color: var(--color-text-secondary); }
+.icon-chip__value { font-size: var(--text-body); color: var(--color-text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ----- PAGE HEADER (título + acciones, reutilizable por pantalla) --------- */
+.page-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  margin-bottom: var(--section-gap);
+}
+.page-head__titles { display: flex; flex-direction: column; gap: var(--space-1); min-width: 0; }
+.page-head__subtitle { color: var(--color-text-secondary); font-size: var(--text-body); }
+.page-head__actions { display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; }
+
+/* ----- visually-hidden (a11y) -------------------------------------------- */
+.visually-hidden {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0, 0, 0, 0);
+  white-space: nowrap; border: 0;
+}
+
+/* ----- skeleton shimmer (DC-065/120) — usado por <app-skeleton> ----------- */
+@keyframes edm-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+@keyframes edm-rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .edm-rise-in { animation: none !important; }
+}
+
+/* scrollbar discreto */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: #dcdce4; border-radius: 999px; border: 2px solid var(--color-bg); }
+::-webkit-scrollbar-thumb:hover { background: #cfcfd9; }

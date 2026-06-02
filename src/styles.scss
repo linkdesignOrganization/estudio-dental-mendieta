@@ -1,0 +1,16 @@
+/* ============================================================================
+   ENTRY GLOBAL STYLES — Estudio Dental Mendieta
+   Orden: tokens → fonts → Bootstrap SELECTIVO (grid + utilidades) → theme.
+   Bootstrap se importa parcial (ADR-2): solo grid + API de utilidades, SIN su
+   capa `root` (que emitiría el azul #0d6efd y otras CSS vars que chocan con el
+   brief). Detalle en styles/bootstrap-subset.scss.
+   ============================================================================ */
+
+@use "styles/tokens";
+@use "styles/fonts";
+
+/* Bootstrap 5 SELECTIVO — grid + utilidades, sin root/reboot/componentes. */
+@use "styles/bootstrap-subset";
+
+/* Capa propia del design system (overrides + utilidades del DS) — al final para ganar */
+@use "styles/theme";

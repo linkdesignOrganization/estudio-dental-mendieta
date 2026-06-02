@@ -27,10 +27,8 @@ jobs:
           lfs: false
 
       # Angular 21 requires Node ^20.19 || ^22.12 || >=24. We pin 22.x (LTS)
-      # for reproducible CI builds. The build runs inside the SWA action via
-      # Oryx, but we install + run a guarded build here is NOT done — Oryx
-      # handles npm ci && npm run build. We only set up Node so any pre-steps
-      # (e.g. manifest generation) have a runtime available if Oryx skips them.
+      # for reproducible CI builds. Oryx (inside the SWA action) honors the
+      # version exported below via NODE_VERSION when building the app.
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -45,20 +43,24 @@ jobs:
           action: upload
           ###### Repository/Build Configurations ######
           # app_location: path to the Angular app source, relative to repo root.
-          #   Phase 4 scaffolds the app at the repo root, so "/" is correct.
+          #   The Angular project lives at the repo root, so "/" is correct.
           # api_location: empty — this is a frontend-only app (no Functions API).
           # output_location: path to the built static files, relative to app_location.
           #   The @angular/build (application) builder emits to dist/<app>/browser.
-          #   IMPORTANT: Phase 4 must set <app> to the real Angular project name
-          #   (output_location below) so the deploy picks up the correct folder.
+          #   Real project name is "estudio-dental-mendieta" → verified locally to
+          #   produce dist/estudio-dental-mendieta/browser.
+          # app_build_command: run the project's own build script EXPLICITLY so the
+          #   "prebuild" lifecycle hook (node scripts/generate-manifest.mjs) ALWAYS
+          #   runs before `ng build` — generating public/seed/manifest.json and
+          #   copying patient photos into public/imagenes/. Relying on Oryx's
+          #   implicit `npm run build` can skip npm pre*/post* hooks; pinning the
+          #   command guarantees the seed manifest is materialized in the bundle.
           app_location: "/"
           api_location: ""
           output_location: "dist/estudio-dental-mendieta/browser"
+          app_build_command: "npm run build"
         env:
-          # Oryx runs `npm run build`. If a prebuild script exists in package.json
-          # (e.g. "prebuild": "node scripts/generate-manifest.mjs"), npm runs it
-          # automatically before build — generating assets/seed/manifest.json and
-          # copying patient photos. No extra workflow step is required.
+          # Pin the Node version Oryx uses for the build (Angular 21 needs >=22.12).
           NODE_VERSION: "22"
 
   close_pull_request:

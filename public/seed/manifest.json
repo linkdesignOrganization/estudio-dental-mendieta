@@ -1,0 +1,151 @@
+{
+  "pacientes": [
+    {
+      "path": "/imagenes/pacientes/hombres/1.jpg",
+      "genero": "hombre",
+      "edad": 1
+    },
+    {
+      "path": "/imagenes/pacientes/hombres/2.jpg",
+      "genero": "hombre",
+      "edad": 2
+    },
+    {
+      "path": "/imagenes/pacientes/hombres/28.jpg",
+      "genero": "hombre",
+      "edad": 28
+    },
+    {
+      "path": "/imagenes/pacientes/hombres/30.jpg",
+      "genero": "hombre",
+      "edad": 30
+    },
+    {
+      "path": "/imagenes/pacientes/hombres/33.jpg",
+      "genero": "hombre",
+      "edad": 33
+    },
+    {
+      "path": "/imagenes/pacientes/hombres/35.jpg",
+      "genero": "hombre",
+      "edad": 35
+    },
+    {
+      "path": "/imagenes/pacientes/hombres/4.jpg",
+      "genero": "hombre",
+      "edad": 4
+    },
+    {
+      "path": "/imagenes/pacientes/hombres/40.jpg",
+      "genero": "hombre",
+      "edad": 40
+    },
+    {
+      "path": "/imagenes/pacientes/hombres/43.jpg",
+      "genero": "hombre",
+      "edad": 43
+    },
+    {
+      "path": "/imagenes/pacientes/hombres/5.jpg",
+      "genero": "hombre",
+      "edad": 5
+    },
+    {
+      "path": "/imagenes/pacientes/hombres/76.jpg",
+      "genero": "hombre",
+      "edad": 76
+    },
+    {
+      "path": "/imagenes/pacientes/hombres/80.jpg",
+      "genero": "hombre",
+      "edad": 80
+    },
+    {
+      "path": "/imagenes/pacientes/mujeres/14.jpg",
+      "genero": "mujer",
+      "edad": 14
+    },
+    {
+      "path": "/imagenes/pacientes/mujeres/22.jpg",
+      "genero": "mujer",
+      "edad": 22
+    },
+    {
+      "path": "/imagenes/pacientes/mujeres/23.jpg",
+      "genero": "mujer",
+      "edad": 23
+    },
+    {
+      "path": "/imagenes/pacientes/mujeres/25.jpg",
+      "genero": "mujer",
+      "edad": 25
+    },
+    {
+      "path": "/imagenes/pacientes/mujeres/3.jpg",
+      "genero": "mujer",
+      "edad": 3
+    },
+    {
+      "path": "/imagenes/pacientes/mujeres/32.jpg",
+      "genero": "mujer",
+      "edad": 32
+    },
+    {
+      "path": "/imagenes/pacientes/mujeres/4.jpg",
+      "genero": "mujer",
+      "edad": 4
+    },
+    {
+      "path": "/imagenes/pacientes/mujeres/55.jpg",
+      "genero": "mujer",
+      "edad": 55
+    },
+    {
+      "path": "/imagenes/pacientes/mujeres/62.jpg",
+      "genero": "mujer",
+      "edad": 62
+    },
+    {
+      "path": "/imagenes/pacientes/mujeres/65.jpg",
+      "genero": "mujer",
+      "edad": 65
+    },
+    {
+      "path": "/imagenes/pacientes/mujeres/67.jpg",
+      "genero": "mujer",
+      "edad": 67
+    },
+    {
+      "path": "/imagenes/pacientes/mujeres/68.jpg",
+      "genero": "mujer",
+      "edad": 68
+    },
+    {
+      "path": "/imagenes/pacientes/mujeres/7.jpg",
+      "genero": "mujer",
+      "edad": 7
+    },
+    {
+      "path": "/imagenes/pacientes/mujeres/70.jpg",
+      "genero": "mujer",
+      "edad": 70
+    },
+    {
+      "path": "/imagenes/pacientes/mujeres/72.jpg",
+      "genero": "mujer",
+      "edad": 72
+    },
+    {
+      "path": "/imagenes/pacientes/mujeres/80.jpg",
+      "genero": "mujer",
+      "edad": 80
+    },
+    {
+      "path": "/imagenes/pacientes/mujeres/85.jpg",
+      "genero": "mujer",
+      "edad": 85
+    }
+  ],
+  "documentos": [],
+  "generadoEn": "2026-06-02T02:08:41.218Z"
+}

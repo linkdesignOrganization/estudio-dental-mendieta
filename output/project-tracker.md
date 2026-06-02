@@ -6,8 +6,10 @@
 
 ## Estado actual
 - Modo: NEW (NORMAL — no Pixel-Perfect, CON design-brief de Task Dasher)
-- Fase: FASE 3.5 COMPLETADA — infra lista (SWA Standard + repo + CI/CD + token)
-- Próximo: FASE 4 — Construcción Visual (demo navegable)
+- Fase: FASE 4 — Construcción Visual · Paso 4e (DevOps pre-QA deploy)
+- Próximo: 4f QA (contra sitio desplegado) → 4g demo
+- 4a ✓ + 4b ✓ + 4c ✓ + 4d security ✓ (npm audit 0 vulns, build 102KB gzip)
+- Modo Visual: PROSA (fallback) — el workflow estándar hardcodea CRM tracking (PROHIBIDO aquí) + variante visual no validada e2e + sesión con errores de infra
 - Infra: Azure sub=CEFSA-prod (4bdfcf40-…) SKU=Standard · repo=público linkdesignOrganization/estudio-dental-mendieta · node v26 · Angular 21
 - Diseño: design-criteria.md = 120 DC-xxx + 29 BVC-xxx · ux-criteria.md = 71 UX-xxx
 - Cliente APROBÓ el plan (con ajuste: Angular 17→21)
