@@ -239,14 +239,17 @@ test('DC-118: dashboard de reportes — ≤6 KPIs calculados, clickeables (estad
 
 // ───────────────────────────── DC-119 — Reportes detallados (éxito: charts legibles) ─────────────────────────────
 
-// test: DC-119 — estado ÉXITO: el reporte financiero renderiza sus 3 cards de gráfico con datos
-// legibles y montos ARS, sin crashear. (El empty "Sin datos suficientes para este gráfico" no es
-// alcanzable con el seed — todos los charts tienen datos — y queda como verificación visual/source.)
+// test: DC-119 — estado ÉXITO: el reporte financiero renderiza sus cards de gráfico con datos
+// legibles y montos ARS, sin crashear (REQ-241: ingresos por mes, facturación por obra social y
+// deuda por antigüedad). El empty "Sin datos suficientes para este gráfico" no es alcanzable con
+// el seed — todos los charts tienen datos — y queda como verificación visual/source.
 test('DC-119: reporte financiero detallado — charts en cards aireadas, sin crash (estado éxito)', async ({ page }) => {
   await gotoApp(page, '/reportes/financiero');
   await expect(page.getByRole('heading', { name: /Reporte financiero/ })).toBeVisible();
-  // Las 3 visualizaciones del reporte financiero están presentes (1 métrica por card).
-  await expect(page.getByText('Facturación mensual (ARS)')).toBeVisible();
+  // Las visualizaciones requeridas del reporte financiero están presentes (1 métrica por card).
+  await expect(page.getByText('Ingresos facturados por mes')).toBeVisible();
+  await expect(page.getByText('Facturación por obra social')).toBeVisible();
+  await expect(page.getByText('Deuda por antigüedad')).toBeVisible();
   await expect(page.getByText('Cobranzas vs facturado')).toBeVisible();
   await expect(page.getByText('Tasa de cobranza')).toBeVisible();
 });

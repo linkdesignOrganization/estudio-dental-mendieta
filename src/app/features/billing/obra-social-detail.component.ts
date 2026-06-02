@@ -52,6 +52,27 @@ import { StoreService } from '../../core/persistence/store.service';
             <app-empty-state icon="users" title="Sin pacientes asociados" description="Esta obra social no tiene pacientes asociados." />
           }
         </section>
+
+        <section class="surface-card is-lg osd__settle">
+          <h3 class="t-title osd__patients-title">Historial de liquidaciones</h3>
+          @if (liquidaciones().length) {
+            <ul class="osd__settle-list">
+              @for (l of liquidaciones(); track l.periodo) {
+                <li class="osd__settle-row">
+                  <span class="osd__settle-glyph"><app-icon name="receipt" [size]="18" /></span>
+                  <div class="osd__settle-body">
+                    <span class="t-body-medium">{{ l.periodo }}</span>
+                    <span class="t-small t-secondary">{{ l.estado === 'liquidada' ? 'Liquidada' : 'En proceso' }}</span>
+                  </div>
+                  <span class="osd__settle-amount t-body-medium">{{ l.monto | ars }}</span>
+                </li>
+              }
+            </ul>
+          } @else {
+            <app-empty-state icon="receipt" title="Sin liquidaciones registradas"
+              description="Cuando se registren cobranzas de pacientes de esta obra social, vas a ver acá las liquidaciones por período." />
+          }
+        </section>
       </div>
     } @else {
       <app-empty-state icon="shield-check" title="No encontramos esta obra social"
@@ -78,6 +99,12 @@ import { StoreService } from '../../core/persistence/store.service';
     .osd__patient:hover { background: var(--color-accent-tint); }
     .osd__patient:focus-visible { box-shadow: var(--focus-ring); outline: none; }
     .osd__patient-body { display: flex; flex-direction: column; gap: 2px; flex: 1; }
+    .osd__settle-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+    .osd__settle-row { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) 0; border-bottom: 1px solid var(--color-border); }
+    .osd__settle-row:last-child { border-bottom: none; }
+    .osd__settle-glyph { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; flex: 0 0 auto; border-radius: 50%; background: var(--color-accent-tint); color: var(--color-accent-deep); }
+    .osd__settle-body { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+    .osd__settle-amount { color: var(--color-text); white-space: nowrap; font-variant-numeric: tabular-nums; }
     @media (max-width: 767px) { .osd__stats { width: 100%; justify-content: space-between; gap: var(--space-4); } }
   `],
 })
@@ -86,6 +113,7 @@ export class ObraSocialDetailComponent {
   private readonly store = inject(StoreService);
   protected readonly os = computed(() => this.store.obraSocialById(this.id()));
   protected readonly patients = computed(() => this.store.patientsOfObraSocial(this.id()));
+  protected readonly liquidaciones = computed(() => this.store.liquidacionesDe(this.id()));
   protected initials(n: string): string {
     const parts = n.trim().split(/\s+/);
     return parts.length >= 2 ? (parts[0][0] + parts[1][0]).toUpperCase() : n.slice(0, 2).toUpperCase();

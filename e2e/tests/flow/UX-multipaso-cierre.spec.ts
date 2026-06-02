@@ -461,10 +461,10 @@ test('UX-053: el dashboard de reportes muestra datos calculados (sin estado vac�
 // crashear. (El estado "Sin datos suficientes para este gráfico" no es alcanzable con el seed; ver nota.)
 test('UX-053: los reportes detallados renderizan sus charts con datos, sin crash', async ({ page }) => {
   const reportes = [
-    { ruta: '/reportes/pacientes', heading: /Reporte de pacientes/, charts: ['Pacientes nuevos por mes', 'Distribución por edad', 'Pacientes por obra social'] },
-    { ruta: '/reportes/financiero', heading: /Reporte financiero/, charts: ['Facturación mensual (ARS)', 'Cobranzas vs facturado', 'Tasa de cobranza'] },
-    { ruta: '/reportes/productividad', heading: /Reporte de productividad/, charts: ['Turnos por profesional', 'Asistencia a turnos', 'Turnos por día de semana'] },
-    { ruta: '/reportes/tratamientos', heading: /Reporte de tratamientos/, charts: ['Tratamientos por estado', 'Tipos más frecuentes', 'Tasa de finalización'] },
+    { ruta: '/reportes/pacientes', heading: /Reporte de pacientes/, figuras: 5, charts: ['Pacientes nuevos por mes', 'Distribución por edad', 'Distribución por género', 'Pacientes por obra social', 'Pacientes por profesional'] },
+    { ruta: '/reportes/financiero', heading: /Reporte financiero/, figuras: 5, charts: ['Ingresos facturados por mes', 'Facturación por obra social', 'Deuda por antigüedad', 'Cobranzas vs facturado', 'Tasa de cobranza'] },
+    { ruta: '/reportes/productividad', heading: /Reporte de productividad/, figuras: 3, charts: ['Producción por profesional', 'Atendidos vs cancelados', 'Tasa de presentación'] },
+    { ruta: '/reportes/tratamientos', heading: /Reporte de tratamientos/, figuras: 4, charts: ['Tratamientos por estado', 'Tipos más realizados', 'Duración promedio por tipo', 'Tasa de finalización'] },
   ];
   for (const r of reportes) {
     await gotoApp(page, r.ruta);
@@ -472,7 +472,7 @@ test('UX-053: los reportes detallados renderizan sus charts con datos, sin crash
     for (const chart of r.charts) {
       await expect(page.getByText(chart, { exact: false }).first()).toBeVisible();
     }
-    // Cada gráfico es una <figure> con contenido (no un bloque vacío) — al menos 3 figuras visibles.
-    await expect(page.locator('main figure')).toHaveCount(3);
+    // Cada gráfico es una <figure> con contenido (no un bloque vacío) — tras pasar el skeleton de carga.
+    await expect(page.locator('main figure')).toHaveCount(r.figuras);
   }
 });

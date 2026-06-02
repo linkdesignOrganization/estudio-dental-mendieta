@@ -39,6 +39,11 @@ import { StoreService } from '../../core/persistence/store.service';
         </div>
 
         <div class="field">
+          <label class="field__label" for="pay-date">Fecha</label>
+          <input id="pay-date" class="input-edm" type="date" [max]="hoy" [value]="fecha()" (input)="onFecha($event)" />
+        </div>
+
+        <div class="field">
           <label class="field__label" for="pay-method">Medio de pago</label>
           <select id="pay-method" class="select-edm" [value]="medio()" (change)="onMedio($event)">
             <option>Efectivo</option>
@@ -92,7 +97,10 @@ export class RegisterPaymentComponent {
   private readonly toast = inject(ToastService);
   private readonly store = inject(StoreService);
 
+  /** Hoy ancla del viewcase (coherente con el seed). Tope del date picker. */
+  protected readonly hoy = '2026-06-01';
   protected readonly amount = signal<string>('');
+  protected readonly fecha = signal<string>(this.hoy);
   protected readonly medio = signal<string>('Efectivo');
   protected readonly concepto = signal<string>('');
   protected readonly touched = signal(false);
@@ -111,19 +119,20 @@ export class RegisterPaymentComponent {
   protected onAmount(e: Event) { this.amount.set((e.target as HTMLInputElement).value); }
   protected onMedio(e: Event) { this.medio.set((e.target as HTMLSelectElement).value); }
   protected onConcepto(e: Event) { this.concepto.set((e.target as HTMLInputElement).value); }
+  protected onFecha(e: Event) { this.fecha.set((e.target as HTMLInputElement).value || this.hoy); }
 
   protected submit(e: Event) {
     e.preventDefault();
     this.touched.set(true);
     if (!this.isValid()) return;
     // Persiste el pago: agrega el movimiento, recalcula el saldo (DEMO-016 / UX-026/085).
-    this.store.registrarPago(this.id(), this.numericAmount(), this.concepto(), this.medio());
+    this.store.registrarPago(this.id(), this.numericAmount(), this.concepto(), this.medio(), this.fecha());
     this.toast.success('Pago registrado.');
     this.router.navigate(['/pacientes', this.id(), 'pagos']);
   }
 
   protected cancel() {
-    if (this.amount().trim()) this.confirmCancel.set(true);
+    if (this.amount().trim() || this.concepto().trim()) this.confirmCancel.set(true);
     else this.goBack();
   }
   protected goBack() {

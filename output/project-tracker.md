@@ -6,8 +6,10 @@
 
 ## Estado actual
 - Modo: NEW (NORMAL) · FASE 5 en PROSA (worktree no disponible + run-regression sed bug macOS)
-- Fase: FASE 5 — Iteración 4 COMPLETA ✓ (0 bugs). 5j commit → Iteración 5 (Facturación + Pagos + Reportes — ÚLTIMA)
-- Próximo: Iteración 5 — presupuestos, facturas, obras sociales, REGISTRAR pago editable, reportes con gráficos
+- Fase: FASE 5 — Iteración 5 (ÚLTIMA) · Paso 5d (DevOps deploy). 272 REQ cubiertos ✓
+- Próximo: 5d-regress → 5e QA → FASE 6 (deployment)
+- It5 5a ✓: presupuestos detalle+F02, OS liquidaciones, pago editable+fecha (REQ-260), 4 reportes con gráficos SVG/CSS (cero deps), seed byte-idéntico, bundle 103KB. Cierra 272 REQ
+- It1/2/3/4 ✓
 - It4 5a ✓: crear paciente 2 rutas + género (estaba hardcodeado mujer) + foto, editar dirty-check (F01), odontograma editable @defer immediate, tratamientos col próxima fecha. Seed byte-idéntico
 - It1/2/3 ✓
 - UX-003 era flaky (click tragado nav encadenada, no agenda); seed byte-idéntico

@@ -419,6 +419,20 @@ export class StoreService {
     const b = (this._state()?.budgets ?? []).find((x) => x.id === id);
     return b ? b.items.map((it) => ({ concepto: it.concepto, monto: it.monto })) : [];
   }
+  /**
+   * Datos extendidos del presupuesto para el detalle (REQ-211): paciente, vencimiento ya
+   * formateado y un flag de "vencido por fecha" (la fecha pasó y sigue pendiente). Las
+   * condiciones son fijas (no entidad del seed) → no tocan el PRNG.
+   */
+  budgetDetail(id: string): { vencimiento: string; vencido: boolean; pacienteId: string } | undefined {
+    const b = (this._state()?.budgets ?? []).find((x) => x.id === id);
+    if (!b) return undefined;
+    return {
+      vencimiento: formatDmyDate(b.vencimiento),
+      vencido: b.estado === 'pendiente' && b.vencimiento < isoOf(TODAY),
+      pacienteId: b.pacienteId,
+    };
+  }
 
   // obras sociales (cards) — pacientes activos, deuda agregada, último pago
   readonly obrasSociales = computed<ObraSocial[]>(() => {
@@ -456,6 +470,35 @@ export class StoreService {
     return (this._state()?.patients ?? [])
       .filter((p) => p.obraSocialId === id)
       .map((p) => this.toPatient(p));
+  }
+
+  /**
+   * Historial de liquidaciones de una obra social (REQ-229). Una liquidación = la cobranza
+   * mensual agregada de los pacientes de esa obra social. Se DERIVA del estado real (pagos
+   * de los pacientes asociados agrupados por mes) → refleja seed + pagos nuevos del usuario
+   * y no consume el PRNG. "Particular" no liquida (no es obra social real). Más reciente
+   * primero, hasta 6 meses con movimiento.
+   */
+  liquidacionesDe(id: string): { periodo: string; monto: number; estado: 'liquidada' | 'en-proceso' }[] {
+    const s = this._state();
+    if (!s || id === 'os-particular') return [];
+    const pacientesIds = new Set(s.patients.filter((p) => p.obraSocialId === id).map((p) => p.id));
+    const porMes = new Map<string, number>();
+    for (const m of s.movements) {
+      if (m.signo !== 'pago' || !pacientesIds.has(m.pacienteId)) continue;
+      const key = m.fecha.slice(0, 7); // yyyy-mm
+      porMes.set(key, (porMes.get(key) ?? 0) + m.monto);
+    }
+    const hoyMes = isoOf(TODAY).slice(0, 7);
+    return [...porMes.entries()]
+      .sort((a, b) => b[0].localeCompare(a[0]))
+      .slice(0, 6)
+      .map(([key, monto]) => ({
+        periodo: monthLabel(key),
+        monto,
+        // el período en curso queda "en proceso"; los anteriores, liquidados
+        estado: key >= hoyMes ? ('en-proceso' as const) : ('liquidada' as const),
+      }));
   }
 
   // notificaciones
@@ -534,13 +577,19 @@ export class StoreService {
   // MUTACIONES (persisten — UX-084). Inmediatas en confirmaciones.
   // =====================================================================
 
-  /** Registra un pago en la cuenta corriente (DEMO-016 / UX-026/085). Recalcula saldo. */
-  registrarPago(pacienteId: string, monto: number, concepto: string, medioPago: string): void {
+  /**
+   * Registra un pago en la cuenta corriente (DEMO-016 / UX-026/085 / REQ-259..262).
+   * Recalcula saldo (DERIVADO → badge/estado de cuenta coherentes) y persiste de inmediato.
+   * `fechaIso` opcional: por defecto hoy; se acota a [hoy] como tope para no fechar a futuro.
+   */
+  registrarPago(pacienteId: string, monto: number, concepto: string, medioPago: string, fechaIso?: string): void {
     const id = `mv-${Date.now().toString(36)}`;
+    const hoy = isoOf(TODAY);
+    const fecha = fechaIso && fechaIso <= hoy ? fechaIso : hoy;
     const mov: AccountMovementEntity = {
       id,
       pacienteId,
-      fecha: isoOf(TODAY),
+      fecha,
       concepto: concepto?.trim() ? concepto.trim() : `Pago — ${medioPago}`,
       monto,
       signo: 'pago',
@@ -783,6 +832,12 @@ function relativeTime(iso: string): string {
   if (diff < 60) return 'hace 1 mes';
   if (diff < 365) return `hace ${Math.floor(diff / 30)} meses`;
   return `hace ${Math.floor(diff / 365)} año${Math.floor(diff / 365) > 1 ? 's' : ''}`;
+}
+/** "yyyy-mm" → "Mayo 2026" (es-AR), para encabezar liquidaciones por período. */
+function monthLabel(key: string): string {
+  const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+  const [y, m] = key.split('-').map(Number);
+  return `${meses[(m - 1) % 12]} ${y}`;
 }
 /** Monto ARS compacto para KPIs: 4.820.000 → "$ 4.82 M"; 880.000 → "$ 880 K". */
 function compactArs(value: number): string {
