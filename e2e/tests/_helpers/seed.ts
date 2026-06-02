@@ -27,6 +27,41 @@ export async function readState(page: Page): Promise<any> {
   return page.evaluate((k) => JSON.parse(localStorage.getItem(k) || 'null'), STATE_KEY);
 }
 
+/**
+ * Reset the store back to the deterministic seed.
+ *
+ * Some flows MUTATE persisted state (e.g. reagendar pushes a real WhatsApp
+ * NotificationEntity → the bell badge increments and survives refresh). To keep
+ * such specs idempotent and avoid contaminating later specs, we clear the
+ * localStorage state key and reload `path`: the SeedReadyGuard then re-hydrates
+ * from scratch and `StoreService.hydrate()` regenerates the byte-identical seed.
+ * After the reload we wait for the shell (seed-backed) so the page is ready to
+ * drive. Returns once the seed is freshly hydrated again.
+ */
+export async function resetSeed(page: Page, path = '/agenda'): Promise<void> {
+  // Make sure we are on the app origin so localStorage is accessible.
+  if (!page.url().startsWith('http')) {
+    await gotoApp(page, path);
+  }
+  await page.evaluate((k) => localStorage.removeItem(k), STATE_KEY);
+  await page.goto(path, { waitUntil: 'domcontentloaded' });
+  // Guard re-hydrates from the seed; wait until the state is back in storage.
+  await page.waitForFunction((k) => !!localStorage.getItem(k), STATE_KEY, { timeout: 20_000 });
+  await expect(page.getByRole('navigation', { name: 'Navegación principal' })).toBeVisible();
+}
+
+/**
+ * Current unread badge count on the header bell (0 when the badge is absent).
+ * The badge `.header__badge` only renders when `unreadCount() > 0`.
+ */
+export async function bellBadgeCount(page: Page): Promise<number> {
+  const badge = page.locator('.header__badge');
+  if ((await badge.count()) === 0) return 0;
+  const txt = (await badge.first().textContent())?.trim() ?? '0';
+  const n = parseInt(txt, 10);
+  return Number.isNaN(n) ? 0 : n;
+}
+
 /** Parse an ARS-formatted amount like "$ 276.020" / "−$ 100.000" into a number (sign included). */
 export function parseArs(text: string): number {
   const negative = /[−-]/.test(text.trim().charAt(0)) || text.trim().startsWith('−');

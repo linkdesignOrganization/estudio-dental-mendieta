@@ -6,8 +6,9 @@
 
 ## Estado actual
 - Modo: NEW (NORMAL) · FASE 5 en PROSA (worktree no disponible + run-regression sed bug macOS)
-- Fase: FASE 5 — Iteración 3 (Agenda) · Paso 5d (DevOps deploy)
-- Próximo: 5d-regress → 5e QA → It4..It5
+- Fase: FASE 5 — Iteración 3 COMPLETA ✓ (0 bugs). 5j commit → Iteración 4 (Pacientes escritura + Tratamientos)
+- Próximo: Iteración 4 — crear/editar paciente, odontograma editable, catálogo tratamientos
+- UX-003 era flaky (click tragado nav encadenada, no agenda); seed byte-idéntico
 - It3 5a ✓: vista semanal real (corrigió bug grid mensual), mobile día/lista (feedback demo), notas internas, reagendar notif WhatsApp real. Seed byte-idéntico
 - It1/It2 ✓. Lección: PRNG separado para datos nuevos del seed
 - It2 5a ✓: sub-detalles pieza/evento/plan + 3 gaps (detalle pieza historial real, contacto emergencia, filtros lista). SEED byte-idéntico (PRNG separado, sin drift)
@@ -64,3 +65,4 @@
 - ✓ FASE 3.5-INFRA: N/A (frontend-only, sin backend/DB) (2026-06-02)
 - ✓ FASE 5 It1 (Fundación): auditoría base demo, corrigió REQ-057/058 + regresión seed (PRNG separado), UX-022 flaky estabilizado, 0 bugs, suite 490 tests (2026-06-02)
 - ✓ FASE 5 It2 (Pacientes): ficha a fondo + sub-detalles (pieza/evento/plan), 3 gaps hardcodeados corregidos, seed byte-idéntico (sin drift), regresión 486 verde, 0 bugs (2026-06-02)
+- ✓ FASE 5 It3 (Agenda): vista semanal real (bug grid mensual corregido), mobile día/lista (feedback demo, chips 22px→44px), reagendar notif WhatsApp, notas internas, UX-003 flaky estabilizado, regresión 536 verde, 0 bugs (2026-06-02)

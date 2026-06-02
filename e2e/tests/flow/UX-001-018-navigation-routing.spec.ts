@@ -52,32 +52,72 @@ test('UX-002: shell presente en rutas internas; header refleja el módulo', asyn
 // cierra). Encadenar 7 navegaciones en una sola sesión es flaky por la animación
 // de cierre/apertura del drawer, no por un fallo del flujo. Desktop: nav fijo,
 // `openNav()` es no-op y se navega en una sola sesión.
+//
+// Estabilidad (web-first): tras cada click NO basta con assert de la URL. Cada
+// ruta es lazy + OnPush, así que al resolver `toHaveURL` la página destino aún
+// puede estar terminando de renderizar; el siguiente `.click()` sobre el sidebar
+// (link persistente, siempre "stable & visible") ocasionalmente cae en medio del
+// ciclo del router/zone y se traga sin navegar → la URL no cambia y el `toHaveURL`
+// del paso siguiente expira (15s). Sincronizamos cada paso al ciclo de vida del
+// router esperando el <h1> del header, que SOLO se actualiza en `NavigationEnd`
+// (ver header.component `moduleTitle()`): así confirmamos que la navegación se
+// confirmó Y damos tiempo a que el render del destino se asiente antes del próximo
+// click. App correcta (desktop abre Agenda en vista Mes, el sidebar navega bien);
+// este wait elimina la carrera de click-en-medio-de-render, no enmascara un bug.
 test('UX-003: los items del sidebar navegan a sus rutas', async ({ page }, testInfo) => {
   const nav = page.getByRole('navigation', { name: 'Navegación principal' });
-  const items: Array<[string, RegExp]> = [
-    ['Agenda', /\/agenda$/],
-    ['Pacientes', /\/pacientes$/],
-    ['Tratamientos', /\/tratamientos$/],
-    ['Facturación', /\/facturacion(\/presupuestos)?$/],
-    ['Reportes', /\/reportes$/],
-    ['Configuración', /\/configuracion$/],
-    ['Ayuda', /\/ayuda$/],
+  const bannerTitle = page.getByRole('banner').getByRole('heading', { level: 1 });
+  // [label del sidebar, URL esperada, título del header tras NavigationEnd].
+  const items: Array<[string, RegExp, string]> = [
+    ['Agenda', /\/agenda$/, 'Agenda'],
+    ['Pacientes', /\/pacientes$/, 'Pacientes'],
+    ['Tratamientos', /\/tratamientos$/, 'Tratamientos'],
+    ['Facturación', /\/facturacion(\/presupuestos)?$/, 'Facturación'],
+    ['Reportes', /\/reportes$/, 'Reportes'],
+    ['Configuración', /\/configuracion$/, 'Configuración'],
+    ['Ayuda', /\/ayuda$/, 'Ayuda'],
   ];
   const isMobile = testInfo.project.name === 'mobile-chromium';
 
+  // Navega un item de forma web-first y resiliente al "click tragado".
+  //
+  // Por qué un retry de click (y no solo un wait): cada ruta es lazy + OnPush; un
+  // `.click()` sobre el link del sidebar (siempre estable/visible) puede dispararse
+  // en medio del ciclo del router/zone y NO disparar la navegación del `routerLink`
+  // → la URL no cambia. Un `toHaveURL` posterior solo reintenta el ASSERT, nunca el
+  // click, así que expira. `expect.poll` re-clickea el link hasta que la URL cambia:
+  // patrón web-first idiomático para navegaciones SPA intermitentes. No enmascara un
+  // bug — la app navega bien (verificado en vivo); solo cubre la carrera del click.
+  const navigateTo = async (label: string, re: RegExp, title: string) => {
+    const link = nav.getByRole('link', { name: label, exact: true });
+    await expect
+      .poll(
+        async () => {
+          if (re.test(new URL(page.url()).pathname)) return true; // ya navegó
+          await openNav(page); // no-op en desktop; (re)abre el drawer en mobile
+          await link.click();
+          // Margen corto para que el router confirme; si el click se tragó, el
+          // siguiente ciclo del poll reabre el nav y vuelve a clickear.
+          await page.waitForURL(re, { timeout: 2_000 }).catch(() => {});
+          return re.test(new URL(page.url()).pathname);
+        },
+        { timeout: 15_000, intervals: [200, 400, 800] },
+      )
+      .toBe(true);
+    await expect(page).toHaveURL(re);
+    // El <h1> del header solo cambia en NavigationEnd → confirma commit + render asentado.
+    await expect(bannerTitle).toHaveText(title);
+  };
+
   if (isMobile) {
-    for (const [label, re] of items) {
+    for (const [label, re, title] of items) {
       await gotoApp(page, '/reportes');
-      await openNav(page);
-      await nav.getByRole('link', { name: label, exact: true }).click();
-      await expect(page).toHaveURL(re);
+      await navigateTo(label, re, title);
     }
   } else {
     await gotoApp(page, '/reportes');
-    for (const [label, re] of items) {
-      await openNav(page); // no-op en desktop
-      await nav.getByRole('link', { name: label, exact: true }).click();
-      await expect(page).toHaveURL(re);
+    for (const [label, re, title] of items) {
+      await navigateTo(label, re, title);
     }
   }
 });

@@ -222,6 +222,26 @@ Smoke test post-deploy (alcance: "deploy exitoso + sitio carga"; la validación 
 | Thumbnail SVG (path real del manifest) | `/imagenes/documentos/foto-01.svg` → 200 `image/svg+xml`, bytes `<svg xmlns=...`. Control negativo `NOPE-99.svg` → 200 `text/html` (fallback) → prueba que el type del SVG real es genuino |
 | Security headers | CSP, X-Frame-Options (SAMEORIGIN), X-Content-Type-Options (nosniff), Referrer-Policy, Permissions-Policy → todos presentes |
 
+### Iteración 3 (Agenda) — Pre-QA Deploy (2026-06-02, paso 5d) — verificado
+Push de `feat: iteration 3 - pre-QA deploy` (commit `8d5fd31`) → run `26834655604` **success** (~2m1s). `headSha` del run coincide con el HEAD local pusheado. Redeploy de **solo código** — sin cambios de infra (SWA, CI/CD y secret siguen igual que en Fase 4). El Developer completó la Agenda a producción sobre la base de la demo: **vista semanal real** (nuevo `week-view.component.ts`), **default mobile en vista día/lista** (`agenda-list-view.component.ts`, filas touch ≥44px), **bloque de turno compartido** (`cal-appt-block.component.ts`, dedup mes/semana), **notas internas** en el detalle, y **reagendar persiste una notificación de WhatsApp real** que aparece en la campana. Cambios: 3 componentes nuevos + 4 modificados (`models.ts`, `store.service.ts`, `appointment-detail.component.ts`, `calendar.component.ts`).
+
+**Seed byte-idéntico (sin drift):** el Developer agregó los campos nuevos al *shape de presentación* (`Appointment`), no a `AppointmentEntity`, y la notificación de reagenda usa id por `Date.now()` (no PRNG). Build local verificado antes del push: `[manifest] 29 pacientes (12 H / 17 M), 15 documentos` y `Initial total 428.70 kB / 103.59 kB gzipped` (<500KB error-budget; +4KB vs It1 por los componentes nuevos, dentro de presupuesto). El bundle servido `main-VR4MDJED.js` == el `dist/.../main-VR4MDJED.js` local → confirma código realmente desplegado, no caché.
+
+**Verificación funcional post-deploy (Playwright contra el SWA, 7/7 PASS)** — alcance "deploy exitoso + sitio carga + cambios de It3 reflejados"; la validación QA detallada la hace el QA Orchestrator:
+
+| Eje | Resultado |
+|---|---|
+| Root `/`, `/agenda`, `/pacientes` | 200 `text/html` (shell Angular + SPA fallback); manifest fresco `generadoEn 2026-06-02T16:51:23Z` (29 pacientes / 15 docs) |
+| **DESKTOP abre en MES** | `.cal__grid` presente (35 celdas), toggle "Mes" activo, sin columnas-semana |
+| **DESKTOP toggle "Semana" = SEMANA REAL** | `app-week-view .week` con `grid-template-columns: repeat(7,1fr)` → **7 `.week__col`** (Lun→Dom), **grid mensual ausente** (`.cal__grid=0`). NO es el grid del mes |
+| **MOBILE (~390px) arranca en DÍA/LISTA** | `app-agenda-list-view .agenda-list` con **31 `.agenda-row`** (filas), sin grid mensual ni columnas-semana; altura de fila real **76px** (≥44px touch) |
+| **DETALLE de turno muestra "Notas internas"** | `.appt__notes-label` con texto "Notas internas" en `/agenda/tur-008` |
+| **REAGENDAR → notificación en la campana** | slot `09:00` confirmado en `/agenda/tur-008/reagendar` → badge `.header__badge` **5→6** y el panel `.np__item` muestra **"Aviso de WhatsApp enviado"** (notificación real, sin lenguaje de simulación) |
+| Errores de consola | 0 en agenda (mes/semana) y en detalle/reagenda |
+| Security headers | CSP, X-Frame-Options (SAMEORIGIN), X-Content-Type-Options (nosniff), Referrer-Policy, Permissions-Policy → presentes |
+
+> **Nota para el QA Orchestrator (rutas de la agenda — evitar falso negativo):** la clase `.agenda-row` (vista lista) vive en `agenda-list-view.component.ts` y se renderiza en `/agenda` con **viewport mobile** (`agenda` es el default mobile). La ruta `/agenda/dia` carga un componente DISTINTO (`DayListComponent`, una **tabla** `app-data-table` con `<td class="cell">` que lista solo los turnos de HOY) y NO usa `.agenda-row`. Para navegar a un turno reagendable desde un probe, usar la lista mobile de `/agenda` (cada fila enlaza a `/agenda/:id`), no `/agenda/dia`. El form de reagendar usa `input#r-date` + botones `.resch__slot` (ocupados `[disabled]`) + primary "Confirmar nuevo horario" (deshabilitado hasta elegir slot).
+
 ---
 
 ## 5. Decisión de suscripción y SKU (resuelta)
