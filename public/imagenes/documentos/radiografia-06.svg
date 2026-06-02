@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="Serie periapical">
+  <defs><radialGradient id="g" cx="50%" cy="45%" r="70%"><stop offset="0%" stop-color="#2b3640"/><stop offset="100%" stop-color="#0e1417"/></radialGradient></defs>
+  <rect width="400" height="300" fill="url(#g)"/>
+  <line x1="0" y1="105" x2="400" y2="105" stroke="#1b2329" stroke-width="2"/>
+  <rect x="30.0" y="7.6" width="33.9" height="52.4" rx="8" fill="#e9eef2" opacity="0.70"/>
+  <rect x="72.0" y="11.8" width="26.3" height="48.2" rx="8" fill="#e9eef2" opacity="0.59"/>
+  <rect x="114.0" y="8.3" width="32.6" height="51.7" rx="8" fill="#e9eef2" opacity="0.76"/>
+  <rect x="156.0" y="14.9" width="29.8" height="45.1" rx="8" fill="#e9eef2" opacity="0.79"/>
+  <rect x="198.0" y="12.2" width="27.3" height="47.8" rx="8" fill="#e9eef2" opacity="0.62"/>
+  <rect x="240.0" y="11.2" width="27.4" height="48.8" rx="8" fill="#e9eef2" opacity="0.67"/>
+  <rect x="282.0" y="14.5" width="26.2" height="45.5" rx="8" fill="#e9eef2" opacity="0.89"/>
+  <rect x="324.0" y="9.0" width="32.3" height="51.0" rx="8" fill="#e9eef2" opacity="0.75"/>
+  <rect x="30.0" y="150.0" width="30.8" height="54.0" rx="8" fill="#e9eef2" opacity="0.93"/>
+  <rect x="72.0" y="150.0" width="30.7" height="41.1" rx="8" fill="#e9eef2" opacity="0.73"/>
+  <rect x="114.0" y="150.0" width="26.1" height="55.3" rx="8" fill="#e9eef2" opacity="0.61"/>
+  <rect x="156.0" y="150.0" width="30.7" height="47.1" rx="8" fill="#e9eef2" opacity="0.78"/>
+  <rect x="198.0" y="150.0" width="32.5" height="55.0" rx="8" fill="#e9eef2" opacity="0.93"/>
+  <rect x="240.0" y="150.0" width="29.7" height="53.7" rx="8" fill="#e9eef2" opacity="0.86"/>
+  <rect x="282.0" y="150.0" width="27.1" height="48.9" rx="8" fill="#e9eef2" opacity="0.56"/>
+  <rect x="324.0" y="150.0" width="26.7" height="51.5" rx="8" fill="#e9eef2" opacity="0.67"/>
+  <rect x="14" y="14" width="372" height="272" rx="6" fill="none" stroke="#39454e" stroke-width="1.5"/>
+  <text x="24" y="284" font-family="monospace" font-size="13" fill="#7d8a93">Serie periapical</text>
+</svg>

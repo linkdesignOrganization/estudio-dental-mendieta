@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="Panorámica ctrl.">
+  <defs><radialGradient id="g" cx="50%" cy="45%" r="70%"><stop offset="0%" stop-color="#2b3640"/><stop offset="100%" stop-color="#0e1417"/></radialGradient></defs>
+  <rect width="400" height="300" fill="url(#g)"/>
+  <line x1="0" y1="105" x2="400" y2="105" stroke="#1b2329" stroke-width="2"/>
+  <rect x="30.0" y="12.9" width="28.4" height="47.1" rx="8" fill="#e9eef2" opacity="0.93"/>
+  <rect x="72.0" y="17.5" width="32.7" height="42.5" rx="8" fill="#e9eef2" opacity="0.75"/>
+  <rect x="114.0" y="17.0" width="26.6" height="43.0" rx="8" fill="#e9eef2" opacity="0.55"/>
+  <rect x="156.0" y="5.1" width="30.0" height="54.9" rx="8" fill="#e9eef2" opacity="0.70"/>
+  <rect x="198.0" y="10.8" width="27.3" height="49.2" rx="8" fill="#e9eef2" opacity="0.58"/>
+  <rect x="240.0" y="7.7" width="27.3" height="52.3" rx="8" fill="#e9eef2" opacity="0.74"/>
+  <rect x="282.0" y="12.7" width="33.2" height="47.3" rx="8" fill="#e9eef2" opacity="0.83"/>
+  <rect x="324.0" y="9.3" width="30.3" height="50.7" rx="8" fill="#e9eef2" opacity="0.62"/>
+  <rect x="30.0" y="150.0" width="29.0" height="45.5" rx="8" fill="#e9eef2" opacity="0.90"/>
+  <rect x="72.0" y="150.0" width="29.6" height="50.4" rx="8" fill="#e9eef2" opacity="0.94"/>
+  <rect x="114.0" y="150.0" width="31.1" height="38.6" rx="8" fill="#e9eef2" opacity="0.73"/>
+  <rect x="156.0" y="150.0" width="31.6" height="39.0" rx="8" fill="#e9eef2" opacity="0.94"/>
+  <rect x="198.0" y="150.0" width="30.2" height="42.4" rx="8" fill="#e9eef2" opacity="0.61"/>
+  <rect x="240.0" y="150.0" width="33.0" height="38.4" rx="8" fill="#e9eef2" opacity="0.75"/>
+  <rect x="282.0" y="150.0" width="33.2" height="51.3" rx="8" fill="#e9eef2" opacity="0.58"/>
+  <rect x="324.0" y="150.0" width="26.1" height="38.5" rx="8" fill="#e9eef2" opacity="0.84"/>
+  <rect x="14" y="14" width="372" height="272" rx="6" fill="none" stroke="#39454e" stroke-width="1.5"/>
+  <text x="24" y="284" font-family="monospace" font-size="13" fill="#7d8a93">Panorámica ctrl.</text>
+</svg>

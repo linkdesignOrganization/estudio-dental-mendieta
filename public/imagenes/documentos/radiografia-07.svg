@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="Aleta de mordida">
+  <defs><radialGradient id="g" cx="50%" cy="45%" r="70%"><stop offset="0%" stop-color="#2b3640"/><stop offset="100%" stop-color="#0e1417"/></radialGradient></defs>
+  <rect width="400" height="300" fill="url(#g)"/>
+  <line x1="0" y1="105" x2="400" y2="105" stroke="#1b2329" stroke-width="2"/>
+  <rect x="30.0" y="20.4" width="28.5" height="39.6" rx="8" fill="#e9eef2" opacity="0.67"/>
+  <rect x="72.0" y="9.9" width="29.6" height="50.1" rx="8" fill="#e9eef2" opacity="0.68"/>
+  <rect x="114.0" y="10.9" width="28.4" height="49.1" rx="8" fill="#e9eef2" opacity="0.61"/>
+  <rect x="156.0" y="16.8" width="32.6" height="43.2" rx="8" fill="#e9eef2" opacity="0.68"/>
+  <rect x="198.0" y="19.1" width="26.7" height="40.9" rx="8" fill="#e9eef2" opacity="0.88"/>
+  <rect x="240.0" y="15.2" width="31.1" height="44.8" rx="8" fill="#e9eef2" opacity="0.88"/>
+  <rect x="282.0" y="4.8" width="28.6" height="55.2" rx="8" fill="#e9eef2" opacity="0.66"/>
+  <rect x="324.0" y="18.7" width="27.7" height="41.3" rx="8" fill="#e9eef2" opacity="0.58"/>
+  <rect x="30.0" y="150.0" width="32.5" height="40.2" rx="8" fill="#e9eef2" opacity="0.79"/>
+  <rect x="72.0" y="150.0" width="31.5" height="55.7" rx="8" fill="#e9eef2" opacity="0.66"/>
+  <rect x="114.0" y="150.0" width="28.1" height="40.4" rx="8" fill="#e9eef2" opacity="0.84"/>
+  <rect x="156.0" y="150.0" width="26.7" height="52.5" rx="8" fill="#e9eef2" opacity="0.60"/>
+  <rect x="198.0" y="150.0" width="31.3" height="47.5" rx="8" fill="#e9eef2" opacity="0.80"/>
+  <rect x="240.0" y="150.0" width="31.7" height="45.8" rx="8" fill="#e9eef2" opacity="0.63"/>
+  <rect x="282.0" y="150.0" width="26.5" height="47.7" rx="8" fill="#e9eef2" opacity="0.80"/>
+  <rect x="324.0" y="150.0" width="33.0" height="47.3" rx="8" fill="#e9eef2" opacity="0.83"/>
+  <rect x="14" y="14" width="372" height="272" rx="6" fill="none" stroke="#39454e" stroke-width="1.5"/>
+  <text x="24" y="284" font-family="monospace" font-size="13" fill="#7d8a93">Aleta de mordida</text>
+</svg>

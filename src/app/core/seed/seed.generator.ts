@@ -337,38 +337,39 @@ function eventDesc(tipo: string, rng: Prng): string {
 function buildDocuments(rng: Prng, patients: PatientEntity[], manifest: SeedManifest): DocumentEntity[] {
   const docs: DocumentEntity[] = [];
   let seq = 1;
-  const pool = manifest.documentos; // puede estar vacío → thumbnail '' → placeholder controlado (UX-048)
+  // Pool de imágenes partido por tipo (REQ-058: ~10 radiografías + 5 fotos clínicas).
+  // El nombre de archivo codifica el tipo (radiografia-*/foto-*); así el thumbnail es
+  // COHERENTE con el tipo del documento. Si el pool viniera vacío (dev sin prebuild),
+  // thumbnailPath cae a '' y el tab muestra el placeholder controlado (UX-048).
+  const pool = manifest.documentos;
+  const radioPool = pool.filter((p) => /\/(radiografia|radio|rx)/i.test(p));
+  const fotoPool = pool.filter((p) => /\/(foto|photo|clinic)/i.test(p));
+  const thumbFor = (tipo: 'radiografia' | 'foto'): string => {
+    const sub = tipo === 'radiografia' ? radioPool : fotoPool;
+    if (sub.length) return rng.pick(sub);
+    return pool.length ? rng.pick(pool) : '';
+  };
+  const pushDoc = (pac: PatientEntity) => {
+    const tipo: 'radiografia' | 'foto' = rng.chance(0.65) ? 'radiografia' : 'foto';
+    docs.push({
+      id: `doc-${String(seq++).padStart(3, '0')}`,
+      pacienteId: pac.id,
+      nombre: rng.pick(DOCUMENT_NAMES[tipo]),
+      tipo,
+      thumbnailPath: thumbFor(tipo),
+      fecha: isoDate(addDays(TODAY, -rng.int(5, 600))),
+    });
+  };
+
   for (const pac of patients) {
     // distribuir 40-60 documentos en total; algunos pacientes sin documentos (edge case)
     let count: number;
     if (pac.edad < 5) count = rng.chance(0.5) ? 0 : 1;
     else count = rng.int(0, 3);
-    for (let k = 0; k < count; k++) {
-      const esRadio = rng.chance(0.65);
-      const tipo: 'radiografia' | 'foto' = esRadio ? 'radiografia' : 'foto';
-      const nombres = DOCUMENT_NAMES[tipo];
-      docs.push({
-        id: `doc-${String(seq++).padStart(3, '0')}`,
-        pacienteId: pac.id,
-        nombre: rng.pick(nombres),
-        tipo,
-        thumbnailPath: pool.length ? rng.pick(pool) : '',
-        fecha: isoDate(addDays(TODAY, -rng.int(5, 600))),
-      });
-    }
+    for (let k = 0; k < count; k++) pushDoc(pac);
   }
   // garantía 40-60
-  while (docs.length < 44) {
-    const pac = rng.pick(patients.filter((p) => p.edad >= 6));
-    const esRadio = rng.chance(0.65);
-    const tipo: 'radiografia' | 'foto' = esRadio ? 'radiografia' : 'foto';
-    docs.push({
-      id: `doc-${String(seq++).padStart(3, '0')}`, pacienteId: pac.id,
-      nombre: rng.pick(DOCUMENT_NAMES[tipo]), tipo,
-      thumbnailPath: pool.length ? rng.pick(pool) : '',
-      fecha: isoDate(addDays(TODAY, -rng.int(5, 600))),
-    });
-  }
+  while (docs.length < 44) pushDoc(rng.pick(patients.filter((p) => p.edad >= 6)));
   return docs;
 }
 

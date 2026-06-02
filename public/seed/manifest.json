@@ -146,6 +146,22 @@
       "edad": 85
     }
   ],
-  "documentos": [],
-  "generadoEn": "2026-06-02T07:23:05.860Z"
+  "documentos": [
+    "/imagenes/documentos/foto-01.svg",
+    "/imagenes/documentos/foto-02.svg",
+    "/imagenes/documentos/foto-03.svg",
+    "/imagenes/documentos/foto-04.svg",
+    "/imagenes/documentos/foto-05.svg",
+    "/imagenes/documentos/radiografia-01.svg",
+    "/imagenes/documentos/radiografia-02.svg",
+    "/imagenes/documentos/radiografia-03.svg",
+    "/imagenes/documentos/radiografia-04.svg",
+    "/imagenes/documentos/radiografia-05.svg",
+    "/imagenes/documentos/radiografia-06.svg",
+    "/imagenes/documentos/radiografia-07.svg",
+    "/imagenes/documentos/radiografia-08.svg",
+    "/imagenes/documentos/radiografia-09.svg",
+    "/imagenes/documentos/radiografia-10.svg"
+  ],
+  "generadoEn": "2026-06-02T11:47:32.175Z"
 }

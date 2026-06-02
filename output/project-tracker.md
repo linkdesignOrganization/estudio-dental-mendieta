@@ -5,17 +5,12 @@
 > Código → Developer | Testing → QA | Deploy → DevOps | Requirements → BA | Arquitectura → Architect | Diseño → DO
 
 ## Estado actual
-- Modo: NEW (NORMAL — no Pixel-Perfect, CON design-brief de Task Dasher)
-- Fase: FASE 4 — Construcción Visual · Paso 4f-sub (3 sub-testers SECUENCIAL, sin worktree)
-- Próximo: 4f-consolidate → anti-deferral → 4g demo
-- 4f-plan ✓: 233 criterios (Visual 158, Flow 47, Edge 28), ronda 1
-- NOTA worktree no disponible (git init post-arranque) → sub-testers secuenciales por browser MCP compartido
-- Flow Tester ✓: 45 PASA, 90/90 desktop+4/4 mobile, 1 bug baja (BUG-F01 ruta catálogo)
-- Edge Tester ✓: 28 criterios, 100/100 PASS, 6 bugs (E01-E06)
-- Visual Checker ✓: 138/158 PASA, BUG-V01 CRÍTICO (hoja estilos no aplica: media=print+onload bloqueado por CSP — raíz de E02/E05/V06/20 fallas visuales) + V04 a11y. BVC-027 y GAP-A04 PASAN
-- Fase: FASE 4 — 4j feedback-curator ✓ (49 entradas, 8 memorias). 4k commit final
-- Próximo: FASE 3.5-INFRA (N/A — frontend-only, sin backend/DB) → FASE 5 (iteraciones)
-- Bugs abiertos: 0 · 24 .spec.ts / 234 tests · regresión 480 pass exit 0 · sitio VIVO
+- Modo: NEW (NORMAL) · FASE 5 en PROSA (worktree no disponible + run-regression sed bug macOS)
+- Fase: FASE 5 — Iteración 1 (Fundación) · Paso 5d (DevOps deploy)
+- Próximo: 5d-regress → 5e QA → It2..It5
+- Bugs abiertos: 0 · sitio VIVO: https://happy-coast-044ea7e0f.7.azurestaticapps.net
+- It1 5a ✓: Developer auditó base demo, corrigió REQ-057 (6 profesionales nombres exactos) + REQ-058 (44 docs thumbnails), build 102KB
+- FASE 3.5-INFRA: N/A (frontend-only, sin backend/DB)
 
 ## Scope para FASE 5 (feedback de la demo)
 - [Iteración 3 Agenda] Cliente pidió: en MOBILE la agenda arranca por defecto en vista DÍA/LISTA (turnos como filas ≥44px), no en semanal con chips chicos. Resuelve el touch de los chips de 22px.
@@ -60,3 +55,5 @@
 - ✓ FASE 3.0 (síntesis): visual-analysis.md (360 líneas, 30 BVC, tokens prescriptivos azul+Red Hat) — Design Researcher cayó 1 vez por socket, OK en intento 2 (2026-06-01)
 - ✓ FASE 3: planificación completa, 5 iteraciones, 21 DEMO-xxx, 120 DC-xxx, 71 UX-xxx, plan-verifier PASA sin gaps (2026-06-01)
 - ✓ FASE 3.5: infra demo — repo público + CI/CD GitHub Actions + SWA Standard en CEFSA-prod (happy-coast-044ea7e0f), cliente autorizó ~$9/mes (2 bloqueos resueltos: cuota Free, permisos Sponsorship) (2026-06-01)
+- ✓ FASE 4: Construcción Visual completa — demo APROBADA, sitio vivo, 233 criterios, 0 bugs, 24 .spec.ts/234 tests, ~13 bugs corregidos (V01 CSP crítico). PROSA. commit dda276f (2026-06-02)
+- ✓ FASE 3.5-INFRA: N/A (frontend-only, sin backend/DB) (2026-06-02)

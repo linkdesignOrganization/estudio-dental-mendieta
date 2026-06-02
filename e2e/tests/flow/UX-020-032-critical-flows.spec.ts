@@ -27,7 +27,7 @@ test('UX-020: crear turno end-to-end persiste y navega al detalle del turno', as
 
   await expect(page).toHaveURL(/\/agenda\/nuevo\/profesional$/);
   await expect(page.getByText('Paso 2 de 3')).toBeVisible();
-  await page.getByLabel('Profesional').selectOption({ label: 'Dra. Mariana Sosa · Odontología general' });
+  await page.getByLabel('Profesional').selectOption({ label: 'Dra. Soledad Russo · Odontología general' });
   await page.getByRole('textbox', { name: 'Fecha' }).fill('2026-06-23');
   await page.getByRole('button', { name: '10:00' }).click();
   await page.getByRole('button', { name: 'Siguiente' }).click();
@@ -36,7 +36,7 @@ test('UX-020: crear turno end-to-end persiste y navega al detalle del turno', as
   await expect(page.getByText('Paso 3 de 3')).toBeVisible();
   // El resumen arrastra los datos de los pasos previos.
   await expect(page.getByText('Agustín Benítez')).toBeVisible();
-  await expect(page.getByText('Dra. Mariana Sosa')).toBeVisible();
+  await expect(page.getByText('Dra. Soledad Russo')).toBeVisible();
 
   await page.getByRole('button', { name: 'Confirmar turno' }).click();
 
@@ -56,7 +56,7 @@ test('UX-020/UX-084: el turno creado persiste tras refresh real', async ({ page 
   await gotoApp(page, '/agenda/nuevo/paciente');
   await page.getByRole('button', { name: /Mateo Gómez/ }).first().click();
   await page.getByRole('button', { name: 'Siguiente' }).click();
-  await page.getByLabel('Profesional').selectOption({ label: 'Dr. Andrés Vidal · Endodoncia' });
+  await page.getByLabel('Profesional').selectOption({ label: 'Dr. Martín Aguilera · Endodoncia' });
   await page.getByRole('textbox', { name: 'Fecha' }).fill('2026-06-24');
   await page.getByRole('button', { name: '11:30' }).click();
   await page.getByRole('button', { name: 'Siguiente' }).click();
@@ -68,7 +68,7 @@ test('UX-020/UX-084: el turno creado persiste tras refresh real', async ({ page 
   await page.reload({ waitUntil: 'domcontentloaded' });
   await expect(page).toHaveURL(url);
   await expect(page.getByText('Mateo Gómez')).toBeVisible();
-  await expect(page.getByText('Dr. Andrés Vidal')).toBeVisible();
+  await expect(page.getByText('Dr. Martín Aguilera')).toBeVisible();
 });
 
 // test: UX-021 — "Agendar turno" desde la ficha inicia el flujo con el paciente preseleccionado
@@ -79,7 +79,7 @@ test('UX-021: agendar turno desde la ficha preselecciona el paciente', async ({ 
   await expect(page).toHaveURL(/\/agenda\/nuevo\/profesional$/);
   await expect(page.getByText('Paso 2 de 3')).toBeVisible();
 
-  await page.getByLabel('Profesional').selectOption({ label: 'Dr. Tomás Herrera · Ortodoncia' });
+  await page.getByLabel('Profesional').selectOption({ label: 'Dra. Carolina Etcheverry · Ortodoncia' });
   await page.getByRole('textbox', { name: 'Fecha' }).fill('2026-06-25');
   await page.getByRole('button', { name: '11:00' }).click();
   await page.getByRole('button', { name: 'Siguiente' }).click();
@@ -93,7 +93,7 @@ test('UX-022: avanzar estado del turno (confirmado -> atendiendo) persiste', asy
   await gotoApp(page, '/agenda/nuevo/paciente');
   await page.getByRole('button', { name: /Diego Sosa/ }).first().click();
   await page.getByRole('button', { name: 'Siguiente' }).click();
-  await page.getByLabel('Profesional').selectOption({ label: 'Dra. Lucía Paredes · Implantología' });
+  await page.getByLabel('Profesional').selectOption({ label: 'Dr. Juan Pablo Acuña · Implantología' });
   await page.getByRole('textbox', { name: 'Fecha' }).fill('2026-06-26');
   await page.getByRole('button', { name: '12:00' }).click();
   await page.getByRole('button', { name: 'Siguiente' }).click();

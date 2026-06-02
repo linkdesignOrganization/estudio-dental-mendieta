@@ -81,7 +81,7 @@ test.beforeEach(async ({ page }) => {
 // Usamos un turno recién creado (Confirmado) para no depender del seed mutable.
 test('UX-023: cancelar turno — confirmación + "Sí, cancelar" persiste el estado Cancelado', async ({ page }) => {
   const url = await crearTurnoConfirmado(
-    page, /Agustín Benítez/, 'Dra. Mariana Sosa · Odontología general', '2026-06-23', '10:00',
+    page, /Agustín Benítez/, 'Dra. Soledad Russo · Odontología general', '2026-06-23', '10:00',
   );
 
   await page.getByRole('button', { name: 'Cancelar turno' }).click();
@@ -112,7 +112,7 @@ test('UX-023: cancelar turno — confirmación + "Sí, cancelar" persiste el est
 // test: UX-023 — la rama "Volver" ABORTA la cancelación (el turno NO cambia de estado).
 test('UX-023: "Volver" en la confirmación NO cancela el turno', async ({ page }) => {
   await crearTurnoConfirmado(
-    page, /Mateo Gómez/, 'Dr. Andrés Vidal · Endodoncia', '2026-06-24', '11:30',
+    page, /Mateo Gómez/, 'Dr. Martín Aguilera · Endodoncia', '2026-06-24', '11:30',
   );
 
   await page.getByRole('button', { name: 'Cancelar turno' }).click();

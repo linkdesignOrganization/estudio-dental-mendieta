@@ -24,7 +24,7 @@ const PUB_PHOTOS = path.join(ROOT, 'public', 'imagenes', 'pacientes');
 const PUB_DOCS = path.join(ROOT, 'public', 'imagenes', 'documentos');
 const SEED_DIR = path.join(ROOT, 'public', 'seed');
 
-const IMG_RE = /\.(jpe?g|png|webp|avif)$/i;
+const IMG_RE = /\.(jpe?g|png|webp|avif|svg)$/i;
 const AGE_RE = /^(\d{1,3})(?:-\d+)?$/; // "32" o "23-1" → edad 32 / 23
 
 /** carpeta → género del modelo */
