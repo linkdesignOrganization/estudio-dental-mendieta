@@ -204,6 +204,24 @@ Verificación post-deploy (todos ✅):
 
 > Redeploy de solo código + assets — sin cambios de infra. El SWA, CI/CD y secret siguen igual que en Fase 4.
 
+### Iteración 1 (Fundación) — Re-deploy fix de regresión de seed (2026-06-02, FASE 5) — verificado
+Push de `fix: iteration 1 - separate PRNG for doc thumbnails (restore seed sequence)` (commit `6fcc2df`) → run `26821585530` **success** (~1m56s). `headSha` del run coincide con el HEAD local pusheado.
+
+**Causa raíz de la regresión (para futuros redeploys):** al pasar de **0 → 15 documentos** en el manifest (cambio de la Fundación), `buildDocuments` en `seed.generator.ts` empezó a ejecutar un `rng.pick(pool)` extra por documento para asignar el thumbnail. Ese draw adicional consumía del **PRNG global**, desplazando toda la secuencia downstream (presupuestos → facturas → movimientos → **saldos/estados** distintos a los de la demo). El fix usa un **PRNG separado** (`new Prng(SEED_ROOT ^ 0x444f_4353)`, "DOCS") solo para el thumbnail cosmético, de modo que la secuencia global queda intacta y los saldos vuelven a los valores de la demo. Cambio de **una sola línea de lógica** en `src/app/core/seed/seed.generator.ts` (+ reordenamiento de los draws globales antes de resolver el thumbnail). Redeploy de **solo código** — sin cambios de infra ni de assets (los 15 SVG y el manifest no cambian).
+
+**Confirmación del prebuild en CI:** el log del run muestra `[manifest] 29 pacientes (12 H / 17 M), 15 documentos → public/seed/manifest.json` y `Initial total 424.70 kB / 102.44 kB gzipped` (<500KB error-budget). El bundle `main-*.js` cambió a `main-5CCD4VTD.js` (desde `main-GFYDB2WD.js`) → confirma que el código del fix está realmente desplegado, no caché.
+
+Smoke test post-deploy (alcance: "deploy exitoso + sitio carga"; la validación funcional de saldos/secuencia la hace la re-regresión + QA), todos ✅:
+
+| Eje | Resultado |
+|---|---|
+| Root `/` | 200 `text/html`, shell Angular (`<app-root>`, `<base href="/">`, title "Estudio Dental Mendieta", bundle hasheado **nuevo** `main-5CCD4VTD.js` / `styles-PDCEFIZS.css`) |
+| Deep-link `/pacientes` | 200 (SPA fallback correcto) |
+| Manifest `/seed/manifest.json` | 200 `application/json`, `generadoEn 2026-06-02T13:05:30Z` (fresco, regenerado por CI), **29 pacientes + 15 documentos** |
+| Foto de paciente (path real del manifest) | `/imagenes/pacientes/hombres/1.jpg` → 200 `image/jpeg` (content-type verificado, no SPA-fallback enmascarado) |
+| Thumbnail SVG (path real del manifest) | `/imagenes/documentos/foto-01.svg` → 200 `image/svg+xml`, bytes `<svg xmlns=...`. Control negativo `NOPE-99.svg` → 200 `text/html` (fallback) → prueba que el type del SVG real es genuino |
+| Security headers | CSP, X-Frame-Options (SAMEORIGIN), X-Content-Type-Options (nosniff), Referrer-Policy, Permissions-Policy → todos presentes |
+
 ---
 
 ## 5. Decisión de suscripción y SKU (resuelta)
