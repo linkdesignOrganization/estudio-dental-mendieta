@@ -6,9 +6,10 @@
 
 ## Estado actual
 - Modo: NEW (NORMAL) · FASE 5 en PROSA (worktree no disponible + run-regression sed bug macOS)
-- Fase: FASE 5 — Iteración 1 · fix seed ✓ (PRNG separado para thumbnails), DevOps re-deploy → re-regresión
-- Próximo: re-regresión → 5e QA → It2..It5
-- Causa raíz regresión: pool docs vacío→15 activó draw extra rng.pick que desplazó PRNG global. Fix: PRNG separado. 98/98 specs afectados PASS local
+- Fase: FASE 5 — Iteración 1 COMPLETA ✓ (0 bugs). 5j commit → Iteración 2 (Pacientes)
+- Próximo: Iteración 2 — ficha 6 tabs a fondo + sub-detalles (5a..5e)
+- Nota: demos/feedback intermedios (5f/5g/5i) consolidados al final de FASE 5
+- UX-022 era flaky (carrera wizard, no bug); seed restaurado. Iteración 1 = auditoría, criterios mayormente cubiertos por regresión
 - Bugs abiertos: 0 · sitio VIVO: https://happy-coast-044ea7e0f.7.azurestaticapps.net
 - It1 5a ✓: Developer auditó base demo, corrigió REQ-057 (6 profesionales nombres exactos) + REQ-058 (44 docs thumbnails), build 102KB
 - FASE 3.5-INFRA: N/A (frontend-only, sin backend/DB)
@@ -58,3 +59,4 @@
 - ✓ FASE 3.5: infra demo — repo público + CI/CD GitHub Actions + SWA Standard en CEFSA-prod (happy-coast-044ea7e0f), cliente autorizó ~$9/mes (2 bloqueos resueltos: cuota Free, permisos Sponsorship) (2026-06-01)
 - ✓ FASE 4: Construcción Visual completa — demo APROBADA, sitio vivo, 233 criterios, 0 bugs, 24 .spec.ts/234 tests, ~13 bugs corregidos (V01 CSP crítico). PROSA. commit dda276f (2026-06-02)
 - ✓ FASE 3.5-INFRA: N/A (frontend-only, sin backend/DB) (2026-06-02)
+- ✓ FASE 5 It1 (Fundación): auditoría base demo, corrigió REQ-057/058 + regresión seed (PRNG separado), UX-022 flaky estabilizado, 0 bugs, suite 490 tests (2026-06-02)

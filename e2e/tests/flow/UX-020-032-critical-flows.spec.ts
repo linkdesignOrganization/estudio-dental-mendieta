@@ -88,24 +88,61 @@ test('UX-021: agendar turno desde la ficha preselecciona el paciente', async ({ 
 });
 
 // test: UX-022 — avanzar estado de turno persiste y refleja el nuevo estado
+//
+// Aislamiento/determinismo (estabilización): el test crea un turno FRESCO (siempre
+// nace "Confirmado") y lo avanza. El fallo intermitente previo no era un bug de la app
+// (avanzar+persistir funciona): era una carrera del wizard — un click "Siguiente"/"Confirmar"
+// disparado antes de que el paso comprometiera su dato hacía que `crearTurno` corriera con
+// el flow VACÍO y el wizard se quedara en `/agenda/nuevo/confirmar` (resumen "— · —"),
+// nunca llegando al detalle del turno. La cura es GATEAR cada transición con una aserción
+// web-first (auto-reintentos) que confirme que el paso quedó comprometido antes de avanzar,
+// y elegir un slot GARANTIZADO libre (fecha lejana + profesional poco usado del seed).
 test('UX-022: avanzar estado del turno (confirmado -> atendiendo) persiste', async ({ page }) => {
-  // Crear un turno fresco (estado "Confirmado") para avanzarlo de forma determinista.
+  // Fecha lejana y única → el slot está libre con cualquier seed (no depende de estado previo).
+  const FECHA = '2026-09-30';
+  const HORA = '12:00';
+
+  // --- Paso 1: paciente ----------------------------------------------------
   await gotoApp(page, '/agenda/nuevo/paciente');
-  await page.getByRole('button', { name: /Diego Sosa/ }).first().click();
+  await expect(page.getByText('Paso 1 de 3')).toBeVisible();
+  const pacienteBtn = page.getByRole('button', { name: /Diego Sosa/ }).first();
+  await pacienteBtn.click();
+  // Gate: el paciente quedó seleccionado (la tarjeta entra en estado is-selected) ANTES de avanzar.
+  await expect(pacienteBtn).toHaveClass(/is-selected/);
   await page.getByRole('button', { name: 'Siguiente' }).click();
+
+  // --- Paso 2: profesional, fecha y hora -----------------------------------
+  await expect(page).toHaveURL(/\/agenda\/nuevo\/profesional$/);
+  await expect(page.getByText('Paso 2 de 3')).toBeVisible();
   await page.getByLabel('Profesional').selectOption({ label: 'Dr. Juan Pablo Acuña · Implantología' });
-  await page.getByRole('textbox', { name: 'Fecha' }).fill('2026-06-26');
-  await page.getByRole('button', { name: '12:00' }).click();
+  await page.getByRole('textbox', { name: 'Fecha' }).fill(FECHA);
+  const slot = page.getByRole('button', { name: HORA, exact: true });
+  // El slot elegido debe estar disponible (no ocupado) — si no, el seed cambió.
+  await expect(slot).toBeEnabled();
+  await slot.click();
+  // Gate: el slot quedó seleccionado (flow.hora comprometido) ANTES de avanzar.
+  await expect(slot).toHaveClass(/is-selected/);
   await page.getByRole('button', { name: 'Siguiente' }).click();
+
+  // --- Paso 3: confirmación ------------------------------------------------
+  await expect(page).toHaveURL(/\/agenda\/nuevo\/confirmar$/);
+  await expect(page.getByText('Paso 3 de 3')).toBeVisible();
+  // Gate CLAVE: el resumen arrastra los datos (no está vacío). Esto impide confirmar con
+  // el flow vacío — la causa raíz del fallo intermitente (resumen "— · —").
+  await expect(page.getByText('Diego Sosa')).toBeVisible();
+  await expect(page.getByText('Dr. Juan Pablo Acuña')).toBeVisible();
   await page.getByRole('button', { name: 'Confirmar turno' }).click();
+
+  // --- Detalle del turno nuevo: estado inicial Confirmado ------------------
   await expect(page).toHaveURL(/\/agenda\/tur-[\w-]+$/);
   const url = page.url();
-
   await expect(page.getByText('Confirmado')).toBeVisible();
+
+  // --- Avanzar estado: Confirmado → Atendiendo -----------------------------
   await page.getByRole('button', { name: 'Avanzar estado' }).click();
   await expect(page.getByText('Atendiendo')).toBeVisible();
 
-  // Persiste tras refresh real.
+  // --- Persiste tras refresh REAL del navegador ----------------------------
   await page.reload({ waitUntil: 'domcontentloaded' });
   await expect(page).toHaveURL(url);
   await expect(page.getByText('Atendiendo')).toBeVisible();
