@@ -1,8 +1,8 @@
 # Infrastructure Setup — Estudio Dental Mendieta
 
 > **Owner:** DevOps. Leído por Developer, Plan Verifier, QA Orchestrator y DevOps (modos posteriores).
-> **Fase:** 3.5 — Setup de Deploy para Demo (SWA + CI/CD).
-> **Fecha:** 2026-06-01.
+> **Fase:** 3.5 — Setup de Deploy para Demo (SWA + CI/CD). **Actualizado en paso 4e (Pre-QA Deploy de la Construcción Visual): primer deploy real COMPLETADO y sitio verificado cargando.**
+> **Fecha:** 2026-06-01 (setup) · 2026-06-02 (primer deploy real verificado).
 
 ---
 
@@ -18,7 +18,7 @@
 | Resource group `EstudioDentalMendieta-RG` en `CEFSA-prod` | ✅ **Recreado** en `eastus2` |
 | **Azure Static Web Apps** | ✅ **Provisionado** — `estudio-dental-mendieta`, SKU **Standard**, en `CEFSA-prod`. URL: `https://happy-coast-044ea7e0f.7.azurestaticapps.net` |
 | Secret del repo `AZURE_STATIC_WEB_APPS_API_TOKEN` | ✅ **Cargado** vía `gh secret set` (2026-06-02) |
-| Primer deploy real | ⏳ Pendiente (lo dispara Fase 4 al pushear el código Angular; ahora la app aún no existe) |
+| Primer deploy real | ✅ **COMPLETADO** (2026-06-02, paso 4e Pre-QA) — run `26794016083` `success`. Sitio sirviendo la app Angular en `https://happy-coast-044ea7e0f.7.azurestaticapps.net` |
 
 > **Resumen:** Infraestructura de deploy para la demo **completa**. El cliente autorizó el costo y se provisionó el SWA en la suscripción **`CEFSA-prod`** (donde la cuenta `hola@linkdesign.cr` SÍ tiene permiso de escritura) con **SKU Standard** (~$9/mes — evita el límite de 10 SWAs Free de CEFSA-prod, que está lleno 10/10). El deployment token ya está cargado como secret del repo, por lo que el CI/CD está completamente cableado. El primer deploy con contenido real ocurrirá en Fase 4 cuando el Developer scaffoldee la app Angular y se haga push.
 >
@@ -82,20 +82,22 @@ gh secret set AZURE_STATIC_WEB_APPS_API_TOKEN \
 
 - **Workflow:** `.github/workflows/azure-static-web-apps.yml` (✅ versionado).
 - **Trigger:** cada `push` a `main` dispara build + deploy. Los PR contra `main` generan un entorno de preview; al cerrar el PR, se limpia.
-- **Acción:** `Azure/static-web-apps-deploy@v1` (Oryx detecta Angular y corre `npm ci && npm run build`).
-- **Secret requerido:** `AZURE_STATIC_WEB_APPS_API_TOKEN` (deployment token del SWA). ✅ **Cargado** (2026-06-02). El CI/CD está completamente cableado; el deploy fallará por ahora solo porque la app Angular todavía no existe (se scaffoldea en Fase 4) — no por falta de token.
-- **Node:** el workflow fija Node 22 (Angular 21 requiere `^20.19 || ^22.12 || >=24`).
+- **Acción:** `Azure/static-web-apps-deploy@v1` con **`app_build_command: "npm run build"`** explícito (Oryx instala deps con `npm ci` y luego corre ESE comando, en vez de su detección implícita).
+- **Secret requerido:** `AZURE_STATIC_WEB_APPS_API_TOKEN` (deployment token del SWA). ✅ **Cargado** (2026-06-02). CI/CD completamente cableado y **verificado funcionando** en el primer deploy real (run `26794016083`).
+- **Node:** el workflow fija Node 22 vía `NODE_VERSION: "22"` (Angular 21 requiere `^20.19 || ^22.12 || >=24`). En el run real Oryx usó `nodejs 22.22.0`.
 
-### Configuración de build (alineación con Fase 4 — IMPORTANTE)
+### Configuración de build (verificada en el deploy real)
 El workflow declara:
 - `app_location: "/"` → el proyecto Angular vive en la **raíz** del repo.
 - `api_location: ""` → sin backend.
-- `output_location: "dist/estudio-dental-mendieta/browser"` → salida del `@angular/build` (`application`).
+- `output_location: "dist/estudio-dental-mendieta/browser"` → salida del `@angular/build` (`application`). ✅ Confirmado: el run validó la ubicación `.../dist/estudio-dental-mendieta/browser`.
+- `app_build_command: "npm run build"` → **crítico**: fuerza a Oryx a correr el script de build del proyecto (que dispara el hook `prebuild`), en lugar de su build implícito de Angular que **NO garantiza** ejecutar los hooks `pre*/post*` de npm.
 
-> ⚠️ **Para el Developer (Fase 4):** El `output_location` asume que el proyecto Angular se llama **`estudio-dental-mendieta`** (carpeta `dist/estudio-dental-mendieta/browser`). Al scaffoldear con `ng new`, usar ese nombre de proyecto **o** ajustar `output_location` en el workflow al nombre real (`dist/<tu-app>/browser`). Si no coinciden, el deploy subirá una carpeta vacía / fallará.
+### Seed dinámico (prebuild) — RESUELTO Y VERIFICADO
+La arquitectura (GAP-A02) requiere generar `manifest.json` en build-time desde `input/mockpeople/`. El script `scripts/generate-manifest.mjs` está conectado como hook `"prebuild"` en `package.json`. **Por qué `app_build_command` es obligatorio aquí:** si se deja que Oryx use su detección implícita de Angular, los hooks `pre*/post*` de npm pueden NO ejecutarse → el manifest no se genera y la app carga sin pacientes. Con `app_build_command: "npm run build"`, npm corre `prebuild` → `ng build` en orden. ✅ Verificado en el log del run: `[manifest] 29 pacientes (12 H / 17 M), 0 documentos → public/seed/manifest.json`.
 
-### Seed dinámico (prebuild)
-La arquitectura (GAP-A02) requiere generar `manifest.json` en build-time desde `input/mockpeople/`. Oryx ejecuta `npm run build`; si `package.json` define un script `"prebuild": "node scripts/generate-manifest.mjs"`, npm lo corre automáticamente antes del build (genera `manifest.json` y copia las fotos a la carpeta de assets / `public/`). **No requiere un paso extra en el workflow.** El Developer debe crear ese script y el hook `prebuild` en Fase 4.
+### `staticwebapp.config.json` — ubicación CRÍTICA (corregido en 4e)
+El config de SWA (SPA fallback + security headers) **debe vivir en `public/`**, NO en la raíz del repo. Con el builder `application`, lo único que llega al `output_location` (`dist/<app>/browser`) es lo que Angular emite + los assets de `public/`. Un `staticwebapp.config.json` en la raíz del repo **NO se despliega** → ni SPA fallback ni headers se aplicarían. Se movió a `public/staticwebapp.config.json` (Angular lo copia al root del output) y se eliminó el duplicado de la raíz. ✅ Verificado: `/pacientes` hace SPA fallback (200) y los headers CSP/X-Frame-Options/X-Content-Type-Options/Referrer-Policy/Permissions-Policy están presentes en la respuesta.
 
 ### Budget de bundle (NFR-002, GAP-A03)
 El límite <500KB gzipped del initial se configura en `angular.json` (warn 450KB / error 500KB). Como es **error** de build, un exceso hace fallar `ng build` y por lo tanto el deploy — no hace falta un paso de CI adicional.
@@ -120,7 +122,30 @@ az staticwebapp show \
 # → happy-coast-044ea7e0f.7.azurestaticapps.net
 ```
 
-**Tiempo estimado de deploy:** ~2–4 min por push (checkout + `npm ci` + `ng build` + upload). El primer build es algo más lento (sin caché de npm).
+**Tiempo estimado de deploy:** ~2–4 min por push (checkout + `npm ci` + `ng build` + upload). El primer build real tardó ~1m57s (job `Build and Deploy`).
+
+### Verificación del deploy real (2026-06-02, paso 4e Pre-QA) — para el QA Orchestrator
+El sitio `https://happy-coast-044ea7e0f.7.azurestaticapps.net` quedó **verificado cargando** con la Construcción Visual. Resultados del smoke test (todos ✅):
+
+| Eje | Resultado |
+|---|---|
+| **Root `/`** | HTTP 200, sirve el shell Angular (`<app-root>`, `<base href="/">`, title "Estudio Dental Mendieta", bundles hasheados `main-*.js` / `styles-*.css`) |
+| **Deep-link `/pacientes`** | HTTP 200, SPA fallback correcto (devuelve el mismo `index.html` → el router del cliente resuelve la ruta) |
+| **Seed manifest `/seed/manifest.json`** | HTTP 200, `application/json`, 29 pacientes (12 H / 17 M) |
+| **Fotos de paciente** | `hombres/28.jpg` y `mujeres/32.jpg` → HTTP 200, `image/jpeg` |
+| **Bundles + favicon** | `main-*.js` (`text/javascript`), `styles-*.css` (`text/css`), `favicon.ico` → HTTP 200 |
+| **Security headers** | CSP, X-Frame-Options (SAMEORIGIN), X-Content-Type-Options (nosniff), Referrer-Policy, Permissions-Policy → todos presentes en la respuesta (config de `public/` aplicada) |
+
+> **Nota de performance (no bloqueante):** algunas fotos source en `input/mockpeople/` están sin optimizar (ej. `hombres/28.jpg` ~2.9 MB). Cargan correctamente y no bloquean QA, pero conviene comprimirlas/redimensionarlas antes del deploy final de Fase 6 para mejorar el LCP de la ficha y el listado. Es decisión del dueño del pipeline de datos/build (fuera del alcance de config de deploy).
+
+**Comando de verificación rápida (re-ejecutable):**
+```bash
+SITE="https://happy-coast-044ea7e0f.7.azurestaticapps.net"
+curl -s -o /dev/null -w "root %{http_code}\n" "$SITE/"
+curl -s -o /dev/null -w "/pacientes %{http_code}\n" "$SITE/pacientes"   # SPA fallback → 200
+curl -s -o /dev/null -w "manifest %{http_code} %{content_type}\n" "$SITE/seed/manifest.json"
+curl -s -D - -o /dev/null "$SITE/" | grep -i content-security-policy    # headers vivos
+```
 
 ---
 
