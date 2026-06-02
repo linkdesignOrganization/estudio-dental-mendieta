@@ -59,6 +59,9 @@ import { ToastService, ToastKind } from './toast.service';
     @media (prefers-reduced-motion: reduce) { .toast { animation: none; } }
     @media (max-width: 767px) {
       .toast-host { left: var(--space-4); right: var(--space-4); bottom: var(--space-4); max-width: none; }
+      /* El botón cerrar (icon-btn) recupera el hit-area ≥44px en mobile (DC-088). */
+      .toast__close { width: var(--touch-target-min); height: var(--touch-target-min); min-width: var(--touch-target-min); }
+      .toast__action { min-height: var(--touch-target-min); display: inline-flex; align-items: center; }
     }
   `],
 })

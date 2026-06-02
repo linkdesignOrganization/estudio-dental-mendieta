@@ -106,6 +106,8 @@ import { AppNotification } from '../core/models/models';
     @media (max-width: 767px) {
       .np { position: fixed; left: 0; right: 0; bottom: 0; top: auto; width: 100%; max-width: none; border-radius: var(--radius-lg) var(--radius-lg) 0 0; }
       .np-backdrop { background: rgba(42,42,53,0.35); }
+      /* Pills de filtro (role=tab) touch ≥44px en mobile (DC-088). */
+      .np__pill { display: inline-flex; align-items: center; min-height: var(--touch-target-min); }
     }
   `],
 })

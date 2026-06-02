@@ -166,6 +166,9 @@ interface TabLink { label: string; route: string; }
       .ficha__badges { justify-content: center; }
       .ficha__panel { grid-template-columns: 1fr; }
       .ficha__actions .btn-edm { flex: 1; }
+      /* Barra de 6 tabs scrollable: cada tab touch ≥44px en mobile (DC-083 / DC-088). */
+      .ficha__tab { display: inline-flex; align-items: center; min-height: var(--touch-target-min); }
+      .ficha__menu-item { min-height: var(--touch-target-min); }
     }
   `],
 })

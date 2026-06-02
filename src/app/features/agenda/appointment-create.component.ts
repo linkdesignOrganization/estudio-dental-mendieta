@@ -168,7 +168,7 @@ const STEP_ROUTES = ['', '/agenda/nuevo/paciente', '/agenda/nuevo/profesional', 
     .wiz__actions { display: flex; align-items: center; gap: var(--space-3); }
     .wiz__spacer { flex: 1; }
     .field__error { display: inline-flex; align-items: center; gap: var(--space-1); color: var(--color-error-text); font-size: var(--text-small); }
-    @media (max-width: 767px) { .form-grid { grid-template-columns: 1fr; } .wiz__actions .btn-edm { flex: 1; } }
+    @media (max-width: 767px) { .form-grid { grid-template-columns: 1fr; } .wiz__actions .btn-edm { flex: 1; } .wiz__slot { min-height: var(--touch-target-min); } }
   `],
 })
 export class AppointmentCreateComponent {

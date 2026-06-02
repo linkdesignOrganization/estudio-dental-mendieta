@@ -13,8 +13,10 @@
 - Flow Tester ✓: 45 PASA, 90/90 desktop+4/4 mobile, 1 bug baja (BUG-F01 ruta catálogo)
 - Edge Tester ✓: 28 criterios, 100/100 PASS, 6 bugs (E01-E06)
 - Visual Checker ✓: 138/158 PASA, BUG-V01 CRÍTICO (hoja estilos no aplica: media=print+onload bloqueado por CSP — raíz de E02/E05/V06/20 fallas visuales) + V04 a11y. BVC-027 y GAP-A04 PASAN
-- Fase: 4f anti-deferral RONDA 1 — Developer fix ✓ (7 bugs), DevOps re-deploy + verificar
-- Bugs abiertos: 7 en re-test (fix V01 = inlineCritical:false; resto corregidos)
+- Fase: 4f anti-deferral RONDA 3 — V05 fix ✓ (touch ≥44px mobile), DevOps deploy → activar fixme touch → regresión
+- Bugs abiertos: 1 (V05 en re-deploy/re-test)
+- Bugs abiertos: 9 fallos en re-QA — naturaleza: UX-045 test obsoleto (E03 ya fixeado), 6 mobile timeouts (tests no adaptados a mobile/posible bug), DC-076 odontograma (¿@defer?)
+- NOTA regresión: usar --no-chunks desde e2e/ con REGRESSION_TESTS_DIR=tests (chunked rompe por BSD sed)
 - 4a ✓ + 4b ✓ + 4c ✓ + 4d ✓ + 4e DEPLOY VIVO ✓ (sitio carga, manifest+fotos OK)
 - 4e-regress: N/A (primera construcción, sin tests previos)
 - Modo Visual: PROSA (fallback) — el workflow estándar hardcodea CRM tracking (PROHIBIDO aquí) + variante visual no validada e2e + sesión con errores de infra

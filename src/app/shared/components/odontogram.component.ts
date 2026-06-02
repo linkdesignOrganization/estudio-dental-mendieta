@@ -116,6 +116,10 @@ const STATE_META: Record<ToothState, StateMeta> = {
     @media (max-width: 767px) {
       .odo__row { grid-template-columns: repeat(8, 1fr); gap: var(--space-1); }
       .tooth__crown { max-width: none; }
+      /* Pieza editable: hit-area vertical ≥44px en mobile (DC-086 / DC-088). El
+         ancho lo gobierna la grilla de 8 columnas para NO provocar scroll horizontal
+         (DC-086: piezas legibles sin scroll horizontal que rompa el layout). */
+      .tooth { min-height: var(--touch-target-min); justify-content: center; }
     }
   `],
 })

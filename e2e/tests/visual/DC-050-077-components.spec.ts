@@ -169,24 +169,29 @@ test('DC-074/041 / BVC-020: cabecera de ficha con nombre <h1>, banner azul sobri
 });
 
 // DC-076 — odontograma: 32 piezas con aria-label FDI+universal+estado, leyenda de 6 estados visible.
+// El bloque del odontograma carga con `@defer (on idle)` (fix de BUG-E04: hidrataba por deep-link
+// directo en mobile). `on idle` hidrata en un instante NO determinista (la idle window depende de
+// red/CPU), por lo que un `waitForTimeout` fijo es una carrera: si el idle dispara después del wait,
+// el snapshot lee 0 piezas. Esperamos explícitamente a que el `@defer` puble las 32 piezas y la
+// leyenda (auto-retry de `expect`, hasta `expect.timeout`). Patrón robusto para `on idle` y `on viewport`.
 test('DC-076: odontograma con 32 piezas (aria-label FDI) y leyenda de 6 estados', async ({ page }) => {
   await gotoApp(page, `/pacientes/${PID}/odontograma`);
-  await page.waitForTimeout(1000);
-  const teeth = await page.evaluate(() => {
-    const t = [...document.querySelectorAll('[aria-label^="Pieza"]')];
-    return { count: t.length, sample: t.slice(0, 3).map((e) => e.getAttribute('aria-label')) };
-  });
-  expect(teeth.count).toBe(32);
-  // aria-label con formato "Pieza NN (universal N), Estado"
-  expect(teeth.sample[0]).toMatch(/Pieza\s+\d+\s+\(universal\s+\d+\),/);
 
-  // Leyenda con los 6 estados
-  const legend = await page.evaluate(() => {
-    const l = document.querySelector('[class*="legend"], [class*="leyenda"]');
-    return l ? (l.textContent || '').replace(/\s+/g, '') : '';
-  });
-  for (const s of ['Sana', 'Caries', 'Obturación', 'Ausente', 'Entratamiento', 'Prótesis']) {
-    expect(legend).toContain(s);
+  // Esperar a que el @defer (on idle) hidrate: las 32 piezas FDI deben estar en el DOM.
+  const teethLocator = page.locator('[aria-label^="Pieza"]');
+  await expect(teethLocator).toHaveCount(32);
+
+  // aria-label con formato "Pieza NN (universal N), Estado"
+  const sampleLabels = await teethLocator.evaluateAll((els) =>
+    els.slice(0, 3).map((e) => e.getAttribute('aria-label')),
+  );
+  expect(sampleLabels[0]).toMatch(/Pieza\s+\d+\s+\(universal\s+\d+\),/);
+
+  // Leyenda con los 6 estados (esperar a que el contenedor diferido esté presente y poblado).
+  const legendLocator = page.locator('.odo__legend, [class*="legend"], [class*="leyenda"]').first();
+  await expect(legendLocator).toBeVisible();
+  for (const s of ['Sana', 'Caries', 'Obturación', 'Ausente', 'En tratamiento', 'Prótesis']) {
+    await expect(legendLocator).toContainText(s);
   }
 });
 

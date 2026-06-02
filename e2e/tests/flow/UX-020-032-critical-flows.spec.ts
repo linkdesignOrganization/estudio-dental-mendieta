@@ -1,10 +1,14 @@
 import { test, expect } from '@playwright/test';
-import { gotoApp, warmSeed, readState, parseArs } from '../_helpers/seed';
+import { gotoApp, warmSeed, readState, parseArs, patientRow } from '../_helpers/seed';
 
 /**
  * Flujos de usuario críticos (DEMO-015 crear turno, DEMO-016 registrar pago) +
  * avanzar estado, editar pieza, navegación cruzada. UX-020..UX-032.
  * Persistencia verificada con refresh REAL del navegador (page.reload).
+ *
+ * Responsive (R2): el badge de estado de cuenta en la lista se localiza con
+ * `patientRow()` (la fila/card VISIBLE) — en mobile la tabla está display:none y
+ * `getByText('Con deuda').first()` caía en el subtree oculto.
  */
 
 test.beforeEach(async ({ page }) => {
@@ -160,13 +164,36 @@ test('UX-026/UX-084: el pago registrado persiste tras refresh real', async ({ pa
 });
 
 // test: UX-027 — el badge de estado de cuenta en /pacientes queda coherente con el nuevo saldo
+// R2: se EJERCE el flujo real (pago parcial sobre pac-001 con deuda alta) y se
+// verifica que el badge derivado del saldo sigue "Con deuda" (saldo aún > 0),
+// usando la fila/card VISIBLE en ambos viewports.
 test('UX-027: el badge de estado de cuenta es coherente con el saldo tras el pago', async ({ page }) => {
-  // pac-001 tiene deuda alta; un pago parcial lo deja "Con deuda" todavía.
+  // Estado inicial: pac-001 (Bautista Álvarez) está "Con deuda" en la lista.
   await gotoApp(page, '/pacientes');
-  const row = page.getByRole('button', { name: 'Ver ficha de Bautista Álvarez' }).or(page.locator('text=Bautista Álvarez').first());
-  await expect(page.getByText('Bautista Álvarez').first()).toBeVisible();
-  // El badge se deriva del saldo (no duplicado): tras un pago parcial sigue "Con deuda".
-  await expect(page.getByText('Con deuda').first()).toBeVisible();
+  await expect(patientRow(page, 'Bautista Álvarez').getByText('Con deuda')).toBeVisible();
+
+  // Registramos un pago PARCIAL (pequeño) que no salda la deuda.
+  await gotoApp(page, '/pacientes/pac-001/pagos');
+  const saldoBefore = parseArs(
+    await page.getByText('Saldo pendiente').locator('xpath=following-sibling::*[1]').first().innerText(),
+  );
+  expect(saldoBefore).toBeGreaterThan(0);
+  await page.getByRole('link', { name: 'Registrar pago' }).click();
+  await expect(page).toHaveURL(/\/pacientes\/pac-001\/pagos\/nuevo$/);
+  await page.getByRole('spinbutton', { name: 'Monto (ARS)' }).fill('10000');
+  await page.getByRole('textbox', { name: 'Concepto (opcional)' }).fill('Pago a cuenta');
+  await page.getByRole('button', { name: 'Confirmar pago' }).click();
+  await expect(page).toHaveURL(/\/pacientes\/pac-001\/pagos$/);
+
+  // El saldo bajó pero sigue > 0 → el badge derivado debe mantenerse "Con deuda".
+  const saldoAfter = parseArs(
+    await page.getByText('Saldo pendiente').locator('xpath=following-sibling::*[1]').first().innerText(),
+  );
+  expect(saldoAfter).toBe(saldoBefore - 10000);
+  expect(saldoAfter).toBeGreaterThan(0);
+
+  await gotoApp(page, '/pacientes');
+  await expect(patientRow(page, 'Bautista Álvarez').getByText('Con deuda')).toBeVisible();
 });
 
 // test: UX-028 / UX-086 — editar estado de pieza persiste y se refleja en el odontograma

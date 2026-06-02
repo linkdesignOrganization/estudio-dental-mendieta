@@ -27,23 +27,43 @@ test('UX-045: búsqueda de pacientes sin resultados muestra empty-state con guid
   await expect(page.getByText('0 pacientes en el sistema')).toBeVisible();
 });
 
-// test: UX-045 / UX-041 — INCONSISTENCIA de empty-state entre tabla y tarjetas.
-// HALLAZGO (BUG-E03, verificado en patient-list.component.ts): la vista de TABLA
-// renderiza el empty-state ("No encontramos pacientes con ese criterio"), pero la
-// vista de TARJETAS hace @for sobre filtered() SIN @empty/empty-state => queda una
-// grilla en blanco ambigua (viola UX-041 "nunca pantalla en blanco ambigua").
-// Este test fija el comportamiento REAL observado para servir de regresión.
-test('UX-045: la vista de tarjetas sin match NO muestra empty-state (gap conocido BUG-E03)', async ({ page }) => {
+// test: UX-045 / UX-041 — CONSISTENCIA de empty-state entre tabla y tarjetas.
+// BUG-E03 CORREGIDO (Ronda 2, verificado live desktop+mobile): la vista de TARJETAS
+// ahora declara @empty con EmptyStateComponent, igual que la vista TABLA. Ante una
+// búsqueda sin match, la grilla de tarjetas YA NO queda en blanco ambigua: muestra el
+// mismo empty-state ("No encontramos pacientes con ese criterio" + guidance, mismo
+// ícono/copy que Tabla). Este test fija el comportamiento CORREGIDO como gate de
+// regresión (antes asertaba el gap; ahora aserta el fix). Pasa en desktop y mobile.
+test('UX-045: la vista de tarjetas sin match SÍ muestra el empty-state (BUG-E03 corregido)', async ({ page }) => {
   await gotoApp(page, '/pacientes');
   await page.getByRole('button', { name: 'Vista de tarjetas' }).click();
   await page.getByRole('searchbox', { name: 'Buscar pacientes' }).fill('qqqnomatch');
 
   // El contador refleja 0 (la búsqueda sí filtra).
   await expect(page.getByText('0 pacientes en el sistema')).toBeVisible();
-  // Comportamiento actual: en tarjetas NO aparece el empty-state (gap a corregir en Fase 5).
-  await expect(page.getByRole('heading', { name: 'No encontramos pacientes con ese criterio' })).toHaveCount(0);
-  // No hay tarjetas renderizadas (grilla vacía).
+  // Comportamiento corregido: en tarjetas AHORA aparece el empty-state con guidance,
+  // mismo copy que la vista Tabla (control positivo) — sin pantalla en blanco ambigua.
+  await expect(page.getByRole('heading', { name: 'No encontramos pacientes con ese criterio' })).toBeVisible();
+  await expect(page.getByText(/Probá con otro nombre o ajustá los filtros/)).toBeVisible();
+  // Ya no hay grilla de tarjetas a medio renderizar: el @empty reemplaza las tarjetas.
   await expect(page.locator('main article')).toHaveCount(0);
+});
+
+// test: UX-045 — al limpiar la búsqueda, la vista de tarjetas vuelve a la grilla del seed
+// (el empty-state es transitorio, no "pega" tras un no-match). Regresión del fix BUG-E03.
+test('UX-045: limpiar la búsqueda restaura la grilla de tarjetas del seed', async ({ page }) => {
+  await gotoApp(page, '/pacientes');
+  await page.getByRole('button', { name: 'Vista de tarjetas' }).click();
+  const search = page.getByRole('searchbox', { name: 'Buscar pacientes' });
+
+  await search.fill('qqqnomatch');
+  await expect(page.getByRole('heading', { name: 'No encontramos pacientes con ese criterio' })).toBeVisible();
+
+  await search.fill('');
+  // Vuelve el contador completo del seed y se re-renderizan las tarjetas (sin empty-state).
+  await expect(page.getByText('29 pacientes en el sistema')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'No encontramos pacientes con ese criterio' })).toHaveCount(0);
+  await expect(page.locator('main article').first()).toBeVisible();
 });
 
 // test: UX-045 — control positivo: la vista de TABLA sí renderiza el empty-state esperado

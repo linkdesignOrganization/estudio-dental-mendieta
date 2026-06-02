@@ -98,7 +98,7 @@ import { paymentBadge } from '../../shared/status-map';
       min-width: 240px; transition: border-color var(--motion-fast) var(--motion-ease);
     }
     .search-pill:focus-within { border-color: var(--color-accent-deep); box-shadow: var(--focus-ring); }
-    .search-pill__input { border: none; outline: none; background: transparent; font-family: var(--font-body); font-size: var(--text-body); color: var(--color-text); width: 100%; }
+    .search-pill__input { border: none; outline: none; background: transparent; font-family: var(--font-body); font-size: var(--text-body); color: var(--color-text); width: 100%; height: 100%; min-height: 0; align-self: stretch; }
     .view-toggle { display: inline-flex; border: 1px solid var(--color-border); border-radius: var(--radius-sm); overflow: hidden; }
     .view-toggle__btn {
       display: inline-flex; align-items: center; gap: var(--space-2);
@@ -117,7 +117,10 @@ import { paymentBadge } from '../../shared/status-map';
     @media (max-width: 1199px) { .cards { grid-template-columns: repeat(2, 1fr); } }
     @media (max-width: 767px) {
       .page-head__actions { width: 100%; }
-      .search-pill { flex: 1; min-width: 0; }
+      /* Touch target ≥44px en mobile (DC-088 / BVC-017): el buscador y los toggles
+         de vista crecen su hit-area a 44px (el input estira al alto del pill). */
+      .search-pill { flex: 1; min-width: 0; height: auto; min-height: var(--touch-target-min); }
+      .view-toggle__btn { height: var(--touch-target-min); }
       .cards { grid-template-columns: 1fr; }
     }
   `],

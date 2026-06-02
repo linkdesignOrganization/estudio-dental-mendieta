@@ -87,6 +87,11 @@ import { IconComponent } from '../../shared/components/icon.component';
       .login__card { grid-template-columns: 1fr; max-width: 420px; }
       .login__aside { display: none; }
       .login__form { padding: var(--space-8) var(--space-6); }
+      /* Touch target ≥44px (DC-088): la label (objetivo clickeable del checkbox)
+         alcanza 44px de alto; el checkbox visual crece a 24px. */
+      .login__remember { min-height: var(--touch-target-min); }
+      .login__check { width: 24px; height: 24px; }
+      .login__skip { display: inline-flex; align-items: center; justify-content: center; min-height: var(--touch-target-min); }
     }
   `],
 })

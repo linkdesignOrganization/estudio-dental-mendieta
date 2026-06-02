@@ -5,6 +5,11 @@ import { gotoApp, warmSeed, readState } from '../_helpers/seed';
  * Seed dinámico (DEMO-006) — UX-060..UX-067.
  * Validado leyendo el estado real en localStorage + verificando que la UI lo refleja.
  * El seed deriva de las fotos (no hardcodea cantidades) y es determinista.
+ *
+ * Responsive (R2): los badges de estado de cuenta de la lista se localizan con
+ * `.filter({ visible: true })` — en mobile la tabla está display:none y los
+ * badges existen duplicados (tabla oculta + cards), así que `.first()` a secas
+ * podía caer en el subtree oculto.
  */
 
 test.beforeEach(async ({ page }) => {
@@ -102,8 +107,8 @@ test('UX-067: edge cases representados en el seed', async ({ page }) => {
   const allSana = s.odontograms.filter((o: any) => o.piezas.every((p: any) => p.estado === 'sana'));
   const conAusencias = s.odontograms.filter((o: any) => o.piezas.some((p: any) => p.estado !== 'sana'));
   expect(conAusencias.length).toBeGreaterThan(0);
-  // Estados de cuenta variados se reflejan en la lista (badges).
+  // Estados de cuenta variados se reflejan en la lista (badges) — fila/card VISIBLE.
   await gotoApp(page, '/pacientes');
-  await expect(page.getByText('Con deuda').first()).toBeVisible();
-  await expect(page.getByText('Al día').first()).toBeVisible();
+  await expect(page.getByText('Con deuda', { exact: true }).filter({ visible: true }).first()).toBeVisible();
+  await expect(page.getByText('Al día', { exact: true }).filter({ visible: true }).first()).toBeVisible();
 });

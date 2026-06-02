@@ -3,14 +3,19 @@ import { warmSeed, gotoApp } from '../_helpers/seed';
 
 /**
  * Visual Checker — Gates de regresión para los bugs detectados en Ronda 1.
- * Encierran el comportamiento CORRECTO esperado; quedan `fixme` hasta que el UI Developer
- * corrija. Al pasar tras el fix, entran en la regresión automatizada.
  *
- * BUG-V01 (CRÍTICO, raíz): el stylesheet global de diseño se sirve con media="print" y su
- *   `onload="this.media='all'"` es bloqueado por CSP → la hoja NO aplica en pantalla. Esto
- *   rompe el estilado de `.btn-edm` (DC-071: relleno #6da8d4, alto 40px, radius), el estado
- *   disabled (DC-021/BUG-E02), y los tamaños de touch de icon-buttons (DC-072/088).
- * BUG-V04 (a11y): los tabs de la ficha no exponen aria-selected (DC-073).
+ * CIERRE DE COBERTURA:
+ * BUG-V01 (CRÍTICO, raíz) — CORREGIDO y verificado en producción: la hoja `styles-*.css` ya se
+ *   sirve sin `media="print"` y aplica en pantalla. Esto restaura el estilado de `.btn-edm`
+ *   (DC-071: relleno #6da8d4, texto oscuro, alto 40px, radius 12) y la regla disabled
+ *   (DC-021/BUG-E02: opacity .4 + cursor not-allowed). Esos dos gates quedan ACTIVOS y PASAN.
+ * BUG-V04 (a11y) — CORREGIDO: cada role="tab" de la ficha expone aria-selected. Gate ACTIVO, PASA.
+ *
+ * BUG-V05 (a11y, PENDIENTE — derivado de V01): aunque V01 subió los icon-buttons de ~28px a 40px,
+ *   en mobile (375px) NO alcanzan el touch target ≥44px que exigen DC-021/DC-072/DC-088/BVC-017
+ *   (`--touch-target-min: 44px` está definido pero no se aplica al hit-area). Box real: burger/bell
+ *   40×40, avatar 32×32, search-input 23px alto. El gate DC-072/088 sigue `fixme` y se reporta a
+ *   Developer (ver visual-fixme-cierre.md). Se reactivará cuando los controles mobile lleguen a ≥44px.
  */
 
 const PID = 'pac-001';
@@ -20,8 +25,8 @@ test.beforeEach(async ({ page }) => {
 });
 
 // DC-071 / GAP-A04 — botón primario con relleno azul medio #6da8d4 + texto oscuro, alto 40px, radius 10-14.
-// FALLA hoy: el botón cae a estilo nativo (#efefef / negro / radius 0 / 27px) por BUG-V01.
-test.fixme('DC-071 (BUG-V01): botón primario con relleno #6da8d4 + texto oscuro, alto 40px, radius 10-14', async ({ page }) => {
+// Verificado en producción tras fix V01: bg rgb(109,168,212), color rgb(42,42,53), radius 12, height 40.
+test('DC-071 (BUG-V01): botón primario con relleno #6da8d4 + texto oscuro, alto 40px, radius 10-14', async ({ page }) => {
   await gotoApp(page, `/pacientes/${PID}/informacion`);
   await page.getByRole('button', { name: 'Agendar turno' }).waitFor({ state: 'visible' });
   await page.waitForTimeout(500);
@@ -40,27 +45,41 @@ test.fixme('DC-071 (BUG-V01): botón primario con relleno #6da8d4 + texto oscuro
   expect(btn.height).toBe(40);
 });
 
-// DC-021 / BUG-E02 — botón disabled con opacidad 0.4 y cursor not-allowed.
-// FALLA hoy: cae a opacity:1 / cursor:default por BUG-V01 (la regla .btn-edm:disabled no aplica).
-test.fixme('DC-021 (BUG-E02/BUG-V01): botón disabled con opacity 0.4 y cursor not-allowed', async ({ page }) => {
-  // El detalle de turno en estado terminal tiene la acción primaria deshabilitada.
+// DC-021 / BUG-E02 — la regla .btn-edm:disabled aplica: opacidad 0.4 y cursor not-allowed.
+//
+// V01 era la causa raíz (la hoja no aplicaba → la regla :disabled tampoco). Antes esta prueba
+// dependía de encontrar un botón disabled en una vista concreta (frágil y se auto-skipeaba). Ya
+// con la hoja aplicando, verificamos la REGLA CSS de forma determinista: montamos un `.btn-edm`
+// disabled real dentro del documento de la app (hereda la hoja ya aplicada) y leemos su computed
+// style. Verificado en producción: opacity "0.4", cursor "not-allowed".
+test('DC-021 (BUG-E02/BUG-V01): la regla .btn-edm:disabled aplica (opacity 0.4 + not-allowed)', async ({ page }) => {
   await gotoApp(page, '/agenda');
-  await page.waitForTimeout(600);
-  // Inyectamos un probe deshabilitado dentro del scope no es fiable; verificamos un botón disabled real si existe.
   const disabled = await page.evaluate(() => {
-    const b = [...document.querySelectorAll('button.btn-edm[disabled], button.btn-edm[aria-disabled="true"]')][0] as HTMLElement | undefined;
-    if (!b) return null;
+    const b = document.createElement('button');
+    b.className = 'btn-edm btn-edm--primary';
+    b.setAttribute('disabled', '');
+    b.textContent = 'probe';
+    b.style.position = 'fixed';
+    b.style.left = '-9999px';
+    b.style.top = '0';
+    document.body.appendChild(b);
     const cs = getComputedStyle(b);
-    return { opacity: cs.opacity, cursor: cs.cursor };
+    const out = { opacity: cs.opacity, cursor: cs.cursor };
+    b.remove();
+    return out;
   });
-  test.skip(disabled === null, 'No hay botón .btn-edm disabled visible en esta vista');
-  expect(parseFloat(disabled!.opacity)).toBeCloseTo(0.4, 1);
-  expect(disabled!.cursor).toBe('not-allowed');
+  expect(parseFloat(disabled.opacity)).toBeCloseTo(0.4, 1);
+  expect(disabled.cursor).toBe('not-allowed');
 });
 
 // DC-072 / DC-088 / BVC-017 — touch targets ≥44px en mobile (hamburguesa, campana, icon-buttons).
-// FALLA hoy: hamburguesa 28px, campana 29px, "Editar paciente" 21px por BUG-V01 (sizing de icon-btn no aplica).
-test.fixme('DC-072/088 (BUG-V01): touch targets ≥44px en mobile', async ({ page }) => {
+//
+// SIGUE `fixme` → BUG-V05 (a11y) PENDIENTE para Developer. El fix de V01 subió los icon-buttons de
+// ~28px a 40px, pero NO al ≥44px que exige el design system en mobile. Estado live verificado
+// (375px, /pacientes): burger 40×40, bell 40×40, "Editar paciente" 40×40, avatar 32×32,
+// search-input 23px de alto. El token `--touch-target-min: 44px` está definido en :root pero no se
+// aplica al hit-area de estos controles. Reactivar cuando el hit-area mobile llegue a ≥44px.
+test.fixme('DC-072/088 (BUG-V05): touch targets ≥44px en mobile', async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 });
   await gotoApp(page, '/pacientes');
   await page.getByRole('heading', { level: 1, name: 'Pacientes' }).waitFor();
@@ -78,7 +97,8 @@ test.fixme('DC-072/088 (BUG-V01): touch targets ≥44px en mobile', async ({ pag
 });
 
 // DC-073 (BUG-V04, a11y) — cada role="tab" expone aria-selected (true/false).
-test.fixme('DC-073 (BUG-V04): los tabs de la ficha exponen aria-selected', async ({ page }) => {
+// Verificado en producción: 6 tabs, exactamente 1 con aria-selected="true", resto "false".
+test('DC-073 (BUG-V04): los tabs de la ficha exponen aria-selected', async ({ page }) => {
   await gotoApp(page, `/pacientes/${PID}/informacion`);
   await page.waitForTimeout(500);
   const states = await page.evaluate(() =>

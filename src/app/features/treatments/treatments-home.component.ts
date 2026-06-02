@@ -75,7 +75,11 @@ import { TreatmentPlan } from '../../core/models/models';
     .cell-stage { font-variant-numeric: tabular-nums; font-weight: var(--weight-medium); }
     .catalog { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-5); }
     @media (max-width: 1199px) { .catalog { grid-template-columns: repeat(2, 1fr); } }
-    @media (max-width: 767px) { .catalog { grid-template-columns: 1fr; } }
+    @media (max-width: 767px) {
+      .catalog { grid-template-columns: 1fr; }
+      /* Tabs de sección touch ≥44px en mobile (DC-088). */
+      .section-nav__tab { display: inline-flex; align-items: center; min-height: var(--touch-target-min); }
+    }
   `],
 })
 export class TreatmentsHomeComponent {

@@ -63,11 +63,19 @@ import { StoreService } from '../core/persistence/store.service';
       background: var(--color-accent-deep); color: #ffffff; font-size: 11px; font-weight: var(--weight-medium);
       border: 2px solid var(--color-bg-elevated);
     }
-    .header__avatar-btn { border: none; background: transparent; padding: 0; cursor: pointer; border-radius: 50%; line-height: 0; }
+    .header__avatar-btn {
+      border: none; background: transparent; padding: 0; cursor: pointer; border-radius: 50%;
+      display: inline-flex; align-items: center; justify-content: center;   /* centra el avatar visual de 32px */
+    }
     .header__avatar-btn:focus-visible { box-shadow: var(--focus-ring); }
     @media (max-width: 1199px) {
       .header { padding: 0 var(--space-4); }
       .header__burger { display: inline-flex; }
+    }
+    /* Touch target ≥44px en mobile (DC-088): el botón crece a 44×44 manteniendo
+       el avatar visual de 32px centrado por el flex de arriba. */
+    @media (max-width: 767px) {
+      .header__avatar-btn { min-width: var(--touch-target-min); min-height: var(--touch-target-min); }
     }
   `],
 })

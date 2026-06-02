@@ -78,7 +78,7 @@ import { formatShortDate } from '../../shared/date-format';
     .resch__slot:focus-visible { box-shadow: var(--focus-ring); outline: none; }
     .resch__hint { display: block; margin-top: var(--space-2); }
     .resch__actions { display: flex; justify-content: flex-end; gap: var(--space-3); }
-    @media (max-width: 767px) { .form-grid { grid-template-columns: 1fr; } .resch__actions { flex-direction: column-reverse; } .resch__actions .btn-edm { width: 100%; } }
+    @media (max-width: 767px) { .form-grid { grid-template-columns: 1fr; } .resch__actions { flex-direction: column-reverse; } .resch__actions .btn-edm { width: 100%; } .resch__slot { min-height: var(--touch-target-min); } }
   `],
 })
 export class RescheduleComponent {

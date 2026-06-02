@@ -28,6 +28,10 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
     .bnav__link:hover { background: var(--color-accent-tint); color: var(--color-text); }
     .bnav__link.is-active { background: var(--color-accent-sky); border-color: var(--color-accent-sky); color: var(--color-text); font-weight: var(--weight-medium); }
     .bnav__link:focus-visible { box-shadow: var(--focus-ring); outline: none; }
+    /* Pills de sección touch ≥44px en mobile (DC-088 / BVC-017). */
+    @media (max-width: 767px) {
+      .bnav__link { display: inline-flex; align-items: center; min-height: var(--touch-target-min); }
+    }
   `],
 })
 export class BillingNavComponent {}

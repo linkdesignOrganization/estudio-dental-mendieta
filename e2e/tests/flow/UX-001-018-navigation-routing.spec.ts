@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { gotoApp, warmSeed } from '../_helpers/seed';
+import { gotoApp, warmSeed, openNav, openPatient } from '../_helpers/seed';
 
 /**
  * Navegación y Routing (happy-path) — UX-001..UX-018.
@@ -8,6 +8,10 @@ import { gotoApp, warmSeed } from '../_helpers/seed';
  *
  * Nota de implementación verificada en vivo: el detalle de turno vive en `/agenda/:id`
  * (p.ej. `/agenda/tur-008`), funcionalmente equivalente a una ruta dedicada (no modal).
+ *
+ * Responsive (R2): en mobile el sidebar es un drawer off-canvas → se abre con
+ * `openNav()` antes de clickear items; las filas de pacientes se abren con
+ * `openPatient()` (la fila/card VISIBLE, no el <span> de la tabla oculta).
  */
 
 test.beforeEach(async ({ page }) => {
@@ -43,30 +47,39 @@ test('UX-002: shell presente en rutas internas; header refleja el módulo', asyn
 });
 
 // test: UX-003 — cada item del sidebar navega a su ruta dedicada
-test('UX-003: los items del sidebar navegan a sus rutas', async ({ page }) => {
-  await gotoApp(page, '/reportes');
+// Mobile (R2): el sidebar es un drawer; cada item se navega abriéndolo desde un
+// estado limpio (reproduce el uso real: abrir drawer → elegir un destino → se
+// cierra). Encadenar 7 navegaciones en una sola sesión es flaky por la animación
+// de cierre/apertura del drawer, no por un fallo del flujo. Desktop: nav fijo,
+// `openNav()` es no-op y se navega en una sola sesión.
+test('UX-003: los items del sidebar navegan a sus rutas', async ({ page }, testInfo) => {
   const nav = page.getByRole('navigation', { name: 'Navegación principal' });
+  const items: Array<[string, RegExp]> = [
+    ['Agenda', /\/agenda$/],
+    ['Pacientes', /\/pacientes$/],
+    ['Tratamientos', /\/tratamientos$/],
+    ['Facturación', /\/facturacion(\/presupuestos)?$/],
+    ['Reportes', /\/reportes$/],
+    ['Configuración', /\/configuracion$/],
+    ['Ayuda', /\/ayuda$/],
+  ];
+  const isMobile = testInfo.project.name === 'mobile-chromium';
 
-  await nav.getByRole('link', { name: 'Agenda' }).click();
-  await expect(page).toHaveURL(/\/agenda$/);
-
-  await nav.getByRole('link', { name: 'Pacientes' }).click();
-  await expect(page).toHaveURL(/\/pacientes$/);
-
-  await nav.getByRole('link', { name: 'Tratamientos' }).click();
-  await expect(page).toHaveURL(/\/tratamientos$/);
-
-  await nav.getByRole('link', { name: 'Facturación' }).click();
-  await expect(page).toHaveURL(/\/facturacion(\/presupuestos)?$/);
-
-  await nav.getByRole('link', { name: 'Reportes' }).click();
-  await expect(page).toHaveURL(/\/reportes$/);
-
-  await nav.getByRole('link', { name: 'Configuración' }).click();
-  await expect(page).toHaveURL(/\/configuracion$/);
-
-  await nav.getByRole('link', { name: 'Ayuda' }).click();
-  await expect(page).toHaveURL(/\/ayuda$/);
+  if (isMobile) {
+    for (const [label, re] of items) {
+      await gotoApp(page, '/reportes');
+      await openNav(page);
+      await nav.getByRole('link', { name: label, exact: true }).click();
+      await expect(page).toHaveURL(re);
+    }
+  } else {
+    await gotoApp(page, '/reportes');
+    for (const [label, re] of items) {
+      await openNav(page); // no-op en desktop
+      await nav.getByRole('link', { name: label, exact: true }).click();
+      await expect(page).toHaveURL(re);
+    }
+  }
 });
 
 // test: UX-004 — inicio post-login = /reportes (dashboard KPIs)
@@ -113,10 +126,12 @@ test('UX-007: rutas del flujo de turno y lista del día', async ({ page }) => {
 });
 
 // test: UX-008 — lista de pacientes; fila navega a ficha (redirige a /informacion)
+// R2: se clickea la fila/card VISIBLE (helper openPatient) — en mobile la tabla
+// está display:none y su <span> del nombre tiene caja 0; la card sí es accionable.
 test('UX-008: fila de paciente navega a la ficha y redirige a /informacion', async ({ page }) => {
   await gotoApp(page, '/pacientes');
   await page.getByRole('searchbox', { name: 'Buscar pacientes' }).fill('Mateo Gómez');
-  await page.getByText('Mateo Gómez').first().click();
+  await openPatient(page, 'Mateo Gómez');
   await expect(page).toHaveURL(/\/pacientes\/pac-\d+\/informacion$/);
   await expect(page.getByRole('heading', { name: 'Mateo Gómez', level: 1 })).toBeVisible();
 });
@@ -195,10 +210,11 @@ test('UX-014: las cards del dashboard navegan a reportes con ruta propia', async
 });
 
 // test: UX-015 — botón atrás: ficha -> lista
+// R2: openPatient clickea la fila/card visible (cross-viewport).
 test('UX-015: botón atrás regresa de la ficha a la lista', async ({ page }) => {
   await gotoApp(page, '/pacientes');
   await page.getByRole('searchbox', { name: 'Buscar pacientes' }).fill('Diego Sosa');
-  await page.getByText('Diego Sosa').first().click();
+  await openPatient(page, 'Diego Sosa');
   await expect(page).toHaveURL(/\/pacientes\/pac-\d+\/informacion$/);
   await page.goBack();
   await expect(page).toHaveURL(/\/pacientes$/);

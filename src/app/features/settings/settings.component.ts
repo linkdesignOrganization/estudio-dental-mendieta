@@ -84,7 +84,15 @@ import { StoreService } from '../../core/persistence/store.service';
     .set-switch__thumb { position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; transition: transform var(--motion-fast) var(--motion-ease); box-shadow: var(--shadow-card); }
     .set-switch.is-on .set-switch__thumb { transform: translateX(20px); }
     .set-reset__desc { line-height: var(--lh-body); }
-    @media (max-width: 767px) { .settings { grid-template-columns: 1fr; } }
+    @media (max-width: 767px) {
+      .settings { grid-template-columns: 1fr; }
+      /* Switch (24px de alto) — área táctil transparente ≥44px centrada sobre el
+         track, sin cambiar su tamaño visual (DC-088 / BVC-017). */
+      .set-switch::before {
+        content: ""; position: absolute; left: 0; right: 0; top: 50%;
+        transform: translateY(-50%); height: var(--touch-target-min); min-height: var(--touch-target-min);
+      }
+    }
   `],
 })
 export class SettingsComponent {

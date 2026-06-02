@@ -215,6 +215,35 @@ textarea:focus-visible,
 .icon-btn:focus-visible { box-shadow: var(--focus-ring); }
 .icon-btn:disabled { opacity: var(--disabled-opacity); cursor: not-allowed; }
 
+/* ----- TOUCH TARGETS ≥44px en MOBILE (DC-072 / DC-088 / DC-021 / BVC-017) ---
+   En mobile el área táctil de TODO control interactivo debe ser ≥44px aunque su
+   altura visual de diseño sea 40px. Se expande el hit-area con min-height/width
+   = --touch-target-min sin alterar el tamaño visual del contenido (el flex ya
+   centra el ícono/texto). Reglas por-componente para controles con altura propia
+   más chica (search-pill, view-toggle, switch, tabs, checkboxes) viven en cada
+   componente y referencian este mismo token. */
+@media (max-width: 767px) {
+  .icon-btn,
+  .btn-edm,
+  .input-edm,
+  .select-edm {
+    min-height: var(--touch-target-min);   /* 44px */
+  }
+  .icon-btn {
+    min-width: var(--touch-target-min);     /* icon-only: 44×44 hit-area */
+    width: var(--touch-target-min);
+    height: var(--touch-target-min);
+  }
+  /* back-link (volver) — link de navegación reutilizado en sub-pantallas: hit-area
+     ≥44px en mobile. Ningún componente fija min-height en él, así que esta regla
+     global aplica sin pisar estilos. */
+  .back-link {
+    min-height: var(--touch-target-min);
+    display: inline-flex;
+    align-items: center;
+  }
+}
+
 /* ----- INPUTS / SELECT / TEXTAREA (DC-069) -------------------------------- */
 .field { display: flex; flex-direction: column; gap: var(--space-2); }
 .field__label {

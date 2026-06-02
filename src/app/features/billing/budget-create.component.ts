@@ -115,7 +115,12 @@ const STEP_ROUTES = ['', '/facturacion/presupuestos/nuevo/paciente', '/facturaci
     .field__error { display: inline-flex; align-items: center; gap: var(--space-1); color: var(--color-error-text); font-size: var(--text-small); }
     .wiz__actions { display: flex; align-items: center; gap: var(--space-3); }
     .wiz__spacer { flex: 1; }
-    @media (max-width: 767px) { .wiz__actions .btn-edm { flex: 1; } }
+    @media (max-width: 767px) {
+      .wiz__actions .btn-edm { flex: 1; }
+      /* Row (.wiz__item) ya es ≥44px; checkbox visual crece a 24px en mobile (DC-088). */
+      .wiz__check { min-height: var(--touch-target-min); }
+      .wiz__check input { width: 24px; height: 24px; }
+    }
   `],
 })
 export class BudgetCreateComponent {

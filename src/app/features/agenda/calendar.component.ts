@@ -103,6 +103,8 @@ interface DayCell { day: number; inMonth: boolean; iso: string; appts: Appointme
       .cal__cell { min-height: 72px; }
       .cal__appt-name { display: none; }
       .cal__weekday { font-size: 11px; }
+      /* Toggles del calendario touch ≥44px en mobile (DC-086 / DC-088). */
+      .view-toggle__btn { height: var(--touch-target-min); }
     }
   `],
 })

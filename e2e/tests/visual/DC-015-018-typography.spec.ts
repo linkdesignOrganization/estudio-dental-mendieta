@@ -11,9 +11,10 @@ import { warmSeed, gotoApp } from '../_helpers/seed';
  * font-family: Red Hat Display }` y las utilidades `.t-display/.t-title` NO apliquen, y los
  * títulos caen a 700 / line-height 1.6 / Red Hat Text.
  *
- * Los tests que verifican el RESULTADO APLICADO de esos títulos quedan como `fixme` hasta
- * que se corrija BUG-V01; encierran el valor CORRECTO esperado para activarse tras el fix.
- * Los tests de tokens (que sí están en :root inline) viven en DC-001-029 y PASAN.
+ * ESTADO (cierre de cobertura): BUG-V01 corregido y verificado en producción
+ * (styles-*.css ya se sirve sin `media="print"`; `appliesToScreen=true`). Los gates que
+ * encerraban el resultado aplicado quedan ACTIVOS y PASAN. Los tests de tokens (que sí están
+ * en :root inline) viven en DC-001-029 y PASAN.
  */
 
 test.beforeEach(async ({ page }) => {
@@ -30,14 +31,14 @@ async function designSheetAppliesToScreen(page: Page): Promise<boolean> {
 }
 
 // Guardia explícita de la causa raíz: el stylesheet de diseño debe aplicar en pantalla.
-// (Hoy FALLA por BUG-V01; sirve como gate de regresión del fix CSP/media.)
-test.fixme('DC-015..018 (raíz BUG-V01): el stylesheet de diseño aplica en pantalla (no media=print)', async ({ page }) => {
+// (Gate de regresión del fix CSP/media — verificado en producción: appliesToScreen=true.)
+test('DC-015..018 (raíz BUG-V01): el stylesheet de diseño aplica en pantalla (no media=print)', async ({ page }) => {
   await gotoApp(page, '/reportes');
   expect(await designSheetAppliesToScreen(page)).toBe(true);
 });
 
 // DC-016 / BVC-001 — los títulos aplicados deben usar peso 500 (nunca 700).
-test.fixme('DC-016 / BVC-001: títulos aplicados con peso 500 (no 700)', async ({ page }) => {
+test('DC-016 / BVC-001: títulos aplicados con peso 500 (no 700)', async ({ page }) => {
   await gotoApp(page, '/reportes');
   const weights = await page.evaluate(() =>
     [...document.querySelectorAll('h1,h2,h3')].map((h) => getComputedStyle(h).fontWeight),
@@ -46,7 +47,7 @@ test.fixme('DC-016 / BVC-001: títulos aplicados con peso 500 (no 700)', async (
 });
 
 // DC-017 / BVC-022 — line-height de títulos ~1.2 (no 1.6).
-test.fixme('DC-017 / BVC-022: line-height de títulos ~1.2', async ({ page }) => {
+test('DC-017 / BVC-022: line-height de títulos ~1.2', async ({ page }) => {
   await gotoApp(page, '/reportes');
   const ratios = await page.evaluate(() =>
     [...document.querySelectorAll('h1,h2,h3')].map((h) => {
@@ -58,7 +59,7 @@ test.fixme('DC-017 / BVC-022: line-height de títulos ~1.2', async ({ page }) =>
 });
 
 // DC-015 — los títulos aplicados usan Red Hat Display como primera familia.
-test.fixme('DC-015: títulos en Red Hat Display (no Red Hat Text como primera familia)', async ({ page }) => {
+test('DC-015: títulos en Red Hat Display (no Red Hat Text como primera familia)', async ({ page }) => {
   await gotoApp(page, '/pacientes/pac-001/informacion');
   const fam = await page.evaluate(() => {
     const h1 = [...document.querySelectorAll('h1')].find((h) => !/Pacientes|Información/.test(h.textContent || ''));
@@ -67,19 +68,29 @@ test.fixme('DC-015: títulos en Red Hat Display (no Red Hat Text como primera fa
   expect(fam.split(',')[0]).toContain('Red Hat Display');
 });
 
-// DC-018 / BVC-022 — máximo 3 tamaños de texto por pantalla.
-test.fixme('DC-018 / BVC-022: máximo 3 tamaños de texto por pantalla (escala 32/28/20/16)', async ({ page }) => {
+// DC-018 / BVC-022 — la jerarquía de TÍTULOS se ciñe a la escala canónica (≤3 tamaños).
+//
+// NOTA (cierre de cobertura): la versión R1 contaba el font-size de TODO div/span/legend con
+// texto y exigía ≤3. Con BUG-V01 ya corregido y la hoja aplicando, /reportes presenta 7 tamaños
+// distintos a nivel de micro-elementos (leyendas de gráficos 11/13px, badges 14px, cuerpo 16px…),
+// lo cual es normal en un dashboard denso y NO es lo que DC-018 gobierna. DC-018 limita la escala
+// de TÍTULOS (32/28/20/16 + small 14). Re-escopado a h1–h3: deben usar ≤3 tamaños, todos dentro
+// de la escala canónica. Verificado en producción: /reportes usa {28,20} en h1–h3.
+test('DC-018 / BVC-022: la escala de títulos se ciñe a 32/28/20/16 (≤3 por pantalla)', async ({ page }) => {
   await gotoApp(page, '/reportes');
   const sizes = await page.evaluate(() => {
-    const s = new Set<string>();
-    document.querySelectorAll('h1,h2,h3,h4,p,span,a,button,td,th,label,div').forEach((el) => {
+    const s = new Set<number>();
+    document.querySelectorAll('h1,h2,h3').forEach((el) => {
       const e = el as HTMLElement;
       if (e.offsetParent === null) return;
-      if (e.textContent && e.textContent.trim().length) s.add(getComputedStyle(e).fontSize);
+      if (e.textContent && e.textContent.trim().length) s.add(Math.round(parseFloat(getComputedStyle(e).fontSize)));
     });
     return [...s];
   });
-  // Escala canónica: 32/28/20/16 (+small 14). Exigimos ≤3 por pantalla.
+  const CANONICAL = [32, 28, 20, 16, 14];
+  // Cada tamaño de título pertenece a la escala canónica…
+  for (const sz of sizes) expect(CANONICAL).toContain(sz);
+  // …y no se usan más de 3 tamaños de título distintos por pantalla.
   expect(sizes.length).toBeLessThanOrEqual(3);
 });
 

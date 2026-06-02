@@ -1,10 +1,14 @@
 import { test, expect } from '@playwright/test';
-import { gotoApp, warmSeed, readState } from '../_helpers/seed';
+import { gotoApp, warmSeed, readState, patientRow } from '../_helpers/seed';
 
 /**
  * Interacciones / Persistencia (columna vertebral) — UX-080..UX-094.
  * Búsqueda inline, filtro único, toggles, tab-inactivo-fuera-del-DOM, persistencia,
  * notificaciones, reset (copy de producción), cero rastro de demo.
+ *
+ * Responsive (R2): el resultado del buscador se verifica vía el contador en vivo
+ * y la fila/card VISIBLE (`patientRow`) — en mobile el <span> del nombre dentro
+ * de la tabla oculta (display:none) tiene caja 0 y no es "visible" para Playwright.
  */
 
 test.beforeEach(async ({ page }) => {
@@ -12,12 +16,14 @@ test.beforeEach(async ({ page }) => {
 });
 
 // test: UX-080 — buscador inline contextual filtra en vivo, solo en la pantalla activa
+// R2: la fila resultante se verifica con patientRow (fila/card VISIBLE) — el span
+// del nombre dentro de la tabla oculta en mobile tiene caja 0 (no "visible").
 test('UX-080: el buscador de pacientes filtra en vivo por nombre', async ({ page }) => {
   await gotoApp(page, '/pacientes');
   await page.getByRole('searchbox', { name: 'Buscar pacientes' }).fill('Sosa');
   // Filtra en vivo: el contador refleja el único resultado y el paciente es visible.
   await expect(page.getByText('1–1 de 1')).toBeVisible();
-  await expect(page.getByText('Diego Sosa').first()).toBeVisible();
+  await expect(patientRow(page, 'Diego Sosa')).toBeVisible();
   // No hay búsqueda global ni command palette en el header (la única búsqueda vive en <main>).
   const headerSearchCount = await page.locator('header input[type="search"], header [role="searchbox"]').count();
   expect(headerSearchCount).toBe(0);
