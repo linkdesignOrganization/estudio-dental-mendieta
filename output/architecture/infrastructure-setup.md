@@ -179,6 +179,11 @@ Verificación post-deploy (alcance: "el deploy es exitoso y el sitio carga" — 
 
 > El fix de BUG-V05 vive en `src/styles/theme.scss` (media query `@media (max-width:767px)` con `--touch-target-min` = 44px sobre `.icon-btn`/`.btn-edm`/`.input-edm`/`.select-edm`/`.back-link`) más ajustes `min-height`/`min-width` por-componente en 14 componentes. Redeploy de solo código — sin cambios de infra.
 
+### Re-deploy round 2 (cierre) — residuales BUG-V05 + adaptación de tests QA ronda 2 (2026-06-02) — verificado
+Push de `fix: visual-build - touch target residuals + qa round 2 test adaptations` (commit `e092e49`) → run `26804929741` **success** (~2m23s). Cierra los **2 residuales** de touch targets que la regla global de `theme.scss` no cubría: el `search-input` del listado de pacientes (`patient-list.component.ts`, ahora `min-height: var(--touch-target-min)` directo sobre `.search-pill__input` — el input es el elemento que recibe el tap real, no solo el pill) y el `skip-link` (`app.ts`, `display:inline-flex` + `min-height` para hit-area ≥44px). Incluye también el spec adaptado por los sub-testers de la ronda 2 (`e2e/tests/visual/DC-021-071-072-073-known-bugs.spec.ts`), 2 screenshots de evidencia y reportes en `output/`. El build de CI corrió el hook `prebuild` (`[manifest] 29 pacientes (12 H / 17 M)` regenerado a `2026-06-02T07:24:32Z`) y `ng build` completó sin errores (budget OK). Bundle nuevo: `main-GFYDB2WD.js` (cambió desde `main-7MFTGH7B.js` → confirma que el código de los residuales está realmente desplegado, no caché). `headSha` del run coincide con el HEAD local.
+
+Smoke test post-deploy (alcance: "deploy exitoso + sitio carga"; la validación de los ≥44px la hace el QA): root `/` 200 `text/html` (shell Angular, sin regresión FOUC `media="print"`), `/pacientes` 200 (SPA fallback), manifest 200 `application/json` (29 pacientes), foto `/imagenes/pacientes/hombres/1.jpg` 200 `image/jpeg` (content-type verificado), bundles+favicon 200, security headers (CSP/X-Frame-Options/X-Content-Type-Options/Referrer-Policy/Permissions-Policy) presentes. **Todo ✅.**
+
 ---
 
 ## 5. Decisión de suscripción y SKU (resuelta)
