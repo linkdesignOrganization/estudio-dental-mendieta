@@ -4,12 +4,14 @@ import {
   AppointmentStatus, ToothState, PaymentStatus,
   // presentation shapes (contrato con los componentes de la cáscara)
   Patient, Appointment, TreatmentPlan, TreatmentType, ObraSocial, Tooth, ClinicalEvent,
-  AccountMovement, DocumentItem, Invoice, Budget, Kpi, AppNotification,
+  AccountMovement, DocumentItem, Invoice, Budget, Kpi, AppNotification, ToothProcedure,
 } from '../models/models';
 import { StorageService } from './storage.service';
 import { ManifestLoader } from '../seed/manifest.loader';
 import { generateSeed } from '../seed/seed.generator';
 import { TREATMENT_TYPES as AR_TREATMENT_TYPES } from '../seed/ar-data';
+import { Prng, SEED_ROOT } from '../seed/prng';
+import { toothName } from '../seed/tooth-names';
 import { parseIsoDate, formatShortDate, formatDmyDate } from '../../shared/date-format';
 
 const TODAY = new Date(2026, 5, 1); // ancla coherente con el seed
@@ -144,11 +146,13 @@ export class StoreService {
     dni: p.dni,
     fotoPath: p.fotoPath,
     obraSocial: this.osName().get(p.obraSocialId) ?? '—',
+    numeroAfiliado: afiliadoNumber(p),
     profesional: this.profName().get(p.profesionalId) ?? '—',
     telefono: p.telefono,
     email: p.email,
     direccion: p.direccion,
     fechaNacimiento: p.fechaNacimiento,
+    contactoEmergencia: p.contactoEmergencia,
     proximoTurno: this.proximoTurno(p.id),
     estadoCuenta: this.estadoCuenta(p.id),
     alergias: p.alergias,
@@ -258,6 +262,43 @@ export class StoreService {
   toothOf(pacienteId: string, fdi: number): Tooth | undefined {
     const odo = (this._state()?.odontograms ?? []).find((o) => o.pacienteId === pacienteId);
     return odo?.piezas.find((t) => t.fdi === fdi);
+  }
+  /** Nombre clínico de la pieza por FDI (REQ-186). Fijo, no aleatorio. */
+  toothName(fdi: number): string {
+    return toothName(fdi);
+  }
+  /**
+   * Historial de procedimientos SOBRE una pieza concreta (REQ-186/187).
+   *
+   * Derivado al VUELO del estado actual de la pieza (coherencia: una pieza "sana" o
+   * "ausente" sin intervención → historial vacío; una obturación/prótesis/caries →
+   * procedimientos plausibles que llevaron a ese estado). NO existe como entidad en el
+   * StoreState ni se genera en `generateSeed`, por lo que NO consume el PRNG global de
+   * negocio → cero impacto en volúmenes/saldos/turnos que QA asierta (lección It1).
+   * El detalle/fecha se hacen DETERMINISTAS con un PRNG SEPARADO sembrado por
+   * paciente+pieza (`SEED_ROOT ^ hash`), de modo que "Restablecer datos" devuelve el
+   * mismo historial y la misma pieza siempre muestra lo mismo.
+   */
+  toothHistory(pacienteId: string, fdi: number): ToothProcedure[] {
+    const tooth = this.toothOf(pacienteId, fdi);
+    if (!tooth) return [];
+    const plan = procedurePlan(tooth.estado);
+    if (!plan.length) return []; // sana / ausente sin intervención → estado vacío (REQ-187)
+
+    const profesional = this.headPatientProfessional(pacienteId);
+    const rng = new Prng(SEED_ROOT ^ hashToothKey(pacienteId, fdi));
+    // Procedimientos espaciados hacia atrás desde "hoy" (más reciente primero).
+    let dias = rng.int(20, 120);
+    return plan.map((descripcion) => {
+      const fecha = addDaysTo(TODAY, -dias);
+      dias += rng.int(60, 360); // cada paso anterior, más atrás en el tiempo
+      return { fecha: formatDmyDate(isoOf(fecha)), descripcion, profesional };
+    });
+  }
+  /** Profesional de cabecera del paciente (para atribuir procedimientos de la pieza). */
+  private headPatientProfessional(pacienteId: string): string {
+    const p = this.patientEntityById().get(pacienteId);
+    return (p && this.profName().get(p.profesionalId)) || '—';
   }
 
   // historial
@@ -690,6 +731,55 @@ function compactArs(value: number): string {
   if (value >= 1_000) return `$ ${Math.round(value / 1_000)} K`;
   return `$ ${value}`;
 }
+/**
+ * Nº de afiliado de la obra social (REQ-128), DETERMINISTA y derivado del DNI del
+ * paciente — NO se almacena y NO consume el PRNG global de negocio. Particular no tiene
+ * afiliado. El formato (12 dígitos en bloques) imita una credencial de obra social.
+ */
+function afiliadoNumber(p: PatientEntity): string {
+  if (p.obraSocialId === 'os-particular') return '—';
+  const digits = p.dni.replace(/\D/g, '').padStart(8, '0');
+  const rng = new Prng(SEED_ROOT ^ hashString(p.id + p.obraSocialId));
+  const sufijo = String(rng.int(0, 9999)).padStart(4, '0');
+  const full = (digits.slice(-8) + sufijo).padStart(12, '0');
+  return `${full.slice(0, 4)} ${full.slice(4, 8)} ${full.slice(8, 12)}`;
+}
+
+/** Hash estable de un string a entero 32-bit sin signo (semilla derivada de PRNG). */
+function hashString(s: string): number {
+  let h = 0x811c_9dc5;
+  for (let i = 0; i < s.length; i++) {
+    h ^= s.charCodeAt(i);
+    h = Math.imul(h, 0x0100_0193);
+  }
+  return h >>> 0;
+}
+/** Semilla derivada por paciente+pieza para el historial determinista de la pieza. */
+function hashToothKey(pacienteId: string, fdi: number): number {
+  return hashString(`${pacienteId}#${fdi}`);
+}
+/**
+ * Procedimientos plausibles (más reciente primero) que llevan al estado actual de la
+ * pieza. Coherencia clínica: una obturación tuvo diagnóstico + restauración; una
+ * prótesis, una extracción + colocación; etc. "sana"/"ausente" sin intervención → [].
+ */
+function procedurePlan(estado: ToothState): string[] {
+  switch (estado) {
+    case 'caries':
+      return ['Diagnóstico de caries en control', 'Radiografía periapical de la pieza'];
+    case 'obturacion':
+      return ['Obturación con resina compuesta', 'Remoción de tejido cariado y aislamiento', 'Diagnóstico de caries en radiografía'];
+    case 'en-tratamiento':
+      return ['Sesión de tratamiento de conducto', 'Apertura cameral y diagnóstico endodóntico', 'Radiografía periapical de la pieza'];
+    case 'protesis':
+      return ['Colocación de prótesis / corona', 'Toma de impresión y preparación', 'Extracción de la pieza'];
+    case 'ausente':
+      return []; // ausencia por evolución natural (no erupcionada / pérdida no documentada)
+    default:
+      return []; // sana
+  }
+}
+
 /** Odontograma nuevo: 32 piezas FDI, todas "sana" (paciente nuevo — UX-047). */
 function freshOdontogram(): Tooth[] {
   const piezas: Tooth[] = [];

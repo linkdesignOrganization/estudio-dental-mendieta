@@ -6,9 +6,10 @@
 
 ## Estado actual
 - Modo: NEW (NORMAL) · FASE 5 en PROSA (worktree no disponible + run-regression sed bug macOS)
-- Fase: FASE 5 — Iteración 1 COMPLETA ✓ (0 bugs). 5j commit → Iteración 2 (Pacientes)
-- Próximo: Iteración 2 — ficha 6 tabs a fondo + sub-detalles (5a..5e)
-- Nota: demos/feedback intermedios (5f/5g/5i) consolidados al final de FASE 5
+- Fase: FASE 5 — Iteración 2 (Pacientes) · Paso 5d (DevOps deploy)
+- Próximo: 5d-regress → 5e QA → It3..It5
+- It2 5a ✓: sub-detalles pieza/evento/plan + 3 gaps (detalle pieza historial real, contacto emergencia, filtros lista). SEED byte-idéntico (PRNG separado, sin drift)
+- It1 ✓ (commit ac766db). Demos/feedback consolidados al final de FASE 5
 - UX-022 era flaky (carrera wizard, no bug); seed restaurado. Iteración 1 = auditoría, criterios mayormente cubiertos por regresión
 - Bugs abiertos: 0 · sitio VIVO: https://happy-coast-044ea7e0f.7.azurestaticapps.net
 - It1 5a ✓: Developer auditó base demo, corrigió REQ-057 (6 profesionales nombres exactos) + REQ-058 (44 docs thumbnails), build 102KB

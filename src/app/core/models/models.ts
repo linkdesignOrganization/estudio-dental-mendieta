@@ -19,16 +19,25 @@ export interface Patient {
   dni: string;
   fotoPath: string;
   obraSocial: string;
+  numeroAfiliado: string; // nº de afiliado de la obra social (REQ-128)
   profesional: string;
   telefono: string;
   email: string;
   direccion: string;
   fechaNacimiento: string;
+  contactoEmergencia?: ContactoEmergencia; // REQ-128
   proximoTurno?: string;
   estadoCuenta: PaymentStatus;
   alergias: string[];
   medicacion: string[];
   observaciones: string;
+}
+
+/** Procedimiento histórico sobre una pieza concreta (detalle de pieza — REQ-186). */
+export interface ToothProcedure {
+  fecha: string; // dd/mm/yyyy ya formateada
+  descripcion: string;
+  profesional: string;
 }
 
 export interface Appointment {

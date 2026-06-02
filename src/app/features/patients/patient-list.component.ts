@@ -40,6 +40,49 @@ import { paymentBadge } from '../../shared/status-map';
     </div>
 
     <div class="toolbar">
+      <div class="filters">
+        <button type="button" class="btn-edm btn-edm--ghost filters__toggle"
+                [class.is-active]="activeFilters() > 0" [attr.aria-expanded]="filtersOpen()"
+                (click)="filtersOpen.set(!filtersOpen())">
+          <app-icon name="funnel" [size]="18" /> Filtros
+          @if (activeFilters()) { <span class="filters__count">{{ activeFilters() }}</span> }
+        </button>
+        @if (filtersOpen()) {
+          <div class="filters__panel surface-card" role="group" aria-label="Filtros de pacientes">
+            <div class="field">
+              <label class="field__label" for="f-os">Obra social</label>
+              <select id="f-os" class="select-edm" [value]="fObra()" (change)="setFilter('obra', $event)">
+                <option value="">Todas</option>
+                @for (o of obrasSociales(); track o.id) { <option [value]="o.nombre">{{ o.nombre }}</option> }
+              </select>
+            </div>
+            <div class="field">
+              <label class="field__label" for="f-prof">Profesional</label>
+              <select id="f-prof" class="select-edm" [value]="fProf()" (change)="setFilter('prof', $event)">
+                <option value="">Todos</option>
+                @for (p of profesionales(); track p.id) { <option [value]="p.nombre">{{ p.nombre }}</option> }
+              </select>
+            </div>
+            <div class="field">
+              <label class="field__label" for="f-edad">Rango de edad</label>
+              <select id="f-edad" class="select-edm" [value]="fEdad()" (change)="setFilter('edad', $event)">
+                <option value="">Todas</option>
+                <option value="0-12">Niños (0–12)</option>
+                <option value="13-17">Adolescentes (13–17)</option>
+                <option value="18-39">Adultos jóvenes (18–39)</option>
+                <option value="40-64">Adultos (40–64)</option>
+                <option value="65-200">Adultos mayores (65+)</option>
+              </select>
+            </div>
+            <div class="filters__panel-foot">
+              <button type="button" class="btn-edm btn-edm--ghost" [disabled]="!activeFilters()" (click)="clearFilters()">
+                Limpiar filtros
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+
       <div class="view-toggle" role="group" aria-label="Cambiar vista">
         <button type="button" class="view-toggle__btn" [class.is-active]="view() === 'tabla'" (click)="view.set('tabla')" aria-label="Vista de tabla">
           <app-icon name="rows" [size]="18" /> Tabla
@@ -89,7 +132,20 @@ import { paymentBadge } from '../../shared/status-map';
   `,
   styles: [`
     :host { display: block; }
-    .toolbar { display: flex; justify-content: flex-end; margin-bottom: var(--space-4); }
+    .toolbar { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-3); margin-bottom: var(--space-4); }
+    .filters { position: relative; }
+    .filters__toggle.is-active { border-color: var(--color-accent-deep); color: var(--color-accent-deep); }
+    .filters__count {
+      display: inline-flex; align-items: center; justify-content: center; min-width: 18px; height: 18px;
+      padding: 0 5px; border-radius: var(--radius-pill); background: var(--color-accent-deep); color: #fff;
+      font-size: 11px; font-weight: var(--weight-medium);
+    }
+    .filters__panel {
+      position: absolute; left: 0; top: calc(100% + 6px); z-index: 60; width: 280px;
+      box-shadow: var(--shadow-overlay); display: flex; flex-direction: column; gap: var(--space-4);
+    }
+    .filters__panel-foot { display: flex; justify-content: flex-end; padding-top: var(--space-1); border-top: 1px solid var(--color-border); }
+    @media (max-width: 767px) { .filters__panel { width: min(280px, 78vw); } }
     .search-pill {
       display: inline-flex; align-items: center; gap: var(--space-2);
       height: var(--control-height); padding: 0 var(--space-3);
@@ -134,7 +190,15 @@ export class PatientListComponent {
   protected readonly query = signal('');
   protected readonly loading = signal(false);
 
+  // Filtros adicionales (REQ-101): NO permanentemente visibles, se abren con "Filtros".
+  protected readonly filtersOpen = signal(false);
+  protected readonly fObra = signal('');
+  protected readonly fProf = signal('');
+  protected readonly fEdad = signal('');
+
   private readonly store = inject(StoreService);
+  protected readonly obrasSociales = computed(() => this.store.obrasSociales());
+  protected readonly profesionales = computed(() => this.store.professionals());
   protected readonly columns: TableColumn[] = [
     { key: 'visual', label: 'Paciente' },
     { key: 'obra', label: 'Obra social' },
@@ -143,20 +207,52 @@ export class PatientListComponent {
     { key: 'acciones', label: '', align: 'end' },
   ];
 
+  protected readonly activeFilters = computed(() =>
+    [this.fObra(), this.fProf(), this.fEdad()].filter((v) => v !== '').length,
+  );
+
   protected readonly filtered = computed(() => {
-    const all = this.store.patients();
     const q = this.query().trim().toLowerCase();
-    if (!q) return all;
-    return all.filter((p) =>
-      `${p.nombre} ${p.apellido}`.toLowerCase().includes(q) || p.dni.replace(/\./g, '').includes(q.replace(/\./g, '')),
-    );
+    const obra = this.fObra();
+    const prof = this.fProf();
+    const [edadMin, edadMax] = this.edadRange();
+    return this.store.patients().filter((p) => {
+      if (q && !this.matchesQuery(p, q)) return false;
+      if (obra && p.obraSocial !== obra) return false;
+      if (prof && p.profesional !== prof) return false;
+      if (p.edad < edadMin || p.edad > edadMax) return false;
+      return true;
+    });
+  });
+
+  private readonly edadRange = computed<[number, number]>(() => {
+    const v = this.fEdad();
+    if (!v) return [0, Number.POSITIVE_INFINITY];
+    const [min, max] = v.split('-').map(Number);
+    return [min, max];
   });
 
   constructor(private router: Router) {}
 
   protected onSearch(e: Event) { this.query.set((e.target as HTMLInputElement).value); }
+  protected setFilter(which: 'obra' | 'prof' | 'edad', e: Event) {
+    const value = (e.target as HTMLSelectElement).value;
+    if (which === 'obra') this.fObra.set(value);
+    else if (which === 'prof') this.fProf.set(value);
+    else this.fEdad.set(value);
+  }
+  protected clearFilters() {
+    this.fObra.set('');
+    this.fProf.set('');
+    this.fEdad.set('');
+  }
   protected open(p: Patient) { this.router.navigate(['/pacientes', p.id]); }
   protected badge(p: Patient) { return paymentBadge(p.estadoCuenta); }
   protected readonly trackPatient = (p: Patient) => p.id;
   protected readonly rowLabel = (p: Patient) => `Ver ficha de ${p.nombre} ${p.apellido}`;
+
+  private matchesQuery(p: Patient, q: string): boolean {
+    return `${p.nombre} ${p.apellido}`.toLowerCase().includes(q)
+      || p.dni.replace(/\./g, '').includes(q.replace(/\./g, ''));
+  }
 }

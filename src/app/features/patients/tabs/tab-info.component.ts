@@ -30,7 +30,14 @@ import { currentPatient } from '../patient-context';
             <div class="info-row"><dt>Teléfono</dt><dd>{{ patient.telefono }}</dd></div>
             <div class="info-row"><dt>Correo</dt><dd>{{ patient.email }}</dd></div>
             <div class="info-row"><dt>Dirección</dt><dd>{{ patient.direccion }}</dd></div>
-            <div class="info-row"><dt>Contacto de emergencia</dt><dd class="is-muted">Sin contacto registrado</dd></div>
+            <div class="info-row">
+              <dt>Contacto de emergencia</dt>
+              @if (patient.contactoEmergencia; as ce) {
+                <dd>{{ ce.nombre }} ({{ ce.relacion }}) · {{ ce.telefono }}</dd>
+              } @else {
+                <dd class="is-muted">Sin contacto registrado</dd>
+              }
+            </div>
           </dl>
         </section>
 
@@ -38,6 +45,10 @@ import { currentPatient } from '../patient-context';
           <header class="info-card__head"><app-icon name="shield-check" [size]="18" /><h3 class="t-title">Obra social</h3></header>
           <dl class="info-list">
             <div class="info-row"><dt>Cobertura</dt><dd>{{ patient.obraSocial }}</dd></div>
+            <div class="info-row">
+              <dt>Número de afiliado</dt>
+              <dd [class.is-muted]="patient.numeroAfiliado === '—'">{{ patient.numeroAfiliado }}</dd>
+            </div>
             <div class="info-row"><dt>Profesional de cabecera</dt><dd>{{ patient.profesional }}</dd></div>
           </dl>
         </section>
