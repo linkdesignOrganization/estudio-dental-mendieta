@@ -15,11 +15,12 @@
 | `.gitignore` | ✅ Creado |
 | `staticwebapp.config.json` (fallback SPA + headers) | ✅ Creado |
 | Workflow CI/CD (GitHub Actions → SWA) | ✅ Creado (`.github/workflows/azure-static-web-apps.yml`) |
-| **Azure Static Web Apps** | ⛔ **BLOQUEADO — cuota Free agotada en `CEFSA-prod` (ver más abajo)** |
+| RG orfano `EstudioDentalMendieta-RG` en `CEFSA-prod` | ✅ **Eliminado** (estaba vacío — limpieza realizada) |
+| **Azure Static Web Apps** | ⛔ **BLOQUEADO — sin permiso de escritura en la suscripción `Sponsorship` (MFA + sin rol). Ver "Bloqueo activo".** |
 | Secret del repo `AZURE_STATIC_WEB_APPS_API_TOKEN` | ⛔ Pendiente (depende del SWA) |
 | Primer deploy real | ⛔ Pendiente (lo dispara Fase 4 al pushear el código Angular, una vez exista el SWA) |
 
-> **Resumen:** Todo lo controlable por DevOps está listo. El **único bloqueo** es la creación del recurso Azure Static Web Apps en la suscripción indicada por agotamiento de la cuota Free. Requiere una decisión del cliente/PM (opciones abajo). El repo y el CI/CD quedan a **un paso** de funcionar: en cuanto exista el SWA, se obtiene su deployment token, se carga como secret del repo, y el pipeline despliega.
+> **Resumen:** Todo lo controlable por DevOps con la cuenta actual está listo. El cliente decidió mover el SWA a la suscripción **`Microsoft Azure Sponsorship`** (verificada con **0/10** SWAs Free → hay cuota). Sin embargo, **la identidad disponible no puede provisionar en esa suscripción**: el intento de crear el resource group falla con `AuthorizationFailed` (la cuenta `hola@linkdesign.cr` no tiene rol Contributor/Owner ahí) y el intento de crear el recurso dispara además un desafío de **MFA / Conditional Access** (`AADSTS50076`) que exige un `az login` interactivo en el tenant de Sponsorship. Ninguno de los dos es resoluble de forma no interactiva. Requiere una credencial con acceso de escritura (y MFA satisfecha) a la suscripción Sponsorship, o una nueva decisión del cliente (ver opciones abajo).
 
 ---
 
@@ -29,7 +30,7 @@
 - **Visibilidad:** Público
 - **URL:** https://github.com/linkdesignOrganization/estudio-dental-mendieta
 - **Rama principal:** `main`
-- **Cuenta gh usada:** `roberthcstllo` (autenticada, scopes `repo`, `workflow`, `read:org`)
+- **Cuenta gh usada:** `roberthcstllo` (autenticada, scopes `repo`, `workflow`, `read:org`, `gist`)
 - **Identidad de commits local:** `roberthcstllo <hola@linkdesign.cr>`
 
 El proyecto era un directorio sin control de versiones; se ejecutó `git init`, se crearon los archivos de infra/config y la documentación, y se conectó al remoto.
@@ -38,22 +39,25 @@ El proyecto era un directorio sin control de versiones; se ejecutó `git init`, 
 
 ## 2. Azure Static Web Apps (frontend deploy target)
 
-> ⛔ **NO PROVISIONADO** por bloqueo de cuota (ver sección "Bloqueo" más abajo).
-> Esta sección queda como especificación lista para ejecutar en cuanto se desbloquee.
+> ⛔ **NO PROVISIONADO.** El destino acordado es la suscripción **`Microsoft Azure Sponsorship`**, pero la cuenta disponible no tiene permiso para crear recursos ahí (ver sección "Bloqueo activo"). Esta sección queda como especificación lista para ejecutar en cuanto se disponga de una credencial con acceso de escritura a Sponsorship.
 
 | Parámetro | Valor planificado |
 |---|---|
-| Suscripción | `CEFSA-prod` — `4bdfcf40-ec56-4258-92e9-6f31b977a808` |
-| Resource group | `EstudioDentalMendieta-RG` (✅ **ya creado**, vacío, en `eastus2`) |
+| Suscripción | **`Microsoft Azure Sponsorship`** — `14ace2c9-8dcc-498a-8cc3-ba92a1337967` (0/10 SWAs Free → cuota disponible) |
+| Resource group | `EstudioDentalMendieta-RG` (a crear en Sponsorship — el de CEFSA-prod ya fue **eliminado**) |
 | Nombre del recurso SWA | `estudio-dental-mendieta` |
 | Región | `East US 2` (`eastus2`) |
 | SKU / Tier | **Free** (sin costo) |
 | Hostname default | _(se asigna al crear: `https://<random>.azurestaticapps.net`)_ |
 | `api_location` | _(vacío — frontend-only, sin Functions)_ |
 
-**Comando para provisionar (una vez desbloqueado):**
+**Comandos para provisionar (con una credencial autorizada en Sponsorship):**
 ```bash
-az account set --subscription 4bdfcf40-ec56-4258-92e9-6f31b977a808
+# Autenticación interactiva con MFA en el tenant de Sponsorship (requerido — ver bloqueo):
+az login --tenant 0906487b-e3fa-493e-b62c-138417415de7
+
+az account set --subscription 14ace2c9-8dcc-498a-8cc3-ba92a1337967
+az group create --name "EstudioDentalMendieta-RG" --location "eastus2"
 az staticwebapp create \
   --name "estudio-dental-mendieta" \
   --resource-group "EstudioDentalMendieta-RG" \
@@ -80,7 +84,7 @@ gh secret set AZURE_STATIC_WEB_APPS_API_TOKEN \
 - **Workflow:** `.github/workflows/azure-static-web-apps.yml` (✅ versionado).
 - **Trigger:** cada `push` a `main` dispara build + deploy. Los PR contra `main` generan un entorno de preview; al cerrar el PR, se limpia.
 - **Acción:** `Azure/static-web-apps-deploy@v1` (Oryx detecta Angular y corre `npm ci && npm run build`).
-- **Secret requerido:** `AZURE_STATIC_WEB_APPS_API_TOKEN` (deployment token del SWA). ⛔ Pendiente hasta crear el SWA.
+- **Secret requerido:** `AZURE_STATIC_WEB_APPS_API_TOKEN` (deployment token del SWA). ⛔ Pendiente hasta crear el SWA. Sin el secret, el step de deploy falla con `deployment_token was not provided` (esperado hasta que exista el SWA).
 - **Node:** el workflow fija Node 22 (Angular 21 requiere `^20.19 || ^22.12 || >=24`).
 
 ### Configuración de build (alineación con Fase 4 — IMPORTANTE)
@@ -112,6 +116,7 @@ gh run view --repo linkdesignOrganization/estudio-dental-mendieta --log
 az staticwebapp show \
   --name estudio-dental-mendieta \
   --resource-group EstudioDentalMendieta-RG \
+  --subscription 14ace2c9-8dcc-498a-8cc3-ba92a1337967 \
   --query "defaultHostname" -o tsv
 ```
 
@@ -119,36 +124,37 @@ az staticwebapp show \
 
 ---
 
-## 5. ⛔ Bloqueo activo — Cuota Free de Static Web Apps agotada
+## 5. Limpieza realizada — RG orfano en CEFSA-prod
 
-**Síntoma:** `az staticwebapp create ... --sku Free` falla con:
-> `Sku is invalid. This subscription has too many static sites with SKU: Free.`
+El resource group `EstudioDentalMendieta-RG` que se había creado en la suscripción `CEFSA-prod` (`4bdfcf40-ec56-4258-92e9-6f31b977a808`) quedó **vacío** tras descartar esa suscripción como destino (su cuota Free está 10/10). Se verificó que no contenía recursos y se **eliminó** (`az group delete ... --yes`; `az group exists` → `false`). No queda basura en CEFSA-prod.
 
-**Causa:** Azure limita las Static Web Apps **Free a 10 por suscripción**. La suscripción objetivo `CEFSA-prod` ya tiene **10/10** Free en uso:
+---
 
-| # | SWA Free existente en CEFSA-prod | Resource group |
-|---|---|---|
-| 1 | uga-gate-scanner | UgaFront |
-| 2 | nano-frontend | NanoFront |
-| 3 | vertice-frontend | VerticeFront |
-| 4 | punto-cero-web | PuntoCeroFront |
-| 5 | alturaraiz-swa-0218215354 | AlturaRaiz-RG |
-| 6 | wedrivecr-web | WeDriveCR-Front |
-| 7 | tierrafertil-frontend | WebSite |
-| 8 | cajamaestra-frontend | WebSite |
-| 9 | linkdesign-crm | WebSite |
-| 10 | vahu-vet-demo | VahuVet-RG |
+## 6. ⛔ Bloqueo activo — Sin acceso de escritura en la suscripción Sponsorship
 
-(Además existe 1 SWA Standard: `hesa-coming-soon`, que no cuenta contra la cuota Free.)
+**Contexto:** El cliente decidió provisionar el SWA en `Microsoft Azure Sponsorship` (`14ace2c9-8dcc-498a-8cc3-ba92a1337967`) porque tiene cuota Free (0/10). La cuota **sí está disponible**; el problema es de **permisos/identidad**, no de cuota.
 
-### Opciones para desbloquear (requiere decisión del cliente/PM)
-1. **Liberar un slot Free en `CEFSA-prod`** — eliminar (o subir a Standard) algún SWA Free obsoleto de la lista. Tras liberar uno, el comando de la sección 2 funciona sin cambios. **Sin costo nuevo.** *(Requiere identificar cuál SWA es descartable — decisión del cliente.)*
-2. **Usar otra suscripción con cuota Free disponible** (verificado, read-only):
-   - `Microsoft Azure Sponsorship` → **0/10** Free en uso (capacidad total disponible).
-   - `FAYCA-prod` (`58451a1e-faee-40bc-af12-fb5f0eb88fcb`) → **0/10** Free en uso.
-   - El cliente había fijado `CEFSA-prod`; cambiar de suscripción requiere su confirmación. **Sin costo nuevo.**
-3. **Crear el SWA en `CEFSA-prod` con SKU Standard** — sin límite de 10, pero **tiene costo mensual**. El cliente pidió Free/sin costo, así que esta opción solo si acepta el cargo.
+**Síntomas (dos barreras independientes, ambas no resolubles de forma no interactiva):**
 
-**Recomendación de DevOps:** Opción 1 (liberar un slot Free en `CEFSA-prod`) si hay algún SWA descartable, o si no, Opción 2 con `Microsoft Azure Sponsorship`. Ambas mantienen costo cero. Se evita la Opción 3 salvo aprobación explícita del cargo.
+1. **Sin rol de escritura.** `az group create` en Sponsorship falla con:
+   > `(AuthorizationFailed) The client 'live.com#hola@linkdesign.cr' ... does not have authorization to perform action 'Microsoft.Resources/subscriptions/resourcegroups/write' over scope '/subscriptions/14ace2c9-.../resourcegroups/EstudioDentalMendieta-RG'`
+   La cuenta es un invitado externo (`hola_linkdesign.cr#EXT#@asembiscr.onmicrosoft.com`) y `az role assignment list` muestra **0 asignaciones de rol** para ella en esa suscripción. Puede *leer* (por eso el conteo de cuota funciona) pero no *escribir*.
 
-> El resource group `EstudioDentalMendieta-RG` (eastus2) ya está creado y vacío, listo para recibir el SWA en cuanto se desbloquee con cualquiera de las opciones 1 o 3. Para la opción 2 se crearía el RG en la suscripción elegida.
+2. **MFA / Conditional Access.** El intento de crear el recurso dispara:
+   > `AADSTS50076: ... you must use multi-factor authentication ...` (requiere `az login --tenant 0906487b-e3fa-493e-b62c-138417415de7 --claims-challenge ...` interactivo).
+   El entorno de automatización no puede completar el flujo interactivo de MFA.
+
+> Nota: la suscripción `FAYCA-prod` (`58451a1e-faee-40bc-af12-fb5f0eb88fcb`) también tiene cuota Free (0/10) pero presenta el **mismo patrón**: lectura OK, **0 asignaciones de rol** para esta cuenta → mismo bloqueo de escritura esperado.
+
+### Qué se necesita para desbloquear (decisión/acción del cliente)
+Una de estas tres, en orden de preferencia de DevOps:
+
+1. **(Recomendado) Credencial con acceso de escritura a Sponsorship.** Que el cliente:
+   - asigne el rol **Contributor** (a nivel de la suscripción Sponsorship, o al menos sobre un RG dedicado) a la cuenta `hola@linkdesign.cr`, **y** complete una vez el `az login --tenant 0906487b-e3fa-493e-b62c-138417415de7` con MFA en este equipo; **o**
+   - provea otra cuenta (p. ej. del tenant `asembiscr`) que ya tenga Contributor + MFA satisfecha para ejecutar los comandos de la sección 2.
+
+2. **Volver a `CEFSA-prod` liberando un slot Free.** `CEFSA-prod` tiene cuota 10/10; si el cliente identifica un SWA Free obsoleto que se pueda eliminar (o subir a Standard), se libera un slot y se provisiona ahí con la cuenta actual (que **sí** tiene acceso de escritura a CEFSA-prod). Sin costo nuevo. *(Requiere que el cliente diga cuál SWA es descartable — ver lista en el historial: uga-gate-scanner, nano-frontend, vertice-frontend, punto-cero-web, alturaraiz-swa, wedrivecr-web, tierrafertil-frontend, cajamaestra-frontend, linkdesign-crm, vahu-vet-demo.)*
+
+3. **SWA Standard en `CEFSA-prod`.** Sin límite de 10, pero **con costo mensual**. Solo si el cliente acepta el cargo (pidió Free/sin costo).
+
+**Recomendación de DevOps:** Opción 1 (otorgar Contributor + completar MFA en Sponsorship) — mantiene el destino que el cliente eligió y costo cero. Si no es viable a corto plazo, Opción 2 sobre CEFSA-prod (también costo cero, y la cuenta actual ya tiene acceso de escritura ahí).
