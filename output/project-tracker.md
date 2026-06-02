@@ -6,8 +6,9 @@
 
 ## Estado actual
 - Modo: NEW (NORMAL) · FASE 5 en PROSA (worktree no disponible + run-regression sed bug macOS)
-- Fase: FASE 5 — Iteración 1 (Fundación) · Paso 5d (DevOps deploy)
-- Próximo: 5d-regress → 5e QA → It2..It5
+- Fase: FASE 5 — Iteración 1 · fix seed ✓ (PRNG separado para thumbnails), DevOps re-deploy → re-regresión
+- Próximo: re-regresión → 5e QA → It2..It5
+- Causa raíz regresión: pool docs vacío→15 activó draw extra rng.pick que desplazó PRNG global. Fix: PRNG separado. 98/98 specs afectados PASS local
 - Bugs abiertos: 0 · sitio VIVO: https://happy-coast-044ea7e0f.7.azurestaticapps.net
 - It1 5a ✓: Developer auditó base demo, corrigió REQ-057 (6 profesionales nombres exactos) + REQ-058 (44 docs thumbnails), build 102KB
 - FASE 3.5-INFRA: N/A (frontend-only, sin backend/DB)

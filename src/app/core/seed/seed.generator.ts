@@ -341,23 +341,36 @@ function buildDocuments(rng: Prng, patients: PatientEntity[], manifest: SeedMani
   // El nombre de archivo codifica el tipo (radiografia-*/foto-*); así el thumbnail es
   // COHERENTE con el tipo del documento. Si el pool viniera vacío (dev sin prebuild),
   // thumbnailPath cae a '' y el tab muestra el placeholder controlado (UX-048).
+  //
+  // IMPORTANTE (determinismo del seed): la asignación de thumbnail NO debe consumir del
+  // PRNG global. Antes, `rng.pick(pool)` se ejecutaba sólo cuando el pool tenía imágenes;
+  // poblar `manifest.documentos` activaba ese draw extra por documento y DESPLAZABA toda la
+  // secuencia downstream (presupuestos, facturas, movimientos → saldos/estados distintos a
+  // la demo). Para que el thumbnail (cosmético) sea determinista PERO no altere la secuencia
+  // global, se elige con un PRNG SEPARADO (semilla derivada propia). Así presupuestos/pagos/
+  // saldos quedan idénticos exista o no el pool de imágenes.
   const pool = manifest.documentos;
   const radioPool = pool.filter((p) => /\/(radiografia|radio|rx)/i.test(p));
   const fotoPool = pool.filter((p) => /\/(foto|photo|clinic)/i.test(p));
+  const thumbRng = new Prng(SEED_ROOT ^ 0x444f_4353); // "DOCS" — secuencia aparte, no toca rng global
   const thumbFor = (tipo: 'radiografia' | 'foto'): string => {
     const sub = tipo === 'radiografia' ? radioPool : fotoPool;
-    if (sub.length) return rng.pick(sub);
-    return pool.length ? rng.pick(pool) : '';
+    if (sub.length) return thumbRng.pick(sub);
+    return pool.length ? thumbRng.pick(pool) : '';
   };
   const pushDoc = (pac: PatientEntity) => {
     const tipo: 'radiografia' | 'foto' = rng.chance(0.65) ? 'radiografia' : 'foto';
+    const nombre = rng.pick(DOCUMENT_NAMES[tipo]);
+    const fecha = isoDate(addDays(TODAY, -rng.int(5, 600)));
+    // El thumbnail se resuelve DESPUÉS de los draws globales y con thumbRng → cero impacto
+    // en la secuencia que consumen presupuestos/facturas/movimientos.
     docs.push({
       id: `doc-${String(seq++).padStart(3, '0')}`,
       pacienteId: pac.id,
-      nombre: rng.pick(DOCUMENT_NAMES[tipo]),
+      nombre,
       tipo,
       thumbnailPath: thumbFor(tipo),
-      fecha: isoDate(addDays(TODAY, -rng.int(5, 600))),
+      fecha,
     });
   };
 
