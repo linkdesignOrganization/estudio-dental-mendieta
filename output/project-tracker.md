@@ -6,9 +6,11 @@
 
 ## Estado actual
 - Modo: NEW (NORMAL — no Pixel-Perfect, CON design-brief de Task Dasher)
-- Fase: FASE 4 — Construcción Visual · Paso 4e (DevOps pre-QA deploy)
-- Próximo: 4f QA (contra sitio desplegado) → 4g demo
-- 4a ✓ + 4b ✓ + 4c ✓ + 4d security ✓ (npm audit 0 vulns, build 102KB gzip)
+- Fase: FASE 4 — Construcción Visual · Paso 4f-sub (3 sub-testers en worktree)
+- Próximo: 4f-consolidate → anti-deferral → 4g demo
+- 4f-plan ✓: 233 criterios (Visual 158, Flow 47, Edge 28), ronda 1
+- 4a ✓ + 4b ✓ + 4c ✓ + 4d ✓ + 4e DEPLOY VIVO ✓ (sitio carga, manifest+fotos OK)
+- 4e-regress: N/A (primera construcción, sin tests previos)
 - Modo Visual: PROSA (fallback) — el workflow estándar hardcodea CRM tracking (PROHIBIDO aquí) + variante visual no validada e2e + sesión con errores de infra
 - Infra: Azure sub=CEFSA-prod (4bdfcf40-…) SKU=Standard · repo=público linkdesignOrganization/estudio-dental-mendieta · node v26 · Angular 21
 - Diseño: design-criteria.md = 120 DC-xxx + 29 BVC-xxx · ux-criteria.md = 71 UX-xxx
@@ -22,7 +24,7 @@
 - Mobile: TODOS los flujos usables en mobile (responsive completo) — sube alcance
 - Interacción: Pagos Y Odontograma editables — sube alcance
 - Bugs abiertos: 0
-- URL deploy: https://happy-coast-044ea7e0f.7.azurestaticapps.net (SWA Standard, sin contenido aún hasta 4e)
+- URL deploy: https://happy-coast-044ea7e0f.7.azurestaticapps.net (VIVO — visual-build desplegada)
 - Effort sesión: max ✓
 
 ## Notas de arranque
