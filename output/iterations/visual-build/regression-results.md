@@ -1,49 +1,31 @@
-# Regresion (single-run) - 2026-06-02T02:46:39
+# Regresion (single-run) - 2026-06-02T05:43:40
 
-Exit code: 1 (0 = todos los tests pasaron)
+Exit code: 0 (0 = todos los tests pasaron)
 Mode: --no-chunks (legacy single-run)
 Secret state: DISABLED
 
 ## Tests fallidos
 
-  ✘    9 [desktop-chromium] › tests/edge-case/UX-041-052-estados-vacios.spec.ts:36:5 › UX-045: la vista de tarjetas sin match NO muestra empty-state (gap conocido BUG-E03) (19.4s)
-  ✘  192 [desktop-chromium] › tests/visual/DC-050-077-components.spec.ts:172:5 › DC-076: odontograma con 32 piezas (aria-label FDI) y leyenda de 6 estados (5.0s)
-  ✘  208 [mobile-chromium] › tests/edge-case/UX-041-052-estados-vacios.spec.ts:36:5 › UX-045: la vista de tarjetas sin match NO muestra empty-state (gap conocido BUG-E03) (19.1s)
-  ✘  253 [mobile-chromium] › tests/flow/UX-001-018-navigation-routing.spec.ts:46:5 › UX-003: los items del sidebar navegan a sus rutas (18.2s)
-  ✘  258 [mobile-chromium] › tests/flow/UX-001-018-navigation-routing.spec.ts:116:5 › UX-008: fila de paciente navega a la ficha y redirige a /informacion (19.1s)
-  ✘  266 [mobile-chromium] › tests/flow/UX-001-018-navigation-routing.spec.ts:198:5 › UX-015: botón atrás regresa de la ficha a la lista (19.1s)
-  ✘  277 [mobile-chromium] › tests/flow/UX-020-032-critical-flows.spec.ts:163:5 › UX-027: el badge de estado de cuenta es coherente con el saldo tras el pago (19.1s)
-  ✘  288 [mobile-chromium] › tests/flow/UX-060-067-seed.spec.ts:99:5 › UX-067: edge cases representados en el seed (19.2s)
-  ✘  289 [mobile-chromium] › tests/flow/UX-080-094-interactions-persistence.spec.ts:15:5 › UX-080: el buscador de pacientes filtra en vivo por nombre (19.1s)
-  1) [desktop-chromium] › tests/edge-case/UX-041-052-estados-vacios.spec.ts:36:5 › UX-045: la vista de tarjetas sin match NO muestra empty-state (gap conocido BUG-E03) 
-  2) [desktop-chromium] › tests/visual/DC-050-077-components.spec.ts:172:5 › DC-076: odontograma con 32 piezas (aria-label FDI) y leyenda de 6 estados 
-  3) [mobile-chromium] › tests/edge-case/UX-041-052-estados-vacios.spec.ts:36:5 › UX-045: la vista de tarjetas sin match NO muestra empty-state (gap conocido BUG-E03) 
-  4) [mobile-chromium] › tests/flow/UX-001-018-navigation-routing.spec.ts:46:5 › UX-003: los items del sidebar navegan a sus rutas 
-  5) [mobile-chromium] › tests/flow/UX-001-018-navigation-routing.spec.ts:116:5 › UX-008: fila de paciente navega a la ficha y redirige a /informacion 
-  6) [mobile-chromium] › tests/flow/UX-001-018-navigation-routing.spec.ts:198:5 › UX-015: botón atrás regresa de la ficha a la lista 
-  7) [mobile-chromium] › tests/flow/UX-020-032-critical-flows.spec.ts:163:5 › UX-027: el badge de estado de cuenta es coherente con el saldo tras el pago 
-  8) [mobile-chromium] › tests/flow/UX-060-067-seed.spec.ts:99:5 › UX-067: edge cases representados en el seed 
-  9) [mobile-chromium] › tests/flow/UX-080-094-interactions-persistence.spec.ts:15:5 › UX-080: el buscador de pacientes filtra en vivo por nombre 
 
 ## Resumen final
 
-    ────────────────────────────────────────────────────────────────────────────────────────────────
+  ✓  384 [mobile-chromium] › tests/visual/DC-030-035-layout-shell.spec.ts:74:5 › DC-033/052 / BVC-027: footer sobrio, una línea, sin lenguaje de demo (3.1s)
+  ✓  385 [mobile-chromium] › tests/visual/DC-030-035-layout-shell.spec.ts:86:5 › DC-034: login sin shell, canvas #fafafa, banner azul sobrio (no aurora) (3.7s)
+  ✓  386 [mobile-chromium] › tests/visual/DC-030-035-layout-shell.spec.ts:111:5 › DC-035: ruta inexistente → empty state dentro del shell con "Volver al inicio" (3.7s)
+  ✓  387 [mobile-chromium] › tests/visual/DC-050-077-components.spec.ts:33:5 › DC-053 / DC-010..014: status-badges pastel con contraste AA y sin texto blanco (4.7s)
+  ✓  388 [mobile-chromium] › tests/visual/DC-050-077-components.spec.ts:72:5 › DC-055/078: avatares con imagen o iniciales, nunca imagen rota (4.7s)
+  ✓  389 [mobile-chromium] › tests/visual/DC-050-077-components.spec.ts:86:5 › DC-056: avatar-stack "+N" en azul profundo con texto blanco (4.7s)
+  ✓  390 [mobile-chromium] › tests/visual/DC-050-077-components.spec.ts:112:5 › DC-063 / BVC-009 / BVC-026: tablas ≤5 columnas con paginación offset (sin infinite scroll) (8.8s)
+  ✓  391 [mobile-chromium] › tests/visual/DC-050-077-components.spec.ts:139:5 › DC-073 / BVC-013: ficha con 6 tabs y contenido del tab inactivo NO en el DOM (4.8s)
+  ✓  392 [mobile-chromium] › tests/visual/DC-050-077-components.spec.ts:149:5 › DC-074/041 / BVC-020: cabecera de ficha con nombre <h1>, banner azul sobrio, 1 acción (4.7s)
+  ✓  393 [mobile-chromium] › tests/visual/DC-050-077-components.spec.ts:177:5 › DC-076: odontograma con 32 piezas (aria-label FDI) y leyenda de 6 estados (4.9s)
+  ✓  394 [mobile-chromium] › tests/visual/DC-050-077-components.spec.ts:199:5 › DC-064: empty-state con guidance + 1 acción (no-encontrado) (3.6s)
+  ✓  395 [mobile-chromium] › tests/visual/DC-080-089-responsive.spec.ts:24:5 › DC-080: sidebar→drawer en mobile (hamburguesa), fijo en desktop (4.9s)
+  ✓  396 [mobile-chromium] › tests/visual/DC-080-089-responsive.spec.ts:49:5 › DC-081: tabla → mini-cards en mobile, sin scroll horizontal (4.4s)
+  ✓  397 [mobile-chromium] › tests/visual/DC-080-089-responsive.spec.ts:68:5 › DC-082/083: ficha en mobile — nombre centrado + tabs con scroll horizontal (4.6s)
+  ✓  398 [mobile-chromium] › tests/visual/DC-080-089-responsive.spec.ts:88:5 › DC-088: sin scroll horizontal no intencional en mobile (recorrido) (15.5s)
+  ✓  399 [mobile-chromium] › tests/visual/DC-080-089-responsive.spec.ts:99:5 › DC-084: grid de KPI cards adapta columnas por breakpoint (3.9s)
+  ✓  400 [mobile-chromium] › tests/visual/DC-080-089-responsive.spec.ts:121:5 › DC-088: tablet (900px) sin scroll horizontal (7.0s)
 
-    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
-    ../test-results/flow-UX-080-094-interactio-c3ccd-s-filtra-en-vivo-por-nombre-mobile-chromium/video.webm
-    ────────────────────────────────────────────────────────────────────────────────────────────────
-
-    Error Context: ../test-results/flow-UX-080-094-interactio-c3ccd-s-filtra-en-vivo-por-nombre-mobile-chromium/error-context.md
-
-  9 failed
-    [desktop-chromium] › tests/edge-case/UX-041-052-estados-vacios.spec.ts:36:5 › UX-045: la vista de tarjetas sin match NO muestra empty-state (gap conocido BUG-E03) 
-    [desktop-chromium] › tests/visual/DC-050-077-components.spec.ts:172:5 › DC-076: odontograma con 32 piezas (aria-label FDI) y leyenda de 6 estados 
-    [mobile-chromium] › tests/edge-case/UX-041-052-estados-vacios.spec.ts:36:5 › UX-045: la vista de tarjetas sin match NO muestra empty-state (gap conocido BUG-E03) 
-    [mobile-chromium] › tests/flow/UX-001-018-navigation-routing.spec.ts:46:5 › UX-003: los items del sidebar navegan a sus rutas 
-    [mobile-chromium] › tests/flow/UX-001-018-navigation-routing.spec.ts:116:5 › UX-008: fila de paciente navega a la ficha y redirige a /informacion 
-    [mobile-chromium] › tests/flow/UX-001-018-navigation-routing.spec.ts:198:5 › UX-015: botón atrás regresa de la ficha a la lista 
-    [mobile-chromium] › tests/flow/UX-020-032-critical-flows.spec.ts:163:5 › UX-027: el badge de estado de cuenta es coherente con el saldo tras el pago 
-    [mobile-chromium] › tests/flow/UX-060-067-seed.spec.ts:99:5 › UX-067: edge cases representados en el seed 
-    [mobile-chromium] › tests/flow/UX-080-094-interactions-persistence.spec.ts:15:5 › UX-080: el buscador de pacientes filtra en vivo por nombre 
-  22 skipped
-  367 passed (31.0m)
+  4 skipped
+  396 passed (30.8m)

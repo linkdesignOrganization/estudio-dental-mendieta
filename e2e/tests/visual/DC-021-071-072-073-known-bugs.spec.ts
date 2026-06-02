@@ -7,9 +7,21 @@ import { warmSeed, gotoApp } from '../_helpers/seed';
  * CIERRE DE COBERTURA:
  * BUG-V01 (CRÍTICO, raíz) — CORREGIDO y verificado en producción: la hoja `styles-*.css` ya se
  *   sirve sin `media="print"` y aplica en pantalla. Esto restaura el estilado de `.btn-edm`
- *   (DC-071: relleno #6da8d4, texto oscuro, alto 40px, radius 12) y la regla disabled
+ *   (DC-071: relleno #6da8d4, texto oscuro, alto 40px desktop, radius 12) y la regla disabled
  *   (DC-021/BUG-E02: opacity .4 + cursor not-allowed). Esos dos gates quedan ACTIVOS y PASAN.
  * BUG-V04 (a11y) — CORREGIDO: cada role="tab" de la ficha expone aria-selected. Gate ACTIVO, PASA.
+ *
+ * DC-071 ↔ DC-072/088 (RECONCILIACIÓN viewport-aware): el design system define DOS contratos de
+ *   altura para `.btn-edm` que NO se contradicen sino que dependen del viewport:
+ *     · DC-021/DC-069/DC-071 → altura de control = 40px (`--control-height`).
+ *     · DC-021/DC-072/DC-088/BVC-017 → touch target en mobile ≥44px (`--touch-target-min`).
+ *   El fix de BUG-V05 (touch targets) subió `.btn-edm` a `min-height:44px` SOLO en el breakpoint
+ *   mobile (correcto — el cliente EXIGE ≥44px táctil en mobile). Verificado en producción:
+ *     · desktop-chromium (1280px): height = 40px exacto.
+ *     · mobile-chromium (Pixel 5, 393px): height = 44px (min-height del touch target).
+ *   En AMBOS viewports el relleno (#6da8d4), el texto oscuro (#2a2a35) y el radius (12px, en 10–14)
+ *   son idénticos. Por eso este gate asserta la ALTURA según el viewport del project y el resto de
+ *   propiedades en común. El código de la app es CORRECTO; el test es el que se hace viewport-aware.
  *
  * BUG-V05 (a11y, PARCIALMENTE corregido — derivado de V01): el fix de V05 subió a ≥44px
  *   burger/bell/avatar (44×44), "Editar paciente", view-toggles, tabs (52px) y piezas del
@@ -26,9 +38,16 @@ test.beforeEach(async ({ page }) => {
   await warmSeed(page);
 });
 
-// DC-071 / GAP-A04 — botón primario con relleno azul medio #6da8d4 + texto oscuro, alto 40px, radius 10-14.
-// Verificado en producción tras fix V01: bg rgb(109,168,212), color rgb(42,42,53), radius 12, height 40.
-test('DC-071 (BUG-V01): botón primario con relleno #6da8d4 + texto oscuro, alto 40px, radius 10-14', async ({ page }) => {
+// DC-071 / GAP-A04 — botón primario: relleno azul medio #6da8d4 + texto oscuro + radius 10-14 (en
+// AMBOS viewports), con altura viewport-aware → 40px en desktop (DC-021/DC-071) y ≥44px en mobile
+// (touch target DC-072/088/BVC-017). Verificado en producción: desktop bg rgb(109,168,212), color
+// rgb(42,42,53), radius 12, height 40; mobile mismas bg/color/radius, height 44 (min-height).
+test('DC-071 (BUG-V01): botón primario #6da8d4 + texto oscuro + radius 10-14 (alto 40px desktop / ≥44px mobile)', async ({ page }) => {
+  // Determina el contrato de altura según el project (viewport). El touch target ≥44px aplica
+  // en el breakpoint mobile; en desktop la altura de control es exactamente 40px.
+  const vw = page.viewportSize()?.width ?? 1280;
+  const isMobile = vw < 1200; // DC-080: <1200px = layout mobile (drawer + touch targets)
+
   await gotoApp(page, `/pacientes/${PID}/informacion`);
   await page.getByRole('button', { name: 'Agendar turno' }).waitFor({ state: 'visible' });
   await page.waitForTimeout(500);
@@ -36,15 +55,28 @@ test('DC-071 (BUG-V01): botón primario con relleno #6da8d4 + texto oscuro, alto
     const b = document.querySelector('button.btn-edm--primary') as HTMLElement;
     const cs = getComputedStyle(b);
     const rgb = (s: string) => (s.match(/\d+/g) || []).slice(0, 3).map(Number);
-    return { bg: rgb(cs.backgroundColor), color: rgb(cs.color), radius: parseInt(cs.borderRadius, 10), height: parseInt(cs.height, 10) };
+    return {
+      bg: rgb(cs.backgroundColor),
+      color: rgb(cs.color),
+      radius: parseInt(cs.borderRadius, 10),
+      height: Math.round(b.getBoundingClientRect().height),
+    };
   });
+  // — Comunes a desktop y mobile —
   // relleno azul medio #6da8d4 = rgb(109,168,212)
   expect(Math.abs(btn.bg[0] - 109) < 10 && Math.abs(btn.bg[1] - 168) < 10 && Math.abs(btn.bg[2] - 212) < 10).toBe(true);
   // texto oscuro #2a2a35 (NO blanco — GAP-A04)
   expect(btn.color[0] < 80 && btn.color[1] < 80 && btn.color[2] < 80).toBe(true);
   expect(btn.radius).toBeGreaterThanOrEqual(10);
   expect(btn.radius).toBeLessThanOrEqual(14);
-  expect(btn.height).toBe(40);
+  // — Altura viewport-aware —
+  if (isMobile) {
+    // DC-072/088/BVC-017: touch target táctil ≥44px en mobile (min-height del fix BUG-V05).
+    expect(btn.height, `mobile (${vw}px): touch target ≥44px`).toBeGreaterThanOrEqual(44);
+  } else {
+    // DC-021/DC-071: altura de control = 40px exacto en desktop.
+    expect(btn.height, `desktop (${vw}px): altura de control 40px`).toBe(40);
+  }
 });
 
 // DC-021 / BUG-E02 — la regla .btn-edm:disabled aplica: opacidad 0.4 y cursor not-allowed.

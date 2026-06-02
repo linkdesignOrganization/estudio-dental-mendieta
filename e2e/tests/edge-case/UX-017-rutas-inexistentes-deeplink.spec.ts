@@ -12,10 +12,19 @@ const DEMO_FORBIDDEN = /\b(demo|mock|simulaci\w*|simulado|de prueba|ficticio|vie
 
 // test: UX-017 / NFR-013 — el servidor devuelve la app (SPA fallback) para rutas del cliente
 test('NFR-013: deep-link directo a ruta inexistente devuelve la SPA (no 404 del server)', async ({ page }) => {
+  // Azure SWA (navigationFallback + responseOverrides.404 → 200) reescribe a index.html.
+  // El contrato HTTP es la esencia de NFR-013: el server NO devuelve 404, devuelve el app shell.
   const resp = await page.goto('/ruta-basura-inexistente', { waitUntil: 'domcontentloaded' });
-  // Azure SWA hace fallback a index.html => 200 (la app maneja el 404 lógico).
   expect(resp?.status()).toBe(200);
-  await expect(page.getByRole('heading', { name: 'No encontramos esta página' })).toBeVisible();
+
+  // Render client-side: domcontentloaded resuelve con el shell ANTES de que Angular
+  // descargue main.js, haga bootstrap + SeedReadyGuard y el router resuelva el wildcard.
+  // Esperamos a que <app-root> hidrate antes de aserir el heading, con timeout explícito
+  // y holgado para tolerar cold-start de la SWA (la causa del timeout intermitente previo).
+  await page.locator('app-root').waitFor({ state: 'attached', timeout: 30_000 });
+  await expect(
+    page.getByRole('heading', { name: 'No encontramos esta página', exact: true }),
+  ).toBeVisible({ timeout: 30_000 });
 });
 
 // test: UX-017 — ruta basura => /no-encontrado dentro del shell, "Volver al inicio" -> /reportes

@@ -13,8 +13,14 @@
 - Flow Tester ✓: 45 PASA, 90/90 desktop+4/4 mobile, 1 bug baja (BUG-F01 ruta catálogo)
 - Edge Tester ✓: 28 criterios, 100/100 PASS, 6 bugs (E01-E06)
 - Visual Checker ✓: 138/158 PASA, BUG-V01 CRÍTICO (hoja estilos no aplica: media=print+onload bloqueado por CSP — raíz de E02/E05/V06/20 fallas visuales) + V04 a11y. BVC-027 y GAP-A04 PASAN
-- Fase: 4f anti-deferral RONDA 3 — V05 residuales fix ✓ (gate touch verde local), DevOps deploy → regresión final
-- Bugs abiertos: 0 (V05 cerrado pendiente verificación post-deploy + regresión)
+- Fase: FASE 4 — 4j feedback-curator ✓ (49 entradas, 8 memorias). 4k commit final
+- Próximo: FASE 3.5-INFRA (N/A — frontend-only, sin backend/DB) → FASE 5 (iteraciones)
+- Bugs abiertos: 0 · 24 .spec.ts / 234 tests · regresión 480 pass exit 0 · sitio VIVO
+
+## Scope para FASE 5 (feedback de la demo)
+- [Iteración 3 Agenda] Cliente pidió: en MOBILE la agenda arranca por defecto en vista DÍA/LISTA (turnos como filas ≥44px), no en semanal con chips chicos. Resuelve el touch de los chips de 22px.
+- F01 (Iteración 4 editar paciente): exponer "Cancelar con confirmación de descarte"
+- F02 (Iteración 5 crear presupuesto): "Atrás" debe repoblar el paciente del Paso 1
 - Observación demo: chips agenda semanal mobile 22px (no forzado — path táctil = vista día/lista; decisión del cliente)
 - Bugs abiertos: 9 fallos en re-QA — naturaleza: UX-045 test obsoleto (E03 ya fixeado), 6 mobile timeouts (tests no adaptados a mobile/posible bug), DC-076 odontograma (¿@defer?)
 - NOTA regresión: usar --no-chunks desde e2e/ con REGRESSION_TESTS_DIR=tests (chunked rompe por BSD sed)
