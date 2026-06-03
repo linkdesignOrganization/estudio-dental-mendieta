@@ -88,20 +88,42 @@ test('UX-003: los items del sidebar navegan a sus rutas', async ({ page }, testI
   // click, así que expira. `expect.poll` re-clickea el link hasta que la URL cambia:
   // patrón web-first idiomático para navegaciones SPA intermitentes. No enmascara un
   // bug — la app navega bien (verificado en vivo); solo cubre la carrera del click.
+  //
+  // It5: el módulo Facturación creció (presupuestos/facturas/obras sociales + alta de
+  // presupuesto) y se añadieron `title:` por ruta. `/facturacion` además REDIRIGE a
+  // `/facturacion/presupuestos` → es la única navegación de dos saltos (lazy + redirect
+  // hijo). Bajo carga el commit de ese redirect se ensancha y el retry-click no
+  // recuperaba: (1) re-clickear el MISMO routerLink mientras el router ya navega a ese
+  // destino lo deduplica (no relanza), y (2) el `pathname` puede leer transitoriamente
+  // `/facturacion` (que la regex acepta) ANTES de que el redirect+render terminen, con
+  // lo que el poll daba éxito prematuro y el click del siguiente item caía en medio del
+  // ciclo y se tragaba. Robustez: el éxito del poll exige URL final Y `<h1>` con el
+  // título esperado (solo cambia en NavigationEnd → commit + render asentados); damos
+  // más margen por intento para el doble salto y subimos el presupuesto total. Sigue
+  // siendo click-driven (sin `goto` que enmascare un click tragado). El título real es
+  // "Facturación" (verificado en vivo; el `title:` cambia solo el <title> de la pestaña,
+  // p.ej. "Presupuestos", no el banner). No enmascara un bug — cubre la carrera del
+  // commit del redirect.
+  const committed = async (re: RegExp, title: string) =>
+    re.test(new URL(page.url()).pathname) &&
+    (await bannerTitle.textContent())?.trim() === title;
+
   const navigateTo = async (label: string, re: RegExp, title: string) => {
     const link = nav.getByRole('link', { name: label, exact: true });
     await expect
       .poll(
         async () => {
-          if (re.test(new URL(page.url()).pathname)) return true; // ya navegó
+          if (await committed(re, title)) return true; // ya navegó y renderizó
           await openNav(page); // no-op en desktop; (re)abre el drawer en mobile
           await link.click();
-          // Margen corto para que el router confirme; si el click se tragó, el
-          // siguiente ciclo del poll reabre el nav y vuelve a clickear.
-          await page.waitForURL(re, { timeout: 2_000 }).catch(() => {});
-          return re.test(new URL(page.url()).pathname);
+          // Margen para que el router confirme el (doble) salto; si el click se tragó
+          // o el redirect aún no asentó, el siguiente ciclo del poll reabre el nav y
+          // vuelve a clickear. Esperamos al <h1> destino, no solo a la URL.
+          await page.waitForURL(re, { timeout: 4_000 }).catch(() => {});
+          await expect(bannerTitle).toHaveText(title, { timeout: 2_000 }).catch(() => {});
+          return committed(re, title);
         },
-        { timeout: 15_000, intervals: [200, 400, 800] },
+        { timeout: 25_000, intervals: [200, 400, 800, 1200] },
       )
       .toBe(true);
     await expect(page).toHaveURL(re);

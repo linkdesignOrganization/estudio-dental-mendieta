@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject, signal, computed } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, signal, computed, viewChild, afterNextRender, ElementRef } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { IconComponent } from '../../shared/components/icon.component';
 import { StepperComponent } from '../../shared/components/stepper.component';
@@ -33,7 +33,7 @@ const STEP_ROUTES = ['', '/facturacion/presupuestos/nuevo/paciente', '/facturaci
             <h3 class="t-title wiz__step-title">Seleccioná el paciente</h3>
             <div class="field">
               <label class="field__label" for="b-pac">Paciente</label>
-              <select id="b-pac" class="select-edm" [value]="flow.pacienteId()" (change)="onPaciente($event)">
+              <select #pacSelect id="b-pac" class="select-edm" [value]="flow.pacienteId()" (change)="onPaciente($event)">
                 <option value="">Elegí un paciente</option>
                 @for (p of patients(); track p.id) { <option [value]="p.id">{{ p.nombre }} {{ p.apellido }}</option> }
               </select>
@@ -136,11 +136,21 @@ export class BudgetCreateComponent {
   protected readonly step1Touched = signal(false);
   protected readonly step2Touched = signal(false);
   protected readonly confirmCancel = signal(false);
+  private readonly pacSelect = viewChild<ElementRef<HTMLSelectElement>>('pacSelect');
 
   constructor() {
     if ((this.route.snapshot.data['step'] ?? 1) === 1 && !this.flow.tienePaciente()) {
       this.flow.reset();
     }
+    // Repinta el <select> con el paciente preservado al volver "Atrás" (BUG-F01 / REQ-216).
+    // El binding [value] se aplica ANTES de que el @for materialice las <option>, así que el
+    // navegador descarta el value (la opción aún no existe) y cae a "Elegí un paciente". Tras el
+    // primer render las opciones ya existen → re-aplicamos el id preservado sobre el control nativo.
+    afterNextRender(() => {
+      const el = this.pacSelect()?.nativeElement;
+      const id = this.flow.pacienteId();
+      if (el && id && el.value !== id) el.value = id;
+    });
   }
 
   protected readonly selectedItems = computed(() =>

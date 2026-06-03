@@ -6,8 +6,10 @@
 
 ## Estado actual
 - Modo: NEW (NORMAL) · FASE 5 en PROSA (worktree no disponible + run-regression sed bug macOS)
-- Fase: FASE 5 — Iteración 5 (ÚLTIMA) · Paso 5d (DevOps deploy). 272 REQ cubiertos ✓
-- Próximo: 5d-regress → 5e QA → FASE 6 (deployment)
+- Fase: FASE 5 — Iteración 5 · anti-deferral — fix F01 ✓ (afterNextRender), DevOps deploy → re-QA REQ-216
+- Próximo: re-QA REQ-216 → 5e-verify → 5j commit → FASE 6
+- Bugs abiertos: 1 (F01 en re-test). Visual 0 bugs. Regresión 709 verde
+- UX-003 flaky reforzado (redirect facturación doble salto, no bug). FASE 6 re-correrá regresión completa contra prod
 - It5 5a ✓: presupuestos detalle+F02, OS liquidaciones, pago editable+fecha (REQ-260), 4 reportes con gráficos SVG/CSS (cero deps), seed byte-idéntico, bundle 103KB. Cierra 272 REQ
 - It1/2/3/4 ✓
 - It4 5a ✓: crear paciente 2 rutas + género (estaba hardcodeado mujer) + foto, editar dirty-check (F01), odontograma editable @defer immediate, tratamientos col próxima fecha. Seed byte-idéntico
