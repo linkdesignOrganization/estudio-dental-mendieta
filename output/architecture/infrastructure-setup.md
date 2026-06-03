@@ -283,6 +283,29 @@ Push de `feat: iteration 5 - pre-QA deploy` (commit `7f92216`) → run `26853562
 > - **El deep-link directo a un detalle puede renderizar antes de que hidrate el store** (`seedReadyGuard`) → estado de carga/empty en vez del contenido. Navegar desde la lista por click llega hidratado; si se deep-linkea, esperar el selector del contenido final, no leer el DOM a los ~700ms.
 > - Rutas It5: pago = `/pacientes/:id/pagos/nuevo` (`#pay-date`); presupuesto detalle = `/facturacion/presupuestos/:id`; obra social detalle = `/facturacion/obras-sociales/:id`; reportes = `/reportes/{pacientes|tratamientos|financiero|productividad}` (cada uno = `ReportDetailComponent` con `data.tema`).
 
+### Iteración 5 — Re-deploy fix BUG-F01 (ciclo anti-deferral, 2026-06-02, FASE 5) — verificado
+Push de `fix: iteration 5 - budget wizard back preserves patient (BUG-F01)` (commit `0c0f5f4`) → run `26858342784` **success** (~1m40s). `headSha` del run == HEAD local pusheado (`0c0f5f4`). Redeploy de **solo código** — sin cambios de infra (SWA, CI/CD y secret siguen igual que en Fase 4). El commit incluye el fix (`src/app/features/billing/budget-create.component.ts`) + los specs/evidencia de la ronda de QA (8 PNG, 11 specs E2E) + reportes en `output/iterations/iteration-5/`. Cambio funcional de **1 archivo**.
+
+**El fix (BUG-F01 / REQ-216):** en el wizard de crear presupuesto (route-per-step), el `<select id="b-pac">` con opciones dinámicas (`@for`) no re-pintaba el paciente preservado al volver "Atrás" — el `[value]` se aplica antes de que existan las `<option>` y el navegador lo descarta, cayendo a "Elegí un paciente". El estado SÍ estaba preservado en `BudgetFlowService`; era un defecto de **view-sync**. Fix: `viewChild('pacSelect')` + `afterNextRender(() => { if (el.value !== id) el.value = id; })` que re-aplica el id preservado una vez materializadas las opciones. No tocó `[value]`/`(change)` ni introdujo `ngModel`.
+
+**Seed byte-idéntico (sin drift):** el churn de `generadoEn` en `public/seed/manifest.json` (timestamp cosmético del `prebuild`) se **descartó** con `git checkout -- public/seed/manifest.json` tras confirmar por `git diff` que era la ÚNICA línea cambiada (datos idénticos: 29 pacientes 12 H / 17 M, 15 docs). CI lo regeneró igual: el log del run muestra `[manifest] 29 pacientes (12 H / 17 M), 15 documentos → public/seed/manifest.json`. Budget OK: `Initial total 431.18 kB / 104.33 kB gzipped` (<500KB error-budget). El bundle servido cambió a `main-UYRA3GV4.js` (desde `main-5NSLIGIB.js` del pre-QA de It5) y el `index.html` desplegado lo referencia → **confirma código realmente desplegado, no caché**.
+
+**Verificación funcional post-deploy (Playwright contra el SWA, 10/10 PASS)** — alcance "deploy exitoso + fix de BUG-F01 reflejado"; la re-verificación QA la hace el QA Orchestrator. Smoke curl previo: root `/`, `/facturacion/presupuestos/nuevo/paciente`, `/facturacion/presupuestos` → 200 `text/html`; `index.html` referencia `main-UYRA3GV4.js`; security headers (CSP/X-Frame-Options/X-Content-Type-Options/Referrer-Policy/Permissions-Policy) presentes.
+
+| Eje (reproducción exacta de BUG-F01) | Resultado |
+|---|---|
+| Paso 1 renderiza | título "Seleccioná el paciente"; `<select #b-pac>` arranca vacío (`value===""` = "Elegí un paciente"); **29 opciones** de paciente |
+| Selección de paciente (vía `(change)` real) | `selectOption('#b-pac', 'pac-001')` → `value==="pac-001"` ("Bautista Álvarez") |
+| "Siguiente" (`.btn-edm--primary`) → Paso 2 | título "Tratamientos a presupuestar"; URL = `.../nuevo/items` |
+| "Atrás" (`.btn-edm--secondary`) → Paso 1 | URL de vuelta = `.../nuevo/paciente` |
+| **FIX BUG-F01: `<select>` re-muestra el paciente preservado** | tras "Atrás", `value==="pac-001"` mostrando label **"Bautista Álvarez"** — **NO** el placeholder vacío "Elegí un paciente" ✅ |
+| Errores de consola | **0** en todo el recorrido |
+
+> **Notas para el QA (re-verificación de BUG-F01 — evitar falso negativo):**
+> - El wizard es **route-per-step** (`STEP_ROUTES`): paso 1 = `/facturacion/presupuestos/nuevo/paciente`, paso 2 = `.../items`, paso 3 = `.../confirmar`. El constructor RESETEA el flow si se aterriza en paso 1 sin paciente → para reproducir el bug hay que poblar el estado **como un usuario** (`selectOption` + click "Siguiente"/"Atrás"), no deep-linkear `/items` (dejaría el flow vacío y "Atrás" mostraría vacío legítimamente — falso FAIL).
+> - El fix repinta el `<select>` en **`afterNextRender`** (un tick post-render). Leer `#b-pac.value` síncronamente tras "Atrás" puede dar `""` antes del repaint → **sondear** el value (poll corto) o usar `toHaveValue('pac-001')` web-first, no `inputValue()` inmediato.
+> - El nota benigna del runner persiste: `error: could not lock config file .git/config: Permission denied` en el step "Post Checkout" es cleanup de la acción `Azure/static-web-apps-deploy`, NO el build/deploy. El run concluyó `success`.
+
 ---
 
 ## 5. Decisión de suscripción y SKU (resuelta)

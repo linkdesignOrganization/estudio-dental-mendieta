@@ -234,14 +234,15 @@ test('UX-025: "Guardar cambios" persiste el dato editado (refresh real)', async 
 // ───────────────────────────── UX-029 — Crear presupuesto (3 pasos) ─────────────────────────────
 
 // test: UX-029 — el Paso 2 calcula el TOTAL automáticamente al marcar tratamientos; "Atrás" es
-// navegación funcional y la SELECCIÓN DE TRATAMIENTOS se preserva al volver al Paso 2; el resumen
-// (Paso 3) arrastra paciente + total.
+// navegación funcional y PRESERVA tanto el paciente del Paso 1 como la SELECCIÓN DE TRATAMIENTOS
+// del Paso 2; el resumen (Paso 3) arrastra paciente + total.
 //
-// HALLAZGO honesto (ver flow-coverage-cierre.md): en este wizard, "Atrás" del Paso 2 → Paso 1 NO
-// repuebla el <select> de Paciente (vuelve a "Elegí un paciente"); hay que re-elegirlo para avanzar.
-// La selección de tratamientos del Paso 2, en cambio, SÍ se conserva (total intacto al re-entrar).
-// Asertamos el comportamiento REAL, sin afirmar una preservación del paciente que la demo no hace.
-test('UX-029: crear presupuesto — total auto-calculado y "Atrás" preserva los tratamientos', async ({ page }) => {
+// ESTADO ACTUAL (BUG-F01 corregido — viewChild + afterNextRender): "Atrás" del Paso 2 → Paso 1
+// AHORA repuebla el <select> de Paciente (value=pac-005 / "Diego Sosa"), así que se avanza de nuevo
+// SIN re-elegirlo. La selección de tratamientos del Paso 2 también se conserva (total intacto al
+// re-entrar). Asertamos ese comportamiento corregido; el value del select se espera web-first
+// porque el re-sync ocurre en afterNextRender tras el re-render del Paso 1.
+test('UX-029: crear presupuesto — total auto-calculado y "Atrás" preserva paciente + tratamientos', async ({ page }) => {
   await gotoApp(page, '/facturacion/presupuestos/nuevo/paciente');
   await expect(page.getByText('Paso 1 de 3')).toBeVisible();
   await page.getByLabel('Paciente').selectOption('Diego Sosa');
@@ -255,12 +256,12 @@ test('UX-029: crear presupuesto — total auto-calculado y "Atrás" preserva los
   await page.getByRole('checkbox', { name: 'Tratamiento de conducto' }).check();
   await expect(page.getByText('Total seleccionado').locator('xpath=following-sibling::*[1]')).toHaveText('$ 163.000');
 
-  // "Atrás" vuelve al Paso 1 (navegación del wizard funcional).
+  // "Atrás" vuelve al Paso 1 (navegación del wizard funcional) y RE-MUESTRA el paciente preservado.
   await page.getByRole('button', { name: 'Atrás' }).click();
   await expect(page.getByText('Paso 1 de 3')).toBeVisible();
-  // Re-elegir paciente (la demo no repuebla el select al volver — hallazgo documentado) y re-avanzar:
-  // la selección de TRATAMIENTOS del Paso 2 SÍ se conservó (total intacto, sin volver a marcar).
-  await page.getByLabel('Paciente').selectOption('Diego Sosa');
+  await expect(page.getByLabel('Paciente')).toHaveValue('pac-005'); // BUG-F01 corregido: el select conserva al paciente.
+  // Avanzar de nuevo SIN re-elegir el paciente: el estado preservado pasa el guard y la selección de
+  // TRATAMIENTOS del Paso 2 también se conservó (total intacto, sin volver a marcar).
   await page.getByRole('button', { name: 'Siguiente' }).click();
   await expect(page.getByText('Paso 2 de 3')).toBeVisible();
   await expect(page.getByText('Total seleccionado').locator('xpath=following-sibling::*[1]')).toHaveText('$ 163.000');

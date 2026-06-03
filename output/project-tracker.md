@@ -6,9 +6,9 @@
 
 ## Estado actual
 - Modo: NEW (NORMAL) · FASE 5 en PROSA (worktree no disponible + run-regression sed bug macOS)
-- Fase: FASE 5 — Iteración 5 · anti-deferral — fix F01 ✓ (afterNextRender), DevOps deploy → re-QA REQ-216
-- Próximo: re-QA REQ-216 → 5e-verify → 5j commit → FASE 6
-- Bugs abiertos: 1 (F01 en re-test). Visual 0 bugs. Regresión 709 verde
+- Fase: FASE 5 COMPLETA ✓ — Iteración 5 cerrada (0 bugs). 5j commit → FASE 6 (deployment a producción)
+- Próximo: FASE 6 — 6a deploy prod → 6a-verify → 6b validación post-deploy → 6c → 6d cierre
+- Bugs abiertos: 0 ✓. 272/272 REQ cubiertos, 0 huérfanos. Suite ~770 verde. Sitio VIVO en SWA
 - UX-003 flaky reforzado (redirect facturación doble salto, no bug). FASE 6 re-correrá regresión completa contra prod
 - It5 5a ✓: presupuestos detalle+F02, OS liquidaciones, pago editable+fecha (REQ-260), 4 reportes con gráficos SVG/CSS (cero deps), seed byte-idéntico, bundle 103KB. Cierra 272 REQ
 - It1/2/3/4 ✓
@@ -73,3 +73,4 @@
 - ✓ FASE 5 It2 (Pacientes): ficha a fondo + sub-detalles (pieza/evento/plan), 3 gaps hardcodeados corregidos, seed byte-idéntico (sin drift), regresión 486 verde, 0 bugs (2026-06-02)
 - ✓ FASE 5 It3 (Agenda): vista semanal real (bug grid mensual corregido), mobile día/lista (feedback demo, chips 22px→44px), reagendar notif WhatsApp, notas internas, UX-003 flaky estabilizado, regresión 536 verde, 0 bugs (2026-06-02)
 - ✓ FASE 5 It4 (escritura+tratamientos): crear paciente (género hardcodeado mujer→real) 2 rutas+foto, editar dirty-check (F01), odontograma editable persistente, tratamientos, FIX seguridad foto (SVG/XSS+2MB), REQ-187 test adaptado @defer, regresión 568 verde, 0 bugs (2026-06-02)
+- ✓ FASE 5 It5 (Facturación+Pagos+Reportes — ÚLTIMA): presupuestos+F02, OS liquidaciones, pago editable+fecha, 4 reportes con gráficos SVG (cero deps), BUG-F01 corregido (afterNextRender), UX-003 reforzado, regresión 768 verde. CIERRA 272 REQ, 0 huérfanos (2026-06-02)
