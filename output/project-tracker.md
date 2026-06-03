@@ -6,9 +6,11 @@
 
 ## Estado actual
 - Modo: NEW (NORMAL) · FASE 5 en PROSA (worktree no disponible + run-regression sed bug macOS)
-- Fase: FASE 5 COMPLETA ✓ — Iteración 5 cerrada (0 bugs). 5j commit → FASE 6 (deployment a producción)
-- Próximo: FASE 6 — 6a deploy prod → 6a-verify → 6b validación post-deploy → 6c → 6d cierre
-- Bugs abiertos: 0 ✓. 272/272 REQ cubiertos, 0 huérfanos. Suite ~770 verde. Sitio VIVO en SWA
+- Fase: FASE 6 — 6d Cierre (6b VALIDADO ✓, 6c N/A). PROYECTO COMPLETO
+- Próximo: commit final + resumen al cliente + feedback de cierre
+- Bugs abiertos: 0 ✓ · 272/272 REQ · suite 770 verde · prod validado · CLAUDE.md actualizado con deployment
+- Bugs abiertos: 0 ✓. 272/272 REQ cubiertos. Suite ~770 verde. Sitio VIVO: happy-coast-044ea7e0f.7.azurestaticapps.net
+- FASE 5 ✓ (5 iteraciones, commit final e5558a0)
 - UX-003 flaky reforzado (redirect facturación doble salto, no bug). FASE 6 re-correrá regresión completa contra prod
 - It5 5a ✓: presupuestos detalle+F02, OS liquidaciones, pago editable+fecha (REQ-260), 4 reportes con gráficos SVG/CSS (cero deps), seed byte-idéntico, bundle 103KB. Cierra 272 REQ
 - It1/2/3/4 ✓

@@ -39,4 +39,17 @@ El seed de pacientes se genera leyendo dinámicamente `input/mockpeople/{hombres
 Familia de color · tipografía (no Inter) · dominio (3 opciones neutrales) · logo/branding · cronograma · marca placeholder del badge "Demo interactivo de [...]" · alcance mobile · límite lectura/escritura del demo (GAP-B08).
 
 ## Métricas Fase 1
-258 criterios REQ-XXX + 18 NFR · 17 gaps (8 negocio, 9 técnicos) · 10 epics, 47 features.
+258 criterios REQ-XXX + 18 NFR · 17 gaps (8 negocio, 9 técnicos) · 10 epics, 47 features. (requirements v2.0: 272 REQ + 20 NFR tras Fase 2.)
+
+## Decisiones del cliente (resueltas en Fase 2)
+- Color: AZUL cielo/medio (#c5d8e8 / #6da8d4) · Tipografía: Red Hat · Logo: isotipo + wordmark.
+- **Sin referencias a demo/mock en la UI** (todo como producción real) · Sin dominio propio (URL default de SWA).
+- Mobile: TODOS los flujos usables · Interacción: pagos Y odontograma editables.
+
+## Deployment (Fase 6) — PROYECTO COMPLETO ✓
+- **URL de producción**: https://happy-coast-044ea7e0f.7.azurestaticapps.net (pública, sin autenticación).
+- **Infra**: Azure Static Web Apps **Standard** (subscription CEFSA-prod, ~$9/mes — autorizado por el cliente) + GitHub Actions CI/CD. Sin backend/DB (frontend-only, todo en localStorage).
+- **Repo**: público `linkdesignOrganization/estudio-dental-mendieta`. Commit cierre FASE 5: `e5558a0`.
+- **Stack final**: Angular 21 standalone zoneless · Bootstrap 5 selectivo + tokens propios · Phosphor · Red Hat self-hosted · gráficos SVG/CSS (cero dependencias de charting). Bundle inicial **104 KB gzip** (<500KB NFR), 50+ lazy chunks.
+- **Estado**: 272/272 REQ cubiertos (FASE 4 demo + 5 iteraciones + deployment). Suite **770 tests Playwright verde** (desktop + mobile). **0 bugs**. Fotos de pacientes optimizadas 67MB→1.72MB (−97%, NFR 4G). Cero demo/mock/tracking verificado.
+- **Proceso**: construido con el plugin dev-team en **modo PROSA** (el workflow autónomo no se usó: worktree no disponible por git-init post-arranque + el workflow estándar hardcodea CRM tracking que el cliente prohibió). Regresión vía `run-regression.sh --no-chunks` (el modo chunked falla en macOS por BSD sed).
