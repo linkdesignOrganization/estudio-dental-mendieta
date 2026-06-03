@@ -308,6 +308,65 @@ Push de `fix: iteration 5 - budget wizard back preserves patient (BUG-F01)` (com
 
 ---
 
+## 6. FASE 6 — Deployment de PRODUCCIÓN (2026-06-03, paso 6a) — COMPLETADO Y VERIFICADO
+
+> **Estado: PRODUCCIÓN LIVE y final.** El sitio estuvo desplegándose vía CI/CD durante toda la Fase 4–5; este paso **finaliza** el deployment de producción: valida que el build es óptimo, que las 5 iteraciones completas están en producción, que la config de producción (security headers + SPA fallback + assets) es correcta, que NO hay rastro de demo/mock ni tracking, y **aplica la optimización de fotos** pendiente desde 4e.
+
+**URL de producción:** `https://happy-coast-044ea7e0f.7.azurestaticapps.net`
+**Último deploy (perf de fotos):** commit `9093e60` → run `26861211178` **success** (~2m). `headSha` == HEAD local. CI corrió el `prebuild` (`[manifest] 29 pacientes (12 H / 17 M), 15 documentos`).
+
+### 6.1 Build de producción — óptimo ✅
+Verificado con `npm run build` local (config `production` por default en `angular.json`):
+- **Initial total: `431.18 kB raw / 104.33 kB transfer (gzip)`** → muy por debajo del **<500KB gzip de NFR-002**. El budget en `angular.json` es `initial` warn 500kB / error 1MB (raw); el gzip real (104KB) es ~5× margen.
+- **Lazy loading confirmado (ADR-6):** 50+ lazy chunks. Cada feature carga bajo demanda — `calendar-component`, `patient-list/detail/create`, `report-detail` (con charts), `tooth-detail` (odontograma `@defer`), `budget-create/detail`, `obra-social-detail`, `dashboard`, etc. El initial es solo shell + router + persistencia + estilos.
+- **Optimización de producción activa:** `optimization.scripts:true`, `fonts:true`, `styles.minify:true`, `inlineCritical:false` (fix histórico de BUG-V01 / FOUC), `outputHashing:all`. **Source maps solo en config `development`** (producción NO los emite).
+
+### 6.2 Las 5 iteraciones completas en producción ✅
+Smoke de las 13 rutas clave (todas HTTP 200 `text/html`, SPA fallback OK): `/`, `/agenda`, `/pacientes`, `/pacientes/:id/informacion`, `/pacientes/:id/odontograma`, `/tratamientos`, `/tratamientos/catalogo`, `/facturacion`, `/facturacion/presupuestos`, `/facturacion/obras-sociales`, `/reportes`, `/reportes/financiero`, `/configuracion`. Verificación en navegador real (Playwright, `scripts/prod-verify.mjs`) confirmó **contenido real** (no shell vacío) en Agenda, Tratamientos, Facturación/Presupuestos y Reportes/Financiero (los reportes con gráficos de It5). Los 272 REQ del commit `e5558a0` están servidos.
+
+### 6.3 Config de producción ✅
+- **Security headers** (live en la respuesta): `Content-Security-Policy` (estricta: `script-src 'self'`, `object-src 'none'`, `frame-ancestors 'self'`, `connect-src 'self'`, `frame-src 'none'` → **imposible cargar analytics/CRM de terceros**), `X-Frame-Options: SAMEORIGIN`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy: geolocation=(), microphone=(), camera=()`. Definidos en `public/staticwebapp.config.json` (ubicación crítica: debe vivir en `public/`, ver §3).
+- **SPA fallback** (`navigationFallback` + `responseOverrides.404 → /index.html`): deep-links como `/pacientes/pac-001/odontograma` → 200. Assets excluidos del fallback por extensión (no enmascaran 404 de assets reales).
+- **Manifest + assets:** `/seed/manifest.json` 200 `application/json` (29 pacientes / 15 documentos); thumbnails de documentos `foto-*.svg` / `radiografia-*.svg` 200 `image/svg+xml`; fotos de paciente 200 `image/jpeg`.
+
+### 6.4 Cero demo/mock, cero tracking ✅
+- `scripts/prod-verify.mjs` escaneó el texto de la home y NO encontró ninguna de: `demo interactivo`, `mock`, `simulaci*`, `viewcase`, `lorem ipsum`, etc. → **limpio**.
+- Interceptando TODOS los requests de red del navegador: **0 hits** a hosts de analytics/tracking (google-analytics, gtm, segment, hotjar, mixpanel, doubleclick, facebook, clarity, amplitude, fullstory, intercom). Coherente con ADR-7 y reforzado por la CSP. **0 errores de consola severos.**
+
+### 6.5 Optimización de fotos de pacientes — APLICADA ✅ (perf)
+**Problema (detectado en 4e):** las 29 fotos source de pacientes estaban **sin optimizar** — total **67 MB**, con casos extremos como `mujeres/14.jpg` 9.4 MB / 4129×4129px, `hombres/4.jpg` 6.2 MB, `mujeres/70.jpg` 6.4 MB, `mujeres/3.jpg` 6.0 MB. El listado de pacientes renderiza las 29 a la vez y la ficha usa la foto en la cabecera → impacto directo en NFR de performance (<3s en 4G). Medición baseline contra producción: `mujeres/14.jpg` tardaba **~17.2 s** en descargar.
+
+**Acción (low-risk, herramienta nativa de macOS `sips`):** redimensión a **600px de lado máximo** (`-Z 600`, nunca hace upscaling) + recompresión JPEG **calidad 72**. Se optimizaron **AMBOS árboles en lock-step**: el source `input/mockpeople/` (origen de verdad — el `prebuild` copia DESDE aquí) y el desplegado `public/imagenes/pacientes/`, de modo que quedan **byte-idénticos** (mismo md5) y la copia del `prebuild` es un **no-op** → **no hay re-bloat ni drift en futuros builds de CI**. **Nombres de archivo sin cambios** → los paths del `manifest.json` resuelven idénticos; el seed (29 pacientes, edades/géneros) es byte-idéntico.
+
+**Resultado (verificado contra producción tras el deploy):**
+| Métrica | Antes | Después |
+|---|---|---|
+| Payload total de las 29 fotos | **67 MB** | **1.72 MB** (−97%) |
+| Peor foto `mujeres/14.jpg` | 9.4 MB / 4129px | **88 KB / 600px** |
+| Rango por foto | 67 KB – 9.4 MB | **39–91 KB** |
+| Dimensión servida (browser, `naturalWidth`) | hasta 4129px | **600px** (verificado en runtime) |
+
+Las fotos sirven `image/jpeg` 200 con los bytes optimizados (no caché de las gordas) — verificado por tamaño descargado real desde el SWA. El listado usa `loading="lazy"` en los `<img>` (las fotos bajo el fold se difieren correctamente — comportamiento esperado, no un bug). Bundle inalterado (las fotos son assets estáticos, no entran al bundle); el impacto es en el **payload de carga de página**, que es justo lo que mide NFR-002/<3s.
+
+**Commit separado:** `9093e60` `perf: optimize patient photos for production` (58 archivos: 29 source + 29 public, 0 cambios de bundle/código). El manifest NO entró al commit (su churn de `generadoEn` se descartó con `git checkout`; CI lo regenera).
+
+### 6.6 Cómo re-aplicar la optimización (si se agregan fotos nuevas)
+Si en el futuro se agregan fotos a `input/mockpeople/`, optimizarlas antes de commitear (mismo criterio):
+```bash
+# desde la raíz del repo — optimiza source + public en lock-step
+for base in input/mockpeople public/imagenes/pacientes; do
+  for g in hombres mujeres; do
+    for f in "$base/$g"/*.jpg; do
+      sips -Z 600 -s format jpeg -s formatOptions 72 "$f" --out "$f"
+    done
+  done
+done
+node scripts/generate-manifest.mjs   # regenera manifest (CI lo hace igual)
+```
+> El budget de bundle (NFR-002) lo sigue protegiendo `ng build` (error a 1MB raw / el gzip real es ~104KB). Las fotos NO afectan el bundle, pero SÍ el tiempo de carga — mantenerlas ≤600px / ~quality 72.
+
+---
+
 ## 5. Decisión de suscripción y SKU (resuelta)
 
 **Cómo se llegó al destino final:**
