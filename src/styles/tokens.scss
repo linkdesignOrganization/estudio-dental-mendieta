@@ -92,6 +92,7 @@
   --header-height: 64px;         /* DC-030 header sticky ~64px */
   --content-max: 1240px;         /* ancho máximo del área de contenido para mucho aire */
   --drawer-width: 320px;         /* DC-080 drawer mobile máx 320 / 80vw */
+  --sidebar-width-collapsed: 76px; /* sidebar colapsado a solo-íconos (desktop) */
 }
 
 /* Respeta prefers-reduced-motion — DC-143: desactiva rise/stagger, mantiene fades */

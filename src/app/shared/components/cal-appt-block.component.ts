@@ -27,7 +27,7 @@ import { appointmentBadge } from '../status-map';
     :host { display: block; }
     .capt { display: flex; border-radius: 8px; line-height: 1.3; overflow: hidden; }
     .capt__time { font-weight: var(--weight-medium); }
-    .capt__name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .capt__name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
 
     /* mensual: hora + nombre en línea, celdas compactas */
     .capt--inline { gap: var(--space-1); align-items: baseline; padding: 3px 6px; border-radius: 6px; font-size: 12px; }

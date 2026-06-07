@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, output } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { IconComponent } from '../shared/components/icon.component';
 
@@ -16,20 +16,30 @@ interface NavItem { label: string; icon: string; route: string; badge?: number; 
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterLink, RouterLinkActive, IconComponent],
   template: `
-    <nav class="sidebar" aria-label="Navegación principal">
-      <a class="sidebar__brand" routerLink="/reportes" (click)="navigate.emit()">
-        <span class="sidebar__mark" aria-hidden="true"><app-icon name="tooth" [size]="22" /></span>
-        <span class="sidebar__wordmark">
-          <span class="sidebar__name">Estudio Dental</span>
-          <span class="sidebar__name sidebar__name--accent">Mendieta</span>
-        </span>
-      </a>
+    <nav class="sidebar" [class.is-collapsed]="collapsed()" aria-label="Navegación principal">
+      <div class="sidebar__top">
+        <a class="sidebar__brand" routerLink="/reportes" (click)="navigate.emit()"
+           [attr.title]="collapsed() ? 'Estudio Dental Mendieta' : null">
+          <span class="sidebar__mark" aria-hidden="true"><app-icon name="tooth" [size]="22" /></span>
+          <span class="sidebar__wordmark">
+            <span class="sidebar__name">Estudio Dental</span>
+            <span class="sidebar__name sidebar__name--accent">Mendieta</span>
+          </span>
+        </a>
+        <button type="button" class="icon-btn sidebar__collapse" (click)="toggleCollapse.emit()"
+                [attr.aria-label]="collapsed() ? 'Expandir menú lateral' : 'Colapsar menú lateral'"
+                [attr.aria-pressed]="collapsed()"
+                [attr.title]="collapsed() ? 'Expandir menú' : 'Colapsar menú'">
+          <app-icon [name]="collapsed() ? 'caret-right' : 'caret-left'" [size]="18" />
+        </button>
+      </div>
 
       <ul class="sidebar__list">
         @for (item of primary; track item.route) {
           <li>
             <a class="sidebar__item" [routerLink]="item.route" routerLinkActive="is-active"
-               [routerLinkActiveOptions]="{ exact: false }" ariaCurrentWhenActive="page" (click)="navigate.emit()">
+               [routerLinkActiveOptions]="{ exact: false }" ariaCurrentWhenActive="page" (click)="navigate.emit()"
+               [attr.title]="collapsed() ? item.label : null">
               <span class="sidebar__icon"><app-icon [name]="item.icon" [size]="20" /></span>
               <span class="sidebar__label">{{ item.label }}</span>
               @if (item.badge) { <span class="sidebar__badge" aria-label="{{ item.badge }} pendientes">{{ item.badge }}</span> }
@@ -44,7 +54,8 @@ interface NavItem { label: string; icon: string; route: string; badge?: number; 
         @for (item of secondary; track item.route) {
           <li>
             <a class="sidebar__item" [routerLink]="item.route" routerLinkActive="is-active"
-               ariaCurrentWhenActive="page" (click)="navigate.emit()">
+               ariaCurrentWhenActive="page" (click)="navigate.emit()"
+               [attr.title]="collapsed() ? item.label : null">
               <span class="sidebar__icon"><app-icon [name]="item.icon" [size]="20" /></span>
               <span class="sidebar__label">{{ item.label }}</span>
             </a>
@@ -60,7 +71,9 @@ interface NavItem { label: string; icon: string; route: string; badge?: number; 
       height: 100%; padding: var(--space-6) var(--space-4);
       background: var(--color-bg-elevated); overflow-y: auto;
     }
-    .sidebar__brand { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-2) var(--space-3); margin-bottom: var(--space-6); }
+    .sidebar__top { display: flex; align-items: center; gap: var(--space-1); margin-bottom: var(--space-6); }
+    .sidebar__brand { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-2) var(--space-3); flex: 1 1 auto; min-width: 0; }
+    .sidebar__collapse { flex: 0 0 auto; }
     .sidebar__mark {
       display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto;
       width: 36px; height: 36px; border-radius: var(--radius-sm);
@@ -88,10 +101,32 @@ interface NavItem { label: string; icon: string; route: string; badge?: number; 
       font-size: 12px; font-weight: var(--weight-medium);
     }
     .sidebar__sep { height: 1px; background: var(--color-border); border: none; margin: var(--space-3) var(--space-2); }
+
+    /* El toggle de colapso es una utilidad de desktop; en el drawer mobile no aplica. */
+    @media (max-width: 1199px) { .sidebar__collapse { display: none; } }
+
+    /* Modo colapsado (solo desktop): columna estrecha, solo íconos centrados. Los
+       labels se ocultan por CSS (no @if) para no alterar el DOM y conservar la
+       hidratación; cada item mantiene su tooltip (title) para accesibilidad. */
+    @media (min-width: 1200px) {
+      .sidebar.is-collapsed { padding-left: var(--space-2); padding-right: var(--space-2); }
+      .sidebar.is-collapsed .sidebar__top { flex-direction: column; gap: var(--space-2); }
+      .sidebar.is-collapsed .sidebar__brand { flex: 0 0 auto; justify-content: center; padding: var(--space-2); }
+      .sidebar.is-collapsed .sidebar__wordmark { display: none; }
+      .sidebar.is-collapsed .sidebar__list { align-items: center; }
+      .sidebar.is-collapsed .sidebar__item { position: relative; width: 44px; padding: 0; gap: 0; justify-content: center; }
+      .sidebar.is-collapsed .sidebar__label { display: none; }
+      .sidebar.is-collapsed .sidebar__badge { position: absolute; top: 4px; right: 4px; min-width: 16px; height: 16px; padding: 0 4px; font-size: 10px; }
+      .sidebar.is-collapsed .sidebar__sep { width: 40px; margin-left: auto; margin-right: auto; }
+    }
   `],
 })
 export class SidebarComponent {
+  /** Modo colapsado (solo-íconos). Lo controla el app-shell; default expandido. */
+  readonly collapsed = input(false);
   readonly navigate = output<void>();
+  /** Pide al shell alternar el colapso del sidebar. */
+  readonly toggleCollapse = output<void>();
 
   protected readonly primary: NavItem[] = [
     { label: 'Agenda', icon: 'calendar-blank', route: '/agenda' },

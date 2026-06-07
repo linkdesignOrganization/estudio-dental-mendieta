@@ -159,15 +159,15 @@ const ESTADOS: { key: AppointmentStatus; label: string }[] = [
     .cal-toolbar__list { white-space: nowrap; }
 
     /* Vista mensual (grid 7 columnas) */
-    .cal__weekdays { display: grid; grid-template-columns: repeat(7, 1fr); gap: var(--space-2); margin-bottom: var(--space-2); }
+    .cal__weekdays { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: var(--space-2); margin-bottom: var(--space-2); }
     .cal__weekday { text-align: center; text-transform: uppercase; letter-spacing: 0.04em; }
-    .cal__grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: var(--space-2); }
-    .cal__cell { min-height: 104px; border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: var(--space-2); display: flex; flex-direction: column; gap: var(--space-1); }
+    .cal__grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: var(--space-2); }
+    .cal__cell { min-height: 104px; min-width: 0; overflow: hidden; border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: var(--space-2); display: flex; flex-direction: column; gap: var(--space-1); }
     .cal__cell.is-out { background: var(--color-bg); opacity: 0.6; }
     .cal__cell.is-today { border-color: var(--color-accent); }
     .cal__daynum { color: var(--color-text-secondary); font-variant-numeric: tabular-nums; align-self: flex-start; padding: 2px; }
     .cal__daynum.is-today { background: var(--color-accent); color: var(--color-text); border-radius: var(--radius-pill); width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; }
-    .cal__appts { display: flex; flex-direction: column; gap: 3px; }
+    .cal__appts { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
     .cal__more { color: var(--color-accent-deep); padding: 2px 6px; }
 
     @media (max-width: 767px) {

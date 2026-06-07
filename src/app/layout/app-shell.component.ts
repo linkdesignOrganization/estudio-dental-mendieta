@@ -17,9 +17,9 @@ import { StoreService } from '../core/persistence/store.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterOutlet, SidebarComponent, HeaderComponent, FooterComponent, IconComponent],
   template: `
-    <div class="shell" [class.shell--drawer-open]="drawerOpen()">
+    <div class="shell" [class.shell--drawer-open]="drawerOpen()" [class.shell--nav-collapsed]="navCollapsed()">
       <aside class="shell__sidebar">
-        <app-sidebar (navigate)="closeDrawer()" />
+        <app-sidebar [collapsed]="navCollapsed()" (navigate)="closeDrawer()" (toggleCollapse)="toggleNav()" />
       </aside>
 
       @if (drawerOpen()) {
@@ -48,6 +48,8 @@ import { StoreService } from '../core/persistence/store.service';
   styles: [`
     :host { display: block; height: 100%; }
     .shell { display: grid; grid-template-columns: var(--sidebar-width) 1fr; height: 100vh; background: var(--color-bg); }
+    /* Colapso del sidebar a solo-íconos: solo en desktop (en mobile el sidebar es drawer). */
+    @media (min-width: 1200px) { .shell--nav-collapsed { grid-template-columns: var(--sidebar-width-collapsed) 1fr; } }
     .shell__sidebar { border-right: 1px solid var(--color-border); height: 100vh; position: sticky; top: 0; }
     .shell__main { display: flex; flex-direction: column; min-width: 0; height: 100vh; overflow: hidden; }
     .shell__header { position: sticky; top: 0; z-index: 50; flex: 0 0 auto; }
@@ -91,6 +93,8 @@ export class AppShellComponent {
   /** Aviso visible cuando el almacenamiento local no está disponible (UX-091 / BUG-E06). */
   protected readonly degraded = inject(StoreService).degraded;
   protected readonly drawerOpen = signal(false);
+  /** Sidebar colapsado a solo-íconos (desktop). Preferencia persistida en localStorage. */
+  protected readonly navCollapsed = signal(readNavCollapsed());
 
   constructor() {
     // Cierra el drawer al navegar (cubre cualquier navegación, no solo clicks del sidebar).
@@ -99,4 +103,17 @@ export class AppShellComponent {
 
   protected openDrawer() { this.drawerOpen.set(true); }
   protected closeDrawer() { this.drawerOpen.set(false); }
+  protected toggleNav() {
+    this.navCollapsed.update((v) => {
+      const next = !v;
+      try { localStorage.setItem(NAV_COLLAPSED_KEY, next ? '1' : '0'); } catch { /* almacenamiento no disponible */ }
+      return next;
+    });
+  }
+}
+
+/** Preferencia del sidebar colapsado. Guardas para SSR/prerender (sin localStorage). */
+const NAV_COLLAPSED_KEY = 'edm:v1:nav-collapsed';
+function readNavCollapsed(): boolean {
+  try { return localStorage.getItem(NAV_COLLAPSED_KEY) === '1'; } catch { return false; }
 }
