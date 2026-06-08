@@ -5,8 +5,10 @@ import { Injectable, signal } from '@angular/core';
  * fuerza un reseed limpio en todos los clientes (purgeOldVersions borra la clave anterior).
  * v2: el staff dejó de usar fotos de pacientes como placeholder (ahora avatar de iniciales),
  *     por lo que el seed persistido debe regenerarse.
+ * v3: los documentos usan imágenes reales (radiografías panorámicas + fotos clínicas) en
+ *     lugar de los placeholders SVG; el seed persistido debe regenerarse para tomarlas.
  */
-export const SCHEMA_VERSION = 'v2';
+export const SCHEMA_VERSION = 'v3';
 export const STORAGE_KEY = `edm:${SCHEMA_VERSION}:state`;
 
 /**
