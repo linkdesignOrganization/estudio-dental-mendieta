@@ -41,7 +41,7 @@ import { ArsPipe } from '../pipes/ars.pipe';
         <app-status-badge [label]="badge().label" [tone]="badge().tone" />
         <div class="pcard__foot-right">
           @if (plan().costo) { <span class="t-small t-secondary">{{ plan().costo | ars }}</span> }
-          <app-avatar-stack [items]="plan().profesionalesFotos" [max]="3" />
+          <app-avatar-stack [items]="plan().profesionalesFotos" [names]="[plan().profesional]" [max]="3" />
         </div>
       </div>
     </article>

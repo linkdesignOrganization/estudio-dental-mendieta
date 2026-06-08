@@ -67,18 +67,17 @@ export interface ProfessionalSeed {
   nombre: string;
   especialidad: string;
   aniosExperiencia: number;
-  fotoIdx: number; // referencia a una foto de paciente como avatar placeholder
 }
 // Staff fijo EXACTO según REQ-057 (nombres, especialidades y años de experiencia
 // son requisito verificable). El orden mantiene prof-03 = Odontopediatría porque el
 // generador asigna los menores a 'prof-03' (niños → odontopediatra).
 export const PROFESSIONALS: ProfessionalSeed[] = [
-  { id: 'prof-01', nombre: 'Dra. Soledad Russo', especialidad: 'Odontología general', aniosExperiencia: 8, fotoIdx: 0 },
-  { id: 'prof-02', nombre: 'Dra. Carolina Etcheverry', especialidad: 'Ortodoncia', aniosExperiencia: 12, fotoIdx: 1 },
-  { id: 'prof-03', nombre: 'Dr. Federico Salinas', especialidad: 'Odontopediatría', aniosExperiencia: 10, fotoIdx: 2 },
-  { id: 'prof-04', nombre: 'Dr. Martín Aguilera', especialidad: 'Endodoncia', aniosExperiencia: 18, fotoIdx: 3 },
-  { id: 'prof-05', nombre: 'Dr. Juan Pablo Acuña', especialidad: 'Implantología', aniosExperiencia: 15, fotoIdx: 4 },
-  { id: 'prof-06', nombre: 'Dra. Laura Béccar Varela', especialidad: 'Estética dental', aniosExperiencia: 7, fotoIdx: 5 },
+  { id: 'prof-01', nombre: 'Dra. Soledad Russo', especialidad: 'Odontología general', aniosExperiencia: 8 },
+  { id: 'prof-02', nombre: 'Dra. Carolina Etcheverry', especialidad: 'Ortodoncia', aniosExperiencia: 12 },
+  { id: 'prof-03', nombre: 'Dr. Federico Salinas', especialidad: 'Odontopediatría', aniosExperiencia: 10 },
+  { id: 'prof-04', nombre: 'Dr. Martín Aguilera', especialidad: 'Endodoncia', aniosExperiencia: 18 },
+  { id: 'prof-05', nombre: 'Dr. Juan Pablo Acuña', especialidad: 'Implantología', aniosExperiencia: 15 },
+  { id: 'prof-06', nombre: 'Dra. Laura Béccar Varela', especialidad: 'Estética dental', aniosExperiencia: 7 },
 ];
 
 /** Catálogo de ≥12 tipos de tratamiento (UX-063). costoRef en ARS. */

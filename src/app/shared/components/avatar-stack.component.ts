@@ -13,7 +13,7 @@ import { AvatarComponent } from './avatar.component';
   template: `
     <span class="stack" role="img" [attr.aria-label]="ariaLabel()">
       @for (item of visible(); track $index) {
-        <span class="stack__item"><app-avatar [src]="item" size="sm" /></span>
+        <span class="stack__item"><app-avatar [src]="item" [name]="names()[$index] ?? ''" size="sm" /></span>
       }
       @if (overflow() > 0) {
         <span class="stack__item stack__more" aria-hidden="true">+{{ overflow() }}</span>
@@ -36,6 +36,8 @@ import { AvatarComponent } from './avatar.component';
 })
 export class AvatarStackComponent {
   readonly items = input<string[]>([]);
+  /** Nombres paralelos a `items`: dan las iniciales cuando un item no tiene foto. */
+  readonly names = input<string[]>([]);
   readonly max = input<number>(4);
 
   protected readonly visible = computed(() => this.items().slice(0, this.max()));

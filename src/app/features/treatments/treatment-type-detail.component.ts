@@ -48,7 +48,7 @@ import { StoreService } from '../../core/persistence/store.service';
             <div class="ttd__profs">
               <span class="t-small t-secondary">Profesionales habilitados</span>
               <div class="ttd__profs-row">
-                <app-avatar-stack [items]="profFotos()" [max]="6" />
+                <app-avatar-stack [items]="profFotos()" [names]="profNombres()" [max]="6" />
                 <ul class="ttd__profs-names">
                   @for (p of profesionales(); track p.id) {
                     <li class="t-small"><span class="ttd__profs-name">{{ p.nombre }}</span><span class="t-secondary"> · {{ p.especialidad }}</span></li>
@@ -97,4 +97,5 @@ export class TreatmentTypeDetailComponent {
   protected readonly materials = computed(() => this.store.treatmentTypeDetail(this.id()).materiales);
   protected readonly profesionales = computed(() => this.store.treatmentTypeProfessionals(this.id()));
   protected readonly profFotos = computed(() => this.profesionales().map((p) => p.fotoPath));
+  protected readonly profNombres = computed(() => this.profesionales().map((p) => p.nombre));
 }

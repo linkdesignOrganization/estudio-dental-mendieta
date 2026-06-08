@@ -38,13 +38,16 @@ function stripDiacritics(s: string): string {
 }
 
 // ---------- catálogos fijos ----------
-function buildProfessionals(manifestPhotos: string[]): Professional[] {
+function buildProfessionals(): Professional[] {
+  // El staff no tiene retrato propio → fotoPath vacío y el avatar cae a iniciales (DC-055/DC-056).
+  // Antes se reutilizaban fotos de PACIENTES como placeholder, lo que mostraba doctoras con
+  // rostro masculino y la misma cara como paciente y como profesional.
   return PROFESSIONALS.map((p: ProfessionalSeed) => ({
     id: p.id,
     nombre: p.nombre,
     especialidad: p.especialidad,
     aniosExperiencia: p.aniosExperiencia,
-    fotoPath: manifestPhotos[p.fotoIdx % manifestPhotos.length] ?? '',
+    fotoPath: '',
   }));
 }
 function buildObrasSociales(): ObraSocialEntity[] {
@@ -616,8 +619,7 @@ function buildNotifications(
 export function generateSeed(manifest: SeedManifest): StoreState {
   const rng = new Prng(SEED_ROOT);
 
-  const photoPool = manifest.pacientes.map((p) => p.path);
-  const professionals = buildProfessionals(photoPool);
+  const professionals = buildProfessionals();
   const obrasSociales = buildObrasSociales();
   const treatmentTypes = buildTreatmentTypes();
 

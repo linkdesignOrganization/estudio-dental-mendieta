@@ -46,7 +46,10 @@ export class AvatarComponent {
   protected readonly alt = computed(() => this.name() ? `Foto de ${this.name()}` : 'Foto de paciente');
 
   protected readonly initials = computed(() => {
-    const parts = this.name().trim().split(/\s+/).filter(Boolean);
+    // Descarta títulos profesionales (Dr./Dra./Lic./Od./Prof.) para que las iniciales sean
+    // del nombre real: "Dra. Laura Béccar Varela" → "LV", no "DV".
+    const TITULO = /^(dra?|lic|od|odont|prof)\.$/i;
+    const parts = this.name().trim().split(/\s+/).filter(Boolean).filter((w) => !TITULO.test(w));
     if (parts.length === 0) return '?';
     if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
     return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();

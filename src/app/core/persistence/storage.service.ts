@@ -1,7 +1,12 @@
 import { Injectable, signal } from '@angular/core';
 
-/** Versión de schema (architecture.md REQ-041). La clave incluye la versión. */
-export const SCHEMA_VERSION = 'v1';
+/**
+ * Versión de schema (architecture.md REQ-041). La clave incluye la versión; bumpearla
+ * fuerza un reseed limpio en todos los clientes (purgeOldVersions borra la clave anterior).
+ * v2: el staff dejó de usar fotos de pacientes como placeholder (ahora avatar de iniciales),
+ *     por lo que el seed persistido debe regenerarse.
+ */
+export const SCHEMA_VERSION = 'v2';
 export const STORAGE_KEY = `edm:${SCHEMA_VERSION}:state`;
 
 /**

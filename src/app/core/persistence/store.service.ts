@@ -228,7 +228,7 @@ export class StoreService {
     estado: t.estado,
     proximaFecha: t.proximaFecha ? formatShortDate(t.proximaFecha) : undefined,
     costo: t.costo,
-    profesionalesFotos: [this.professionals().find((pr) => pr.id === t.profesionalId)?.fotoPath ?? ''].filter(Boolean),
+    profesionalesFotos: [this.professionals().find((pr) => pr.id === t.profesionalId)?.fotoPath ?? ''],
   });
 
   readonly treatmentPlans = computed<TreatmentPlan[]>(() =>
