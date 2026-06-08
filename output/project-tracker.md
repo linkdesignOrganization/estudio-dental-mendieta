@@ -6,9 +6,9 @@
 
 ## Estado actual
 - Modo: NEW (NORMAL) · FASE 5 en PROSA (worktree no disponible + run-regression sed bug macOS)
-- Fase: FASE 6 — 6d Cierre (6b VALIDADO ✓, 6c N/A). PROYECTO COMPLETO
-- Próximo: commit final + resumen al cliente + feedback de cierre
-- Bugs abiertos: 0 ✓ · 272/272 REQ · suite 770 verde · prod validado · CLAUDE.md actualizado con deployment
+- Fase: ✅ PROYECTO COMPLETADO Y ENTREGADO (cliente aprobó la entrega, sin cambios)
+- Próximo: N/A — cerrado. Futuras rondas: poner material en input/enhancements/ → Enhancement Mode
+- Bugs abiertos: 0 ✓ · 272/272 REQ · 770 tests verde · prod validado · 0 feedback funcional de cierre
 - Bugs abiertos: 0 ✓. 272/272 REQ cubiertos. Suite ~770 verde. Sitio VIVO: happy-coast-044ea7e0f.7.azurestaticapps.net
 - FASE 5 ✓ (5 iteraciones, commit final e5558a0)
 - UX-003 flaky reforzado (redirect facturación doble salto, no bug). FASE 6 re-correrá regresión completa contra prod
@@ -76,3 +76,5 @@
 - ✓ FASE 5 It3 (Agenda): vista semanal real (bug grid mensual corregido), mobile día/lista (feedback demo, chips 22px→44px), reagendar notif WhatsApp, notas internas, UX-003 flaky estabilizado, regresión 536 verde, 0 bugs (2026-06-02)
 - ✓ FASE 5 It4 (escritura+tratamientos): crear paciente (género hardcodeado mujer→real) 2 rutas+foto, editar dirty-check (F01), odontograma editable persistente, tratamientos, FIX seguridad foto (SVG/XSS+2MB), REQ-187 test adaptado @defer, regresión 568 verde, 0 bugs (2026-06-02)
 - ✓ FASE 5 It5 (Facturación+Pagos+Reportes — ÚLTIMA): presupuestos+F02, OS liquidaciones, pago editable+fecha, 4 reportes con gráficos SVG (cero deps), BUG-F01 corregido (afterNextRender), UX-003 reforzado, regresión 768 verde. CIERRA 272 REQ, 0 huérfanos (2026-06-02)
+- ✓ FASE 6 (Deployment): prod finalizado en SWA Standard, fotos optimizadas 67MB→1.72MB, regresión final 770 verde contra prod, topología 1 dominio + cero demo/tracking, 4 GIFs evidencia, feedback-curator consolidó FASE 5 (48 entradas). commit 33e06e9 (2026-06-03)
+- ✅ CIERRE: cliente APROBÓ la entrega sin cambios. PROYECTO COMPLETADO. URL: happy-coast-044ea7e0f.7.azurestaticapps.net (2026-06-03)
