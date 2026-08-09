@@ -53,3 +53,13 @@ Familia de color · tipografía (no Inter) · dominio (3 opciones neutrales) · 
 - **Stack final**: Angular 21 standalone zoneless · Bootstrap 5 selectivo + tokens propios · Phosphor · Red Hat self-hosted · gráficos SVG/CSS (cero dependencias de charting). Bundle inicial **104 KB gzip** (<500KB NFR), 50+ lazy chunks.
 - **Estado**: 272/272 REQ cubiertos (FASE 4 demo + 5 iteraciones + deployment). Suite **770 tests Playwright verde** (desktop + mobile). **0 bugs**. Fotos de pacientes optimizadas 67MB→1.72MB (−97%, NFR 4G). Cero demo/mock/tracking verificado.
 - **Proceso**: construido con el plugin dev-team en **modo PROSA** (el workflow autónomo no se usó: worktree no disponible por git-init post-arranque + el workflow estándar hardcodea CRM tracking que el cliente prohibió). Regresión vía `run-regression.sh --no-chunks` (el modo chunked falla en macOS por BSD sed).
+
+## Memoria del proyecto
+
+@.claude/memory/MEMORY.md
+
+Ese índice viaja con el repo: está en cualquier máquina donde lo clones, sin configurar nada. Los
+archivos que lista no se cargan solos — leerlos cuando el tema aparezca.
+
+Cuando aprendas algo duradero de este proyecto, escribilo ahí: un archivo por tema y una línea en
+`MEMORY.md`. El índice se carga entero en cada sesión, así que va corto.
